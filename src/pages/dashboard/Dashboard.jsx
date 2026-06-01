@@ -1,0 +1,110 @@
+import { CountingNumber } from '@/components/animate-ui/primitives/texts/counting-number'
+import { pb } from '@/utils/pocketbase'
+import { useQuery } from '@tanstack/react-query'
+import { Book, CircleQuestionMark, FileCheck, FileX, Sparkles, UserCheck, UserKey, UserPen, Users } from 'lucide-react'
+import React from 'react'
+import { FaCartShopping } from 'react-icons/fa6'
+
+export default function Dashboard() {
+
+  const { data: DashInfo } = useQuery({
+    queryKey: ['dashboard-info'],
+    queryFn: async () => {
+      const res = await pb.collection('Dashboard_Infomation').getList()
+      return res
+    }
+  })
+
+  const iconSize = 40
+
+  const iconList = [
+    {
+      id: 1,
+      icon: <Users size={iconSize} className='text-5xl text-black dark:text-black' />
+    },
+    {
+      id: 2,
+      icon: <Users size={iconSize} className='text-5xl text-black dark:text-black' />
+    },
+    {
+      id: 3,
+      icon: <UserPen size={iconSize} className='text-5xl text-black dark:text-black' />
+    },
+    {
+      id: 4,
+      icon: <UserPen size={iconSize} className='text-5xl text-black dark:text-black' />
+    },
+    {
+      id: 5,
+      icon: <UserKey size={iconSize} className='text-5xl text-black dark:text-black' />
+    },
+    {
+      id: 6,
+      icon: <UserKey size={iconSize} className='text-5xl text-black dark:text-black' />
+    },
+    {
+      id: 7,
+      icon: <Book size={iconSize} className='text-5xl text-black dark:text-black' />
+    },
+    {
+      id: 8,
+      icon: <Sparkles size={iconSize} className='text-5xl text-black dark:text-black' />
+    },
+    {
+      id: 9,
+      icon: <FileCheck size={iconSize} className='text-5xl text-black dark:text-black' />
+    },
+    {
+      id: 10,
+      icon: <FileX size={iconSize} className='text-5xl text-black dark:text-black' />
+    },
+  ]
+
+  const mergeInfo = DashInfo?.items?.map((items) => {
+    const iconData = iconList.find(icon => icon.id == items.id )
+    return {
+      ...items,
+      icon: iconData ? iconData.icon : <CircleQuestionMark className='text-5xl text-black dark:text-black' />
+    }
+  })
+
+  return (
+    <div className='w-full min-h-screen flex flex-col select-none py-28 px-5'>
+        <div className="">
+          <h1 className='text-4xl font-bold text-center'>
+            Dashboard
+          </h1>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-5 justify-start mt-20">
+              { mergeInfo?.map((data, i) => (
+                <div key={i} className="shadow hover:shadow-lg shadow-blue-700 transition-all ease-in-out duration-300 rounded-md grid grid-cols-2 gap-10 h-auto p-4 bg-white border-2 border-slate-50" >
+                  <div className="grid grid-rows-2 items-center gap-2">
+                    <div className="flex justify-center">
+                      { data.icon }
+                    </div>
+                    <div className="text-black dark:text-black font-bold text-center">
+                      {data.info}
+                    </div>
+                  </div>
+                  <div className="text-black dark:text-black flex items-center justify-center">
+                    <p className='text-5xl font-bold text-center'>
+                      <CountingNumber number={data.jumlah} />
+                    </p>
+                  </div>
+                </div>
+              )) }
+            </div> 
+            {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-5 justify-start mt-5">
+              { Array.from({ length: 2 }).map((items, i) => (
+                <div className="shadow shadow-blue-700 hover:shadow-lg transition-all ease-in-out duration-300 rounded-md flex flex-row gap-10 h-auto p-5 bg-white border-2 border-slate-50" key={i}>
+                  <div className="text-black dark:text-black">
+                    <p className='text-sm italic text-justify'>
+                      Lorem ipsum dolor, sit amet consectetur adipisicing elit. Qui aliquam dolorum voluptate laborum natus consectetur delectus harum id. Neque esse veritatis rerum quod quidem itaque tempore aliquid atque. In dolore perspiciatis suscipit provident beatae. Optio, laborum natus? Sunt porro atque tempora perspiciatis consectetur ex facilis quae modi facere, possimus beatae reiciendis placeat nemo debitis optio sit neque fugiat sapiente libero doloribus quo enim incidunt mollitia? Accusantium omnis debitis numquam fugit ullam deserunt tenetur officiis rerum?
+                    </p>
+                  </div>
+                </div>
+              )) }
+            </div> */}
+        </div>
+    </div>
+  )
+}
