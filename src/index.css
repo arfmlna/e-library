@@ -169,3 +169,102 @@
     @apply font-sans;
     }
 }
+
+.quill-dark-fix .ql-editor ul, 
+.quill-dark-fix .ql-editor ol {
+  padding-left: 1.5rem !important;
+  margin-left: 0 !important;
+}
+
+.quill-dark-fix .ql-editor li {
+  padding-left: 0.5rem !important;
+}
+
+.quill-dark-fix .ql-editor .ql-indent-1:not(.ql-direction-rtl) { padding-left: 1.25rem !important; }
+.quill-dark-fix .ql-editor .ql-indent-2:not(.ql-direction-rtl) { padding-left: 2.50rem !important; }
+.quill-dark-fix .ql-editor .ql-indent-3:not(.ql-direction-rtl) { padding-left: 3.75rem !important; }
+
+.quill-dark-fix .ql-editor li.ql-indent-1 { padding-left: 2.0rem !important; }
+.quill-dark-fix .ql-editor li.ql-indent-2 { padding-left: 3.25rem !important; }
+.quill-dark-fix .ql-editor li.ql-indent-3 { padding-left: 4.5rem !important; }
+
+.quill-dark-fix .ql-toolbar.ql-snow {
+  background-color: var(--fallback-b2, #f2f2f2) !important;
+  border-color: var(--fallback-bc, #e5e7eb) !important;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+.quill-dark-fix .ql-container.ql-snow {
+  border-color: var(--fallback-bc, #e5e7eb) !important;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  background-color: var(--fallback-b1, #ffffff);
+  color: var(--fallback-bc, #1f2937);
+}
+.quill-dark-fix .ql-snow .ql-stroke { stroke: var(--fallback-bc, #4b5563); }
+.quill-dark-fix .ql-snow .ql-fill { fill: var(--fallback-bc, #4b5563); }
+.quill-dark-fix .ql-snow .ql-picker { color: var(--fallback-bc, #4b5563); }
+.quill-dark-fix .ql-snow .ql-picker-options { background-color: var(--fallback-b1, #ffffff); }
+
+/* Pembungkus halaman utama dari react-pdf */
+.react-pdf__Page {
+    position: relative !important;
+    display: inline-block !important; /* Mencegah bug misalignment */
+    vertical-align: top;
+    background-color: white;
+}
+
+/* Canvas bertindak sebagai cetakan bentuk fisik kertas */
+.react-pdf__Page__canvas {
+    z-index: 1 !important;
+    position: relative !important; 
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+}
+
+/* Text layer wajib dikunci absolut di atas canvas */
+.react-pdf__Page__textLayer {
+    z-index: 2 !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    opacity: 1 !important;
+    background-color: transparent !important;
+    line-height: 1 !important;
+}
+
+/* Gaya penanda mark search query Anda */
+.textLayer mark {
+    background-color: #facc15 !important; /* Warna kuning Tailwind 400 */
+    color: black !important;
+    border-radius: 0.125rem;
+    padding: 0 2px;
+}
+
+@keyframes pageHintLeft {
+    0% { opacity: 0; transform: translateX(10px) }
+
+    30% { opacity: 1 }
+
+    70% { opacity: 1 }
+
+    100% { opacity: 0; transform: translateX(-10px) }
+}
+
+@keyframes pageHintRight {
+    0% { opacity: 0; transform: translateX(-10px) }
+    30% { opacity: 1 }
+    70% { opacity: 1 }
+    100% { opacity: 0; transform: translateX(10px);}
+}
+
+.animate-page-hint-left {
+    animation: pageHintLeft 1.2s ease-in-out infinite;
+}
+
+.animate-page-hint-right {
+    animation: pageHintRight 1.2s ease-in-out infinite;
+}

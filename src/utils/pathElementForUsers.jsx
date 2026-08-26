@@ -1,0 +1,59 @@
+import { lazy } from 'react'
+
+const ChangePassword = lazy(() => import('@/pages/settings/ChangePassword'))
+const UsersSettings = lazy(() => import('@/pages/settings/UsersSettings'))
+const Reader = lazy(() => import('@/components/bookReader/Reader'))
+const ArticleDetail = lazy(() => import('@/pages/informationboard/ArticleDetail'))
+const LandingPage = lazy(() => import('@/pages/home/landingpage'))
+const InformationBoard = lazy(() => import('@/pages/informationboard/InformationBoard'))
+const AllBooks = lazy(() => import('@/pages/books/AllBooks'))
+const AcademicBooks = lazy(() => import('@/pages/books/AcademicBooks'))
+const NonAcademicBooks = lazy(() => import('@/pages/books/NonAcademicBooks'))
+const NotFound = lazy(() => import('@/NotFound'))
+const Profile = lazy(() => import('@/pages/profile/Profile.jsx')) 
+const Downloads = lazy(() => import('@/pages/download/Downloads.jsx')) 
+const DownloadsId = lazy(() => import('@/pages/download/DownloadsId.jsx'))
+const Books = lazy(() => import('@/pages/books/Books.jsx')) 
+const BooksId = lazy(() => import('@/pages/books/BooksId.jsx')) 
+const Categories = lazy(() => import('@/pages/category/Categories'))
+const CategoryId = lazy(() => import('@/pages/category/CategoryId'))
+const Verification = lazy(() => import('@/pages/signs/Verification'))
+const Discovery = lazy(() => import('@/pages/discovery/Discovery'))
+const UserBorrowHistory = lazy(() => import('@/pages/pengajuan/UserBorrowHistory'))
+const EditProfileExtra = lazy(() => import('@/pages/profile/EditProfileExtra'))
+const TopDigitalBook = lazy(() => import('@/pages/discovery/TopDigitalBook'))
+const TopBorrowedList = lazy(() => import('@/pages/discovery/TopBorrowBook'))
+const TopUsersList = lazy(() => import('@/pages/discovery/TopUsersList'))
+const AuthActivityLogs = lazy(() => import('@/pages/authactivity/AuthActivityLogs'))
+import Test from '@/pages/test/Test'
+
+export const pathElementForUsers = [
+    { path: '*', element: NotFound },
+    { path: '/profile', element: Profile },
+    { path: '/auth-logs', element: AuthActivityLogs },
+    { path: '/downloads', element: Downloads },
+    { path: '/books', element: Books },
+    { path: '/category/', element: Categories },
+    { path: '/category/:categoryName', element: CategoryId },
+    { path: '/academic-books', element: AcademicBooks },
+    { path: '/nonacademic-books', element: NonAcademicBooks },
+    { path: '/all-books', element: AllBooks },
+    { path: '/home', element: LandingPage },
+    { path: '/info-board', element: InformationBoard },
+    { path: '/detail-article/:id', element: ArticleDetail },
+    { path: '/verification', element: Verification },
+    { path: '/flipbook/offline/:downloadId', element: DownloadsId },
+    { path: '/flipbook/online/:bookId', element: BooksId },
+    { path: '/reader/offline/:id', element: Reader },
+    { path: '/reader/online/:id', element: Reader },
+    { path: '/setting', element: UsersSettings },
+    { path: '/change-password', element: ChangePassword },
+    { path: '/discovery', element: Discovery },
+    { path: '/request-history-borrow-book', element: UserBorrowHistory },
+    { path: '/edit-profile', element: EditProfileExtra },
+    { path: '/top-digital-book', element: TopDigitalBook },
+    { path: '/top-borrow-book', element: TopBorrowedList },
+    { path: '/top-users-list', element: TopUsersList },
+    { path: '/discovery', element: Discovery },
+    { path: '/test', element: Test },
+]

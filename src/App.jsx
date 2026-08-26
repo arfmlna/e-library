@@ -1,4 +1,6 @@
-import SignIn from "./pages/signs/SignIn"
+import { lazy } from "react"
+
+const SignIn = lazy(() => import("./pages/signs/SignIn"))
 
 function App() {
   return (

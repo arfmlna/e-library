@@ -7,6 +7,7 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import { createRequire } from 'node:module'
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import basicSsl from '@vitejs/plugin-basic-ssl'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,8 +19,21 @@ const workerPath = normalizePath(path.join(pdfjsDistPath, 'legacy', 'build', 'pd
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  build: {
+    chunkSizeWarningLimit: 2000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            return 'vendor'
+          }
+        }
+      }
+    }
+  },
   plugins: [
     react(),
+    basicSsl(),
     viteStaticCopy({
       targets: [
         { src: cMapsDir, dest: '' },
@@ -42,7 +56,8 @@ export default defineConfig({
         navigateFallbackDenylist: [/^\/__vite_ping/, /^\/@vite\/client/, /^\/node_modules/],
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,json,woff2}'],
         disableDevLogs: true, 
-        cleanupOutdatedCaches: true
+        cleanupOutdatedCaches: true,
+        maximumFileSizeToCacheInBytes: 3000000,
       },
       
       injectRegister: 'auto',
@@ -89,40 +104,19 @@ export default defineConfig({
   optimizeDeps: {
     include: ['react-pdf']
   },
-  // server: {
-  //   host: true,
-  //   // host: '192.168.1.2',
-  //   port: 3000,
-  //   https: false,
-  //   strictPort: true,
-  //   // hmr: {
-  //   //   port: 3000,
-  //   // },
-  //   // proxy: {
-  //   //   '/api': {
-  //   //     target: import.meta.env.VITE_POCKETBASE_URL,
-  //   //     changeOrigin: true,
-  //   //   }
-  //   // },
-  //   allowedHosts: true,
-  //   mimeTypes: {
-  //     'js': 'application/javascript',
-  //   },
-  //   watch: {
-  //     ignored: [
-  //       '**/node_modules/**',
-  //       '**/.git/**',
-  //       '**/dist/**',
-  //       '**/cmaps/**',
-  //       '**/pdf.worker.min.mjs'
-  //     ]
-  //   }
-  // },
+  server: {
+    host: true,
+    proxy: {
+      '/api-ipify': {
+        target: 'https://api.ipify.org', 
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-ipify/, ''),
+      },
+    }
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      // "@": path.resolve(import.meta.dirname, "./src"),
-      // '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   }
 })

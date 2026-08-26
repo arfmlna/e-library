@@ -1,14 +1,16 @@
-import BookFlip from '@/components/bookFlip/BookFlip'
 import { getOfflineBookById } from '@/constants/globals'
+import { pb } from '@/utils/pocketbase'
 import { useQuery } from '@tanstack/react-query'
-import React, { Suspense, useEffect, useMemo } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import React, { lazy, Suspense, useEffect, useMemo } from 'react'
+import { useParams } from 'react-router-dom'
+
+const BookFlip = lazy(() => import('@/components/bookFlip/BookFlip'))
 
 export default function DownloadsId() {
     const { downloadId } = useParams()
-    const navigate = useNavigate()
-
-    const width = 450
+    const userId = pb.authStore.record.id
+    
+    const width = 500
 
     const config = {
         minWidth: width,
@@ -28,61 +30,24 @@ export default function DownloadsId() {
         renderOnlyPageLengthChange: true
     }
 
-    const { data: offlineBook, isLoading } = useQuery({
+    const { data: offlineBook } = useQuery({
         queryKey: ['offlineBook', downloadId],
         queryFn: async () => {
-            const res = await getOfflineBookById(downloadId)
+            const res = await getOfflineBookById(downloadId, userId)
             return res
-        }
+        },
+        // staleTime: Infinity,
+        refetchOnWindowFocus: false, 
     })
 
-    const pdfUrl = useMemo(() => {
-        if (offlineBook?.pdfBlob instanceof Blob) {
-            return URL.createObjectURL(offlineBook.pdfBlob);
-        }
-        return null;
-    }, [offlineBook]);
-
-    useEffect(() => {
-        return () => {
-            if (pdfUrl) URL.revokeObjectURL(pdfUrl);
-        };
-    }, [pdfUrl]);
-
-    if (isLoading) (
-        <div className='w-full h-full flex flex-col justify-center'>
-            <Suspense fallback={
-                <div className='min-h-screen w-full flex justify-center items-center'>
-                    <p className='text-center font-bold text-4xl'>Loading...</p>
-                </div>
-            }>
-                <div>Memuat...</div>
-            </Suspense>
-        </div>
-    );
-    
-    if (!pdfUrl) (
-        <div className='w-full h-full flex flex-col justify-center'>
-            <Suspense fallback={
-                <div className='min-h-screen w-full flex justify-center items-center'>
-                    <p className='text-center font-bold text-4xl'>Loading...</p>
-                </div>
-            }>
-                <div>File tidak ditemukan atau format salah.</div>
-            </Suspense>
-        </div>
-    );
+    const pdfUrl = offlineBook?.pdfUrl
 
 
     return (
-        <div className='w-full h-full flex flex-col justify-center'>
-            <Suspense fallback={
-                <div className='min-h-screen w-full flex justify-center items-center'>
-                    <p className='text-center font-bold text-4xl'>Loading...</p>
-                </div>
-            }>
+        <div className='w-full h-full flex flex-col'>
+            <div className="min-h-screen">
                 <BookFlip path={pdfUrl} options={config} />
-            </Suspense>
+            </div>
         </div>
     )
 }

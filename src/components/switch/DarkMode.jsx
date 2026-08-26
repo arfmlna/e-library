@@ -1,6 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext } from 'react'
 import './darkmode.css'
-import { ConfigContext, updateConfig } from '../../constants/globals'
+import { ConfigContext, updateConfig } from '@/constants/configProvider'
+// import { ConfigContext, updateConfig } from '../../constants/globals'
 
 export default function DarkMode() {
   const { config } = useContext(ConfigContext)

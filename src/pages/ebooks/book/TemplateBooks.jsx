@@ -1,18 +1,29 @@
-import { useEffect, useMemo, useState } from 'react'
-import SearchData from '@/components/search/Search'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { lazy, useEffect, useState } from 'react'
 import { pb } from '@/utils/pocketbase'
 import { FaPeopleGroup } from 'react-icons/fa6'
-import { formatDate, timeAgo } from '@/constants/globals'
-import { Eye, FileText, Link, UserRoundPlus, UserRoundX, X } from 'lucide-react'
+import { Book, FileText, UserRoundPlus, UserRoundX, X } from 'lucide-react'
 import Swal from 'sweetalert2'
-import { useDebounce } from 'use-debounce'
-import anonim from '/anonim.jpg'
-import DialogCreate from './DialogCreate'
-import DialogDetail from './DialogDetail'
-import DialogUpdate from './DialogUpdate'
+import { generateKodeBuku } from '@/utils/generate'
 
-export default function TemplateControl({ title, fullData, tb, refreshData, searchItem, setSearchItem, page, setPage, searchTerm }) {
+const LayoutDashboard = lazy(() => import('@/components/ui/LayoutDashboard'))
+const DialogCreate = lazy(() => import('./DialogCreate'))
+const DialogDetail = lazy(() => import('./DialogDetail'))
+const DialogUpdate = lazy(() => import('./DialogUpdate'))
+
+export default function TemplateControl({ 
+    title, 
+    subtitle,
+    fullData, 
+    tb, 
+    refreshData, 
+    searchItem, 
+    setSearchItem, 
+    page, 
+    setPage, 
+    searchTerm ,
+    setBookType,
+    role
+}) {
     const [selectedIds, setSelectedIds] = useState([]);
     const [openToggle, setOpenToggle] = useState(false)
     const [poster, setPoster] = useState("")
@@ -21,8 +32,10 @@ export default function TemplateControl({ title, fullData, tb, refreshData, sear
     
     const [openDialogUpdate, setOpenDialogUpdate] = useState({
         status: false,
+        role: '',
         data: []
     })
+    
     const [openDetail, setOpenDetail] = useState({
         status: false,
         data: []
@@ -32,12 +45,13 @@ export default function TemplateControl({ title, fullData, tb, refreshData, sear
         setPage(1)
     }, [searchTerm])
 
-    const handleCheckboxChange = (categoryId) => {
+    const handleCheckboxChange = (cat) => {
         setSelectedCategories((prevSelected) => {
-            if (prevSelected.includes(categoryId)) {
-                return prevSelected.filter(id => id !== categoryId);
+            const isExist = prevSelected.some(item => item.id === cat.id);
+            if (isExist) {
+                return prevSelected.filter(item => item.id !== cat.id);
             } else {
-                return [...prevSelected, categoryId];
+                return [...prevSelected, { id: cat.id, kode: cat.kode }];
             }
         });
     };
@@ -56,11 +70,6 @@ export default function TemplateControl({ title, fullData, tb, refreshData, sear
         }
     }
 
-    const handleChange = (result) => {
-        setSelectedIds([])
-        setSearchItem(result)
-    }
-    
     const handleCheckAll = (e) => {
         if (e.target.checked) {
         const allIds = fullData?.items?.map((item) => item.id);
@@ -83,9 +92,30 @@ export default function TemplateControl({ title, fullData, tb, refreshData, sear
         const allInputData = new FormData(e.target)
         const data = Object.fromEntries(allInputData.entries())
 
+        const supplierRaw = allInputData.get('supplier');
+        if (!supplierRaw || supplierRaw === "choose supplier") {
+            return Swal.fire('Error', 'Silakan pilih supplier buku fisik!', 'error');
+        }
+        const [supplierId, supplierKode] = supplierRaw.split('|');
+        data.supplier = supplierId
         data.publishDate = new Date()
         data.uploader = pb?.authStore?.record?.id
-        data.category = selectedCategories
+        if (data?.bookType === 'digital') {
+            if (selectedCategories.length === 0) {
+                return Swal.fire('Error', 'Pilih minimal satu kategori untuk buku digital!', 'error');
+            }
+            const kategoriUtamaKode = selectedCategories[0].kode;
+            data.kode_buku = await generateKodeBuku(kategoriUtamaKode, supplierKode);
+            data.category = selectedCategories.map(item => item.id);
+        } else {
+            const categoryRaw = allInputData.get('category');
+            if (!categoryRaw || categoryRaw === "choose category") {
+                return Swal.fire('Error', 'Silakan pilih kategori buku fisik!', 'error');
+            }
+            const [categoryId, categoryKode] = categoryRaw.split('|');
+            data.kode_buku = await generateKodeBuku(categoryKode, supplierKode);
+            data.category = [categoryId];
+        }
         
         Swal.fire({
             title: 'Mohon Tunggu',
@@ -124,8 +154,61 @@ export default function TemplateControl({ title, fullData, tb, refreshData, sear
         const allInputData = new FormData(e.target)
         const data = Object.fromEntries(allInputData.entries())
 
-        data.category = selectedCategories
+        const supplierRaw = allInputData.get('supplier');
 
+        let supplierId = openDialogUpdate?.data?.supplier;
+        let supplierKode = openDialogUpdate?.data?.expand?.supplier?.kode;
+
+        if (supplierRaw) {
+            const [id, kode] = supplierRaw.split('|');
+            supplierId = id;
+            supplierKode = kode;
+        }
+
+        data.supplier = supplierId;
+        
+        if (data?.bookType === 'digital') {
+            if (selectedCategories.length === 0) {
+                data.category = openDialogUpdate?.data?.category;
+                data.kode_buku = openDialogUpdate?.data?.kode_buku;
+            } else {
+                if (selectedCategories.length === 0) {
+                    return Swal.fire('Error', 'Pilih minimal satu kategori untuk buku digital!', 'error');
+                }
+                
+                const kategoriUtamaKode = selectedCategories[0].kode;
+                
+                data.category = selectedCategories.map(item => item.id);
+
+                if (openDialogUpdate?.data?.category?.[0] !== selectedCategories[0].id || openDialogUpdate?.data?.supplier !== supplierId) {
+                    data.kode_buku = await generateKodeBuku(kategoriUtamaKode, supplierKode);
+                } else {
+                    data.kode_buku = openDialogUpdate?.data?.kode_buku;
+                }
+            }
+        } else {
+            const categoryRaw = allInputData.get('category');
+            let categoryId = openDialogUpdate?.data?.category?.[0] || openDialogUpdate?.data?.category;
+            let categoryKode = openDialogUpdate?.data?.category_kode;
+
+            if (categoryRaw) {
+                const [id, kode] = categoryRaw.split('|');
+                categoryId = id;
+                categoryKode = kode;
+            }
+
+            data.category = Array.isArray(categoryId) ? categoryId : [categoryId];
+
+            if (categoryRaw || supplierRaw) {
+                if (openDialogUpdate?.data?.category !== categoryId || openDialogUpdate?.data?.supplier !== supplierId) {
+                    data.kode_buku = await generateKodeBuku(categoryKode, supplierKode);
+                } else {
+                    data.kode_buku = openDialogUpdate?.data?.kode_buku;
+                }
+            } else {
+                data.kode_buku = openDialogUpdate?.data?.kode_buku;
+            }
+        }
         Swal.fire({
             title: 'Mohon Tunggu',
             text: 'Sedang memperbaharui data...',
@@ -180,14 +263,16 @@ export default function TemplateControl({ title, fullData, tb, refreshData, sear
             confirmButtonText: 'Ya, hapus semua!',
             cancelButtonText: 'Batal'
         });
-        
+
         if (result.isConfirmed) {
             Swal.fire({ title: 'Menghapus...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             const batch = pb.createBatch();
     
             selectedIds.forEach((id) => {
-                batch.collection(tb).delete(id);
+                batch.collection(tb).delete(id, {
+                    isDeleted: true
+                });
             });
     
             try {
@@ -201,6 +286,7 @@ export default function TemplateControl({ title, fullData, tb, refreshData, sear
                     refreshData()
                 });
             } catch (err) {
+                console.error("Detail Error:", err.originalError); 
                 Swal.fire(
                     'Gagal!',
                     'Terjadi kesalahan saat menghapus data: ' + err.message,
@@ -213,223 +299,261 @@ export default function TemplateControl({ title, fullData, tb, refreshData, sear
 
     const handleToggleClose = () => {
         setPoster("")
+        setOpenDialogUpdate({
+            data: [],
+            status: false
+        })
         setOpenToggle(false)
     }
 
     return (
         <>  
-            <DialogCreate title={title} selectedCategories={selectedCategories} handleCheckboxChange={handleCheckboxChange} openToggle={openToggle} setOpenToggle={handleToggleClose} handleAdd={handleAdd} handlePreviewPoster={(e) => handlePreviewPoster(e.target.files[0])} poster={poster} handlePreviewFile={(e) => handlePreviewFile(e.target.files[0])} file={file} />
+            <DialogCreate 
+            title={title} 
+            selectedCategories={selectedCategories} 
+            handleCheckboxChange={handleCheckboxChange} 
+            openToggle={openToggle} 
+            setOpenToggle={handleToggleClose} 
+            handleAdd={handleAdd} 
+            handlePreviewPoster={(e) => handlePreviewPoster(e.target.files[0])} 
+            poster={poster} 
+            handlePreviewFile={(e) => handlePreviewFile(e.target.files[0])} 
+            file={file} 
+            />
 
-            <DialogUpdate title={title} selectedCategories={selectedCategories} setSelectedCategories={setSelectedCategories} handleCheckboxChange={handleCheckboxChange} openToggle={openDialogUpdate} setOpenToggle={() => setOpenDialogUpdate((prev) => ({ status:false, data: [] }))} handleUpdate={handleUpdate} handlePreviewPoster={(e) => handlePreviewPoster(e.target.files[0])} poster={poster} handlePreviewFile={(e) => handlePreviewFile(e.target.files[0])} file={file} />
+            <DialogUpdate title={title} 
+            selectedCategories={selectedCategories} 
+            setSelectedCategories={setSelectedCategories} 
+            handleCheckboxChange={handleCheckboxChange} 
+            openToggle={openDialogUpdate} 
+            setOpenToggle={() => setOpenDialogUpdate((prev) => ({ status:false, data: [] }))} 
+            handleUpdate={handleUpdate} 
+            handlePreviewPoster={(e) => handlePreviewPoster(e.target.files[0])} 
+            poster={poster} 
+            handlePreviewFile={(e) => handlePreviewFile(e.target.files[0])} 
+            file={file} 
+            />
 
-            <DialogDetail open={openDetail?.status} onClose={() => setOpenDetail((prev) => ({ ...prev, status: false }))} detail={openDetail?.data} setOpenEdit={setOpenDialogUpdate} />
+            <DialogDetail open={openDetail?.status} 
+            onClose={() => setOpenDetail((prev) => ({ ...prev, status: false }))} 
+            detail={openDetail?.data} 
+            setOpenEdit={setOpenDialogUpdate} 
+            />
 
-            <div className='w-full min-h-screen select-none pt-25 md:pt-28 px-5 md:px-20'>
-            <h1 className='text-4xl font-bold mb-1 text-center capitalize'>
-                {title}
-            </h1>
-            <div className="flex justify-center md:justify-end">
-                <SearchData searchItem={searchItem} setSearchItem={handleChange} />
-            </div>
-            <div className="flex justify-end gap-2 md:gap-5">
-                <button className='btn-xs md:btn-md btn btn-success' onClick={() => setOpenToggle(true)}>
-                    <UserRoundPlus  />
-                </button>
-                <button className='btn-xs md:btn-md btn btn-error' onClick={() => handleDelete()}>
-                    <UserRoundX />
-                </button>
-            </div>
-            { fullData?.items?.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-gray-500">
-                <FaPeopleGroup className='w-16 h-16 opacity-20 mb-4' />
-                <p className="text-xl font-semibold">Petugas "{searchTerm}" tidak ditemukan</p>
-                <p className="text-sm">Coba kata kunci lain atau periksa ejaan Anda.</p>
+            <LayoutDashboard 
+            icon={<Book size={32} /> }
+            title={title}
+            subtitle={subtitle}
+            fullData={fullData}
+            searchItem={searchItem}
+            setSearchItem={setSearchItem}
+            setSelectedIds={setSelectedIds}
+            >
+                <div className="flex justify-end gap-2 md:gap-5">
+                    <select name="bookType" id="bookType" className='select select-sm'
+                    onChange={(e) => setBookType(e.target.value)}>
+                        <option value="">Semua</option>
+                        <option value="digital">Digital</option>
+                        <option value="academic">Academic</option>
+                        <option value="nonAcademic">Non Academic</option>
+                    </select>
+                    <div className="mx-auto"></div>
+                    <button className='btn-sm md:btn-md btn btn-success' onClick={() => setOpenToggle(true)}>
+                        <UserRoundPlus  />
+                    </button>
+                    <button className='btn-sm md:btn-md btn btn-error' onClick={() => handleDelete()}>
+                        <UserRoundX />
+                    </button>
                 </div>
-            ) : (
-                <div className="w-full gap-5 justify-center overflow-x-auto pb-20">
-                    {/* desktop */}
-                    <table className="hidden md:table shadow-md">
-                    <thead>
-                        <tr>
-                            <th>
-                                <label>
-                                <input type="checkbox" className="checkbox" onChange={handleCheckAll} checked={selectedIds?.length === fullData?.items?.length && fullData?.items?.length > 0} />
-                                </label>
-                            </th>
-                            <th>book</th>
-                            <th>file</th>
-                            <th>publish</th>
-                            <th>category</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        { fullData?.items?.map((data) => {
-                        return (
-                            <tr key={data.id}>
+                { fullData?.items?.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+                    <FaPeopleGroup className='w-16 h-16 opacity-20 mb-4' />
+                    <p className="text-xl font-semibold">Petugas "{searchTerm}" tidak ditemukan</p>
+                    <p className="text-sm">Coba kata kunci lain atau periksa ejaan Anda.</p>
+                    </div>
+                ) : (
+                    <div className="w-full gap-5 justify-center overflow-x-auto pb-20">
+                        {/* desktop */}
+                        <table className="hidden md:table shadow-md">
+                        <thead>
+                            <tr>
                                 <th>
                                     <label>
-                                    <input type="checkbox" className="checkbox" checked={selectedIds.includes(data.id)} onChange={() => handleCheckItem(data.id)} />
+                                    <input type="checkbox" className="checkbox" onChange={handleCheckAll} checked={selectedIds?.length === fullData?.items?.length && fullData?.items?.length > 0} />
                                     </label>
                                 </th>
-                                <td className='w-72'>
-                                    <div className="flex items-center gap-3">
-                                        <div className="avatar">
-                                            <div className="mask mask-squircle h-12 w-12">
-                                            { data?.poster ? (
-                                                <img
-                                                    src={`${import.meta.env.VITE_POCKETBASE_URL}/api/files/${data.collectionId}/${data.id}/${data?.poster}`}
-                                                    alt={data?.title} />
-                                                ) : (
-                                                <img
-                                                    src={anonim}
-                                                    alt={'unknow'} />
-                                            ) }
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="font-bold capitalize">
-                                                {data?.title ? data?.title : 'Unknow'}
-                                            </div>
-                                            <div className="text-sm opacity-50">
-                                                { data?.author ? data?.author : 'N/A' }
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className=''>
-                                    { data?.pdfFile ? (
-                                        <a className='btn btn-neutral btn-xs' target='_blank' href={`${import.meta.env.VITE_POCKETBASE_URL}/api/files/${data.collectionId}/${data.id}/${data?.pdfFile}`}><FileText size={16} /></a>
-                                    ) : (
-                                        'N/A'
-                                    ) }
-                                </td>
-                                <td>
-                                    <div className="text-sm opacity-50">
-                                        { data?.expand?.uploader?.name ? data?.expand?.uploader?.name : 'N/A' }
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="text-sm opacity-50">
-                                        { data?.expand?.category 
-                                        ? data?.expand?.category?.map((data) => (
-                                            <div className="" key={data?.id}>
-                                                <button className='btn btn-neutral btn-xs mb-1'>{data?.name}</button>
-                                            </div>
-                                        )) 
-                                        : 'N/A' }
-                                    </div>
-                                </td>
-                                <th>
-                                    <button className="btn btn-neutral btn-xs" onClick={() => setOpenDetail((prev) => ({ ...prev, status: true, data: data }))}>details</button>
-                                </th>
+                                <th>book</th>
+                                <th>file</th>
+                                <th>publish</th>
+                                <th>category</th>
+                                <th></th>
                             </tr>
-                        )
-                        }) }
-                    </tbody>
-                    </table>
-                    
-                    {/* mobile */}
-                    <table className="table md:hidden shadow-md">
-                    <thead>
-                        <tr>
-                            <th>
-                                <label>
-                                <input type="checkbox" className="checkbox" onChange={handleCheckAll} checked={selectedIds?.length === fullData?.items?.length && fullData?.items?.length > 0} />
-                                </label>
-                            </th>
-                            <th>Name</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        { fullData?.items?.map((data) => {
-                        return (
-                            <tr key={data.id}>
-                                <th>
-                                    <label>
-                                    <input type="checkbox" className="checkbox" checked={selectedIds.includes(data.id)} onChange={() => handleCheckItem(data.id)} />
-                                    </label>
-                                </th>
-                                <td>
-                                    <div className="flex items-center gap-3">
-                                        <div className="avatar flex flex-col">
-                                            <div className="mask mask-squircle h-12 w-12">
-                                            { data?.avatar ? (
-                                                <img
-                                                    src={`${import.meta.env.VITE_POCKETBASE_URL}/api/files/${data.collectionId}/${data.id}/${data?.avatar}`}
-                                                    alt={data?.name} />
-                                                ) : (
-                                                <img
-                                                    src={anonim}
-                                                    alt={'unknow'} />
-                                            ) }
-                                            </div>
-                                            { title === 'all role' && (
-                                                <button className="btn btn-neutral btn-xs" onClick={() => setOpenDetail((prev) => ({ ...prev, status: true, data: data }))}>
-                                                    detail
-                                                </button>
-                                            ) }
-                                        </div>
-                                        <div className='flex flex-col gap-1'>
-                                            <div className="font-bold">
-                                                {data?.name ? data?.name : 'N/A'}
-                                            </div>
-                                            <div className="text-xs opacity-50">
-                                                { data?.email ? data?.email : 'Hidden' }
-                                            </div>
-                                            { title === 'all role' && (
-                                                <div className="text-xs opacity-75">
-                                                    { data?.role }
+                        </thead>
+                        <tbody>
+                            { fullData?.items?.map((data) => {
+                                const file = pb.files.getURL(data, data?.pdfFile)
+                                const poster = pb.files.getURL(data, data?.poster)
+                            return (
+                                <tr key={data.id}>
+                                    <th>
+                                        <label>
+                                        <input type="checkbox" className="checkbox" checked={selectedIds.includes(data.id)} onChange={() => handleCheckItem(data.id)} />
+                                        </label>
+                                    </th>
+                                    <td className='w-72'>
+                                        <div className="flex items-center gap-3">
+                                            <div className="avatar">
+                                                <div className="mask mask-squircle h-12 w-12">
+                                                { data?.poster ? (
+                                                    <img
+                                                        src={poster}
+                                                        alt={data?.title} />
+                                                    ) : (
+                                                    <div className="bg-[#a9a9a9] flex justify-center p-1">
+                                                        <Book size={40} />
+                                                    </div>
+                                                ) }
                                                 </div>
-                                            ) }
-                                            { title !== 'all role' && (
-                                                <button className="btn btn-neutral btn-xs" onClick={() => setOpenDetail((prev) => ({ ...prev, status: true, data: data }))}>
+                                            </div>
+                                            <div>
+                                                <div className="font-bold capitalize">
+                                                    {data?.title ? data?.title : 'Unknow'}
+                                                </div>
+                                                <div className="text-sm opacity-50">
+                                                    { data?.author ? data?.author : 'N/A' }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className=''>
+                                        { 
+                                        data?.pdfFile ? 
+                                            role === 'edmin' 
+                                            ? ( <a className='btn btn-neutral btn-xs' target='_blank' href={file}><FileText size={16} /></a> ) 
+                                            : (<a className='btn btn-neutral btn-xs' target='_blank' href={`/reader/online/${data?.id}`}><FileText size={16} /></a> )
+                                        : ('N/A')
+                                        }
+                                    </td>
+                                    <td>
+                                        <div className="text-sm opacity-50">
+                                            { data?.expand?.uploader?.name ? data?.expand?.uploader?.name : 'N/A' }
+                                        </div>
+                                    </td>
+                                    <td className="w-0 align-top">
+                                        {data?.expand?.category?.length > 0 ? (
+                                            <div className="grid grid-cols-3 gap-1 min-w-max">
+                                                {data.expand.category.map((category) => (
+                                                    <span
+                                                        key={category.id}
+                                                        className="text-sm opacity-50 whitespace-nowrap btn btn-neutral btn-xs text-xs"
+                                                    >
+                                                        {category.name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <span className="text-sm opacity-50">N/A</span>
+                                        )}
+                                    </td>
+                                    <th>
+                                        <button className="btn btn-neutral btn-xs" onClick={() => setOpenDetail((prev) => ({ ...prev, status: true, data: data }))}>details</button>
+                                    </th>
+                                </tr>
+                            )
+                            }) }
+                        </tbody>
+                        </table>
+                        
+                        {/* mobile */}
+                        <table className="table md:hidden shadow-md">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <label>
+                                    <input type="checkbox" className="checkbox" onChange={handleCheckAll} checked={selectedIds?.length === fullData?.items?.length && fullData?.items?.length > 0} />
+                                    </label>
+                                </th>
+                                <th>Name</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            { fullData?.items?.map((data) => {
+                            const posterUrl = pb.files.getURL(data, data.poster)
+                            return (
+                                <tr key={data.id}>
+                                    <th>
+                                        <label>
+                                        <input type="checkbox" className="checkbox" checked={selectedIds.includes(data.id)} onChange={() => handleCheckItem(data.id)} />
+                                        </label>
+                                    </th>
+                                    <td>
+                                        <div className="flex items-center gap-3">
+                                            <div className="avatar flex flex-col items-center">
+                                                <div className="mask mask-squircle h-12 w-12">
+                                                { data?.poster ? (
+                                                    <img
+                                                        src={posterUrl}
+                                                        alt={data?.title} />
+                                                    ) : (
+                                                        <div className="bg-[#a9a9a9] flex justify-center p-1">
+                                                            <Book size={40} />
+                                                        </div>
+                                                ) }
+                                                </div>
+                                            </div>
+                                            <div className='flex flex-col gap-1 w-full'>
+                                                <div className="font-bold">
+                                                    {data?.title ? data?.title : 'N/A'}
+                                                </div>
+                                                <div className="text-xs opacity-50">
+                                                    { data?.author ? data?.author : 'Unknown' }
+                                                </div>
+                                                <button className="btn btn-neutral btn-xs w-full" 
+                                                onClick={() => setOpenDetail((prev) => ({ ...prev, status: true, data: data, role: role }))}>
                                                     detail
                                                 </button>
-                                            ) }
-                                            
+                                            </div>
                                         </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        )
-                        }) }
-                    </tbody>
-                    </table>
+                                    </td>
+                                </tr>
+                            )
+                            }) }
+                        </tbody>
+                        </table>
 
-                    <div className="flex flex-col items-center gap-2 my-4">
-                        <div className="join">
-                            <button 
-                            className="join-item btn btn-sm"
-                            disabled={fullData?.page <= 1}
-                            onClick={() => {
-                                setPage(fullData?.page - 1)
-                                refreshData()
-                            }}
-                            >
-                            « Prev
-                            </button>
-                            
-                            <button className="join-item btn btn-sm no-animation">
-                            Halaman {fullData?.page} dari {fullData?.totalPages}
-                            </button>
-                            
-                            <button 
-                            className="join-item btn btn-sm"
-                            disabled={fullData?.page >= fullData?.totalPages}
-                            onClick={() => {
-                                setPage(fullData?.page + 1)
-                                refreshData()
-                            }}
-                            >
-                            Next »
-                            </button>
+                        <div className="flex flex-col items-center gap-2 my-4">
+                            <div className="join">
+                                <button 
+                                className="join-item btn btn-sm"
+                                disabled={fullData?.page <= 1}
+                                onClick={() => {
+                                    setPage(fullData?.page - 1)
+                                    refreshData()
+                                }}
+                                >
+                                « Prev
+                                </button>
+                                
+                                <button className="join-item btn btn-sm no-animation">
+                                Halaman {fullData?.page} dari {fullData?.totalPages}
+                                </button>
+                                
+                                <button 
+                                className="join-item btn btn-sm"
+                                disabled={fullData?.page >= fullData?.totalPages}
+                                onClick={() => {
+                                    setPage(fullData?.page + 1)
+                                    refreshData()
+                                }}
+                                >
+                                Next »
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            ) }
-            </div>
+                ) }
+            </LayoutDashboard>
         </>
     )
 }

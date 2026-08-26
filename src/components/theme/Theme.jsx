@@ -1,5 +1,6 @@
+import { ConfigContext } from '@/constants/configProvider'
 import React, { useContext } from 'react'
-import { ConfigContext } from '../../constants/globals'
+// import { ConfigContext } from '../../constants/globals'
 
 export default function Theme({ children }) {
     const { config } = useContext(ConfigContext)

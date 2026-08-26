@@ -1,36 +1,59 @@
 import { Dialog, DialogBackdrop, DialogClose, DialogDescription, DialogFooter, DialogHeader, DialogPanel, DialogTitle } from '@/components/animate-ui/primitives/headless/dialog'
 import { X } from 'lucide-react'
-import { useState } from 'react'
 
 export default function DialogUpdate({title, openToggle, setOpenToggle, handleUpdate, password, setPassword, avatar, handlePreviewAvatar }){
+    const theme = localStorage.getItem('theme')
+
     const handleSetOpenToggle = () => {
         setOpenToggle()
     }
     
     return (
-        <Dialog open={openToggle?.status} onClose={handleSetOpenToggle}>
-            <DialogBackdrop className="fixed inset-0 z-50 bg-black/80"/>
-            <DialogPanel
-            className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] z-50 w-[90vw] max-w-md sm:w-full bg-background border p-6 sm:p-10 rounded-lg shadow-lg"
-            >
-            <div className="float-end" onClick={handleSetOpenToggle}>
-                <X size={20} />
-            </div>
-            <DialogHeader>
-                <DialogTitle className="text-lg text-center uppercase">UPDATED {title}</DialogTitle>
-            </DialogHeader>
-            <div className="py-4 text-sm text-muted-foreground">
-                <div className="overflow-hidden">
-                    <form onSubmit={(e) => handleUpdate(e, openToggle?.data?.id)} method="post" className='flex flex-col gap-2 p-1'>
-                        <label htmlFor="name">
-                            <p className='text-black'>Name<span className='text-red-600'>*</span></p>
-                            <input className='w-full h-8 p-2 border-2 border-black outline-none focus:border-blue-500 rounded-xs text-black' type="text" name="name" id="name" placeholder='Insert Name...' required defaultValue={openToggle?.data?.name} />
+        <Dialog data-theme={theme} open={openToggle?.status} onClose={handleSetOpenToggle}>
+            <DialogBackdrop className="fixed inset-0 z-50 bg-black/40" />
+            <DialogPanel className="fixed left-1/2 top-1/2 z-50 w-[95vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl border border-base-200 p-6 shadow-2xl sm:w-full sm:p-8 bg-base-100">
+                <div className="w-full h-full bg-base-100 text-base-content">
+                <button 
+                    type="button"
+                    onClick={handleSetOpenToggle} 
+                    className="absolute right-4 top-4 rounded-md p-1.5 opacity-70 hover:opacity-100 hover:bg-base-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                >
+                    <X size={18} />
+                </button>
+                <DialogHeader className="mb-5">
+                    <DialogTitle className="text-xl font-bold tracking-wide uppercase text-center text-base-content">
+                    UPDATED {title}
+                    </DialogTitle>
+                </DialogHeader>
+                <div className="overflow-hidden pr-1">
+                    <form onSubmit={(e) => handleUpdate(e, openToggle?.data?.id)} method="post" className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-1.5">
+                        <label htmlFor="name" className="text-sm font-medium text-base-content/80">
+                        Name<span className="text-error ml-0.5">*</span>
                         </label>
-                        <button className='btn btn-neutral' type='submit' disabled={password}>submit</button>
+                        <input 
+                        type="text" 
+                        name="name" 
+                        id="name" 
+                        placeholder="Insert Name..." 
+                        required 
+                        defaultValue={openToggle?.data?.name}
+                        className="input input-bordered w-full h-10 px-3 text-sm bg-base-100 shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                        />
+                    </div>
+                    <button 
+                        type="submit" 
+                        disabled={password}
+                        className="btn btn-primary w-full h-10 mt-2 inline-flex items-center justify-center rounded-lg text-sm font-medium shadow transition-colors"
+                    >
+                        Save Changes
+                    </button>
                     </form>
                 </div>
-            </div>
+
+                </div>
             </DialogPanel>
         </Dialog>
+
     )
 }

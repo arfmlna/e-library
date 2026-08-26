@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { lazy, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { pb } from '@/utils/pocketbase'
-import TemplateControl from './TemplateControl'
 import { useDebounce } from 'use-debounce'
+
+const TemplateControl = lazy(() => import('./TemplateControl'))
 
 export default function ControlStudents() {
   const [searchItem, setSearchItem] = useState("")
@@ -21,7 +22,17 @@ export default function ControlStudents() {
 
   return (
     <>
-      <TemplateControl title={"siswa"} fullData={fullData} refreshData={refreshData} searchItem={searchItem} setSearchItem={setSearchItem} page={page} setPage={setPage} searchTerm={searchTerm} />
+      <TemplateControl 
+      title={"data siswa"} 
+      subtitle={"Kelola data akun siswa, hak akses, dan pelacakan aktivitas terbaru."} 
+      role={pb?.authStore?.record?.role}
+      fullData={fullData} 
+      refreshData={refreshData} 
+      searchItem={searchItem} 
+      setSearchItem={setSearchItem} 
+      page={page} 
+      setPage={setPage} 
+      searchTerm={searchTerm} />
     </>
   )
 }

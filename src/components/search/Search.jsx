@@ -1,22 +1,26 @@
+import { Search } from "lucide-react"
+import { useState } from "react"
+
 const SearchData = ({searchItem, setSearchItem}) => {
+    const [getWrite, setWrite] = useState()
+    const handleSubmit = (e) => {
+        e.preventDefault()
+        setSearchItem(getWrite)
+    }
     return (
-        <label className="input mt-3 mb-7">
-            <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <g
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                strokeWidth="2.5"
-                fill="none"
-                stroke="currentColor"
-                >
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.3-4.3"></path>
-                </g>
-            </svg>
-            <input type="search" className="grow" placeholder="Search" onChange={(e) => setSearchItem(e.target.value)} value={searchItem} />
-            <kbd className="kbd kbd-sm">⌘</kbd>
-            <kbd className="kbd kbd-sm">K</kbd>
-        </label>
+        <form onSubmit={handleSubmit} className="relative w-full sm:max-w-md">
+            <label className="">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                <input 
+                type="search"
+                placeholder="Cari judul buku atau penulis..." 
+                className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-slate-300 dark:placeholder:text-white focus:border-transparent transition"
+                value={getWrite} 
+                onChange={(e) => setWrite(e.target.value)} />
+                <kbd className="kbd kbd-sm absolute right-10 top-2.5">⌘</kbd>
+                <kbd className="kbd kbd-sm absolute right-3 top-2.5">K</kbd>
+            </label>
+        </form>
     )
 }
 

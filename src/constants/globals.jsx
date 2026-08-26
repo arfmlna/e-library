@@ -1,143 +1,31 @@
 import { pb } from "@/utils/pocketbase";
 import { openDB } from "idb";
-import { createContext, useState } from "react";
 import Swal from "sweetalert2";
-import { formatDistanceToNow } from 'date-fns';
-import { id } from 'date-fns/locale';
+import { decryptBookData, encryptBlob, getEncryptionKey } from "./Cryptography";
 
-export const ConfigContext = createContext()
-
-let setConfigRef
-
-export const ConfigProvider = ({ children }) => {
-    const [config, setConfig] = useState({
-        app: {
-            theme: 'light'
-        }
-    })
-
-    setConfigRef = setConfig
-
-    return (
-        <ConfigContext.Provider value={{ config }}>
-            { children }
-        </ConfigContext.Provider>
-    )
-}
-
-export const updateConfig = (partialConfig) => {
-  if (setConfigRef) {
-    setConfigRef(prev => ({ ...prev, ...partialConfig }));  // Merge aman
-  }
-};
-
-export const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('id-ID', {
-        dateStyle: 'long', // Contoh: 24 Oktober 2023
-        timeStyle: 'short', // Contoh: 08:30
-    }).format(date);
-};
-
-export const timeAgo = (dateString) => {
-  return formatDistanceToNow(new Date(dateString), { 
-    addSuffix: true, 
-    locale: id 
-  });
-};
-
-export const logs = async (id, action, method) => {
-    try {
-        await pb.collection('logs').create({
-            user: id,
-            action: action,
-            method: method
-        })
-    } catch (error) {
-        console.error('logs: ', error)
-    }
-}
-
-const dbName = 'bookStore'
 const storeName = 'offline_books'
 
-// export const saveBookToOffline = async (book) => {
-//     const { id, title, author, expand, poster, collectionId, pdfFile } = book;
-//     const fileUrl = `${import.meta.env.VITE_POCKETBASE_URL}/api/files/${collectionId}/${id}/${pdfFile}`;
-//     const posterUrl = `${import.meta.env.VITE_POCKETBASE_URL}/api/files/${collectionId}/${id}/${poster}`;
+export const saveBookToOffline = async (book, userId) => {
+    if (!userId) {
+        Swal.fire({ icon: 'error', title: 'Akses Ditolak', text: 'Silakan login terlebih dahulu.' });
+        return false;
+    }
 
-//     Swal.fire({ 
-//         title: 'Mengunduh...', 
-//         html: `Menyimpan <b>${title}</b> ke lokal`,
-//         allowOutsideClick: false, 
-//         didOpen: () => Swal.showLoading() 
-//     });
+    const dbName = `PocketBook_DB_user_${userId}`;
 
-//     try {
-//         const db = await openDB(dbName, 2, {
-//             upgrade(db) {
-//                 if (!db.objectStoreNames.contains(storeName)) {
-//                     db.createObjectStore(storeName, {
-//                         keyPath: 'id'
-//                     });
-//                 }
-//             }
-//         });
-
-//         const [resFile, resPoster] = await Promise.all([
-//             fetch(fileUrl, { mode: 'cors' }),
-//             fetch(posterUrl, { mode: 'cors' })
-//         ]);
-
-//         const blobFile = await resFile.blob();
-//         const blobPoster = await resPoster.blob();
-
-//         const bookData = {
-//             id,
-//             title,
-//             author,
-//             poster: blobPoster,
-//             uploader: expand?.uploader?.name || "Anonim",
-//             pdfBlob: blobFile,
-//             savedAt: new Date().toISOString()
-//         };
-
-//         await db.put(storeName, bookData);
-
-//         Swal.fire({ icon: 'success', title: 'Tersimpan!', timer: 1500, showConfirmButton: false });
-//         return true;
-//     } catch (error) {
-//         console.error(error)
-//         Swal.fire({ icon: 'error', title: 'Gagal mengunduh' });
-//         return false;
-//     }
-// };
-
-export const saveBookToOffline = async (book) => {
-    const { id, title, author, expand, poster, collectionId, pdfFile } = book;
-    const fileUrl = `${import.meta.env.VITE_POCKETBASE_URL}/api/files/${collectionId}/${id}/${pdfFile}`;
-    const posterUrl = `${import.meta.env.VITE_POCKETBASE_URL}/api/files/${collectionId}/${id}/${poster}`;
+    const { id, kode_buku, title, author, expand, poster, pdfFile, bookType, publishDate } = book;
 
     Swal.fire({ 
         title: 'Mengunduh...', 
-        html: `Menyimpan <b>${title}</b> ke lokal`,
+        html: `Menyimpan <b>${title}</b> dengan aman ke lokal`,
         allowOutsideClick: false, 
         didOpen: () => Swal.showLoading() 
     });
 
     try {
-        // 1. Cek dulu versi database saat ini di browser
-        let currentDB = await openDB(dbName);
-        let currentVersion = currentDB.version;
-        
-        // Jika object store belum ada, kita harus menaikkan versi agar fungsi upgrade berjalan
-        const needsUpgrade = !currentDB.objectStoreNames.contains(storeName);
-        currentDB.close(); // Selalu tutup koneksi sebelum membuka kembali dengan versi baru
+        const cryptoKey = await getEncryptionKey(userId);
 
-        const targetVersion = needsUpgrade ? currentVersion + 1 : currentVersion;
-
-        // 2. Buka database dengan target versi yang sesuai
-        const db = await openDB(dbName, targetVersion, {
+        const db = await openDB(dbName, 1, {
             upgrade(db) {
                 if (!db.objectStoreNames.contains(storeName)) {
                     db.createObjectStore(storeName, { keyPath: 'id' });
@@ -145,109 +33,248 @@ export const saveBookToOffline = async (book) => {
             }
         });
 
-        // 3. Proses unduh file (Blob)
-        const [resFile, resPoster] = await Promise.all([
-            fetch(fileUrl, { mode: 'cors' }),
-            fetch(posterUrl, { mode: 'cors' })
-        ]);
-
-        const blobFile = await resFile.blob();
-        const blobPoster = await resPoster.blob();
-
         const bookData = {
             id,
+            kode: kode_buku,
             title,
             author,
-            poster: blobPoster,
-            uploader: expand?.uploader?.name || "Anonim",
-            pdfBlob: blobFile,
-            savedAt: new Date().toISOString()
+            publishDate,
+            uploader: expand?.uploader?.name || "N/A",
+            publisher: expand?.supplier?.supplier || 'N/A',
+            category: expand?.category ? JSON.parse(JSON.stringify(expand.category)) : null, 
+            bookType: bookType || "Digital", 
+            savedAt: new Date().toISOString(),
+            pdfBlob: null,
+            poster: null
         };
 
-        // 4. Simpan ke IndexedDB
+        const downloadPromises = [];
+
+        // 1. Proses Unduh & Enkripsi PDF
+        if (pdfFile && typeof pdfFile === 'string' && pdfFile.trim() !== '') {
+            // Pastikan 'pb' sudah di-import/tersedia di file ini
+            const fileUrl = pb.files.getURL(book, pdfFile); 
+            console.log("Mencoba unduh PDF dari URL:", fileUrl); // DEBUG LINE
+
+            downloadPromises.push(
+                fetch(fileUrl, { mode: 'cors' })
+                    .then(async (res) => {
+                        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+                        const rawBlob = await res.blob();
+                        bookData.pdfBlob = await encryptBlob(rawBlob, cryptoKey);
+                        console.log("PDF Berhasil diunduh dan dienkripsi."); // DEBUG LINE
+                    })
+                    .catch((e) => {
+                        console.error("Gagal proses PDF:", e);
+                        throw new Error(`Gagal mengunduh PDF: ${e.message}`);
+                    })
+            );
+        }
+
+        // 2. Proses Unduh & Enkripsi Poster
+        if (poster && typeof poster === 'string' && poster.trim() !== '') {
+            const posterUrl = pb.files.getURL(book, poster);
+            console.log("Mencoba unduh Poster dari URL:", posterUrl); // DEBUG LINE
+
+            downloadPromises.push(
+                fetch(posterUrl, { mode: 'cors' })
+                    .then(async (res) => {
+                        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+                        const rawBlob = await res.blob();
+                        bookData.poster = await encryptBlob(rawBlob, cryptoKey);
+                        console.log("Poster Berhasil diunduh dan dienkripsi."); // DEBUG LINE
+                    })
+                    .catch((e) => {
+                        console.error("Gagal proses Poster:", e);
+                        // Tidak melempar error keras agar jika hanya poster yang gagal, buku tetap tersimpan
+                    })
+            );
+        }
+
+        // Jalankan semua proses download
+        if (downloadPromises.length > 0) {
+            await Promise.all(downloadPromises);
+        }
+
+        // VALIDASI UTAMA: Jika pdfFile ada di database online tapi gagal diunduh ke lokal, batalkan penyimpanan.
+        if (pdfFile && !bookData.pdfBlob) {
+            throw new Error("Berkas PDF gagal diproses ke penyimpanan lokal.");
+        }
+
+        // Simpan ke IndexedDB
         await db.put(storeName, bookData);
 
-        Swal.fire({ icon: 'success', title: 'Tersimpan!', timer: 1500, showConfirmButton: false });
+        Swal.fire({ icon: 'success', title: 'Buku Tersimpan!', timer: 1500, showConfirmButton: false });
         return true;
     } catch (error) {
-        console.error(error);
+        console.error("Error saat offline saving:", error);
         Swal.fire({ icon: 'error', title: 'Gagal mengunduh', text: error.message });
         return false;
     }
 };
 
-
-
-// export const getAllOfflineBooks = async () => {
-//   const db = await openDB(dbName, 2);
-// //   const allIds = await db.getAllKeys(storeName);
-//   const allBlobs = await db.getAll(storeName);
-//   return allBlobs;
-// };
-
-export const getOfflineBooksList = async (page, perPage, searchTerm) => {
-  // 1. Cek dulu versi database saat ini di browser
-  let currentDB = await openDB(dbName);
-  let currentVersion = currentDB.version;
-  
-  // Jika object store belum ada, kita harus menaikkan versi agar fungsi upgrade berjalan
-  const needsUpgrade = !currentDB.objectStoreNames.contains(storeName);
-  currentDB.close(); // Selalu tutup koneksi sebelum membuka kembali dengan versi baru
-
-  const targetVersion = needsUpgrade ? currentVersion + 1 : currentVersion;
-
-  // 2. Buka database dengan target versi yang sesuai
-  const db = await openDB(dbName, targetVersion, {
-      upgrade(db) {
-          if (!db.objectStoreNames.contains(storeName)) {
-              db.createObjectStore(storeName, { keyPath: 'id' });
-          }
-      }
-  });
-
-  // 3. Ambil semua data dari store yang sudah dipastikan ada
-  let allBlobs = await db.getAll(storeName);
-
-  // Filter berdasarkan searchTerm jika ada (mirip: title ~ "search")
-  if (searchTerm) {
-    allBlobs = allBlobs.filter(book => 
-      book.title && book.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+export const getOfflineBooksList = async (page, perPage, searchTerm, userId) => {
+  if (!userId) {
+    return {
+        page: page,
+        perPage: perPage,
+        totalItems: 0,
+        totalPages: 1,
+        items: []
+    };
   }
 
-  // Urutkan berdasarkan tanggal dibuat menurun (menggunakan properti savedAt dari fungsi simpan Anda)
-  allBlobs.sort((a, b) => new Date(b.savedAt || b.created) - new Date(a.savedAt || a.created));
+  const dynamicDbName = `PocketBook_DB_user_${userId}`;
 
-  // Simulasi Pagination (mirip: getList(page, 8))
-  const startIndex = (page - 1) * perPage;
-  const endIndex = startIndex + perPage;
-  const paginatedItems = allBlobs.slice(startIndex, endIndex);
+  try {
+    const db = await openDB(dynamicDbName, 1, {
+        upgrade(db) {
+            if (!db.objectStoreNames.contains(storeName)) {
+                db.createObjectStore(storeName, { keyPath: 'id' });
+            }
+        }
+    });
 
-  return {
-    page: page,
-    perPage: perPage,
-    totalItems: allBlobs.length,
-    totalPages: Math.ceil(allBlobs.length / perPage || 1), // Mencegah hasil 0 jika data kosong
-    items: paginatedItems 
-  };
+    let allBlobs = await db.getAll(storeName);
+
+    if (searchTerm) {
+        allBlobs = allBlobs.filter(book => 
+            book.title && book.title.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }
+
+    allBlobs.sort((a, b) => new Date(b.savedAt || b.created) - new Date(a.savedAt || a.created));
+
+    const startIndex = (page - 1) * perPage;
+    const endIndex = startIndex + perPage;
+    const paginatedItems = allBlobs.slice(startIndex, endIndex);
+
+    const decryptedItems = await Promise.all(
+        paginatedItems.map(async (book) => {
+            const updatedBook = { ...book };
+
+            // Dekripsi Poster jika ada data biner terenkripsi
+            if (book.poster) {
+                // Dekripsi menjadi Blob gambar (asumsi tipe image/jpeg atau png, browser pintar membacanya otomatis)
+                const posterBlob = await decryptBookData(book.poster, userId, "image/jpeg");
+                if (posterBlob) {
+                    // Mengubah Blob menjadi URL lokal terenkripsi (bisa langsung dimasukkan ke tag <img src="..." />)
+                    updatedBook.posterUrl = URL.createObjectURL(posterBlob);
+                }
+            }
+
+            if (book.pdfBlob) {
+                const pdfBlobDecrypted = await decryptBookData(book.pdfBlob, userId, "application/pdf");
+                if (pdfBlobDecrypted) {
+                    updatedBook.pdfUrl = URL.createObjectURL(pdfBlobDecrypted);
+                }
+            }
+
+            return updatedBook;
+        })
+    );
+
+    return {
+        page: page,
+        perPage: perPage,
+        totalItems: allBlobs.length,
+        totalPages: Math.ceil(allBlobs.length / perPage) || 1,
+        items: decryptedItems 
+    };
+
+  } catch (error) {
+    console.error("Gagal mengambil daftar buku offline:", error);
+    return {
+        page: page,
+        perPage: perPage,
+        totalItems: 0,
+        totalPages: 1,
+        items: []
+    };
+  }
 };
 
-
-export const getOfflineBookById = async (id) => {
-    const db = await openDB(dbName, 2);
-    const data = await db.get(storeName, id);
-    
-    if (data) {
-        return data;
+export const getOfflineBookById = async (id, userId) => {
+    if (!userId) {
+        console.warn("userId tidak tersedia. Gagal mengambil buku offline.");
+        return null;
     }
 
-    console.warn(`Buku dengan ID ${id} tidak ditemukan di IDB, mengambil dari server...`);
+    const dbName = `PocketBook_DB_user_${userId}`;
 
     try {
-        const serverData = await pb.collection('books').getOne(id, { requestKey: null });
-        return serverData;
+        const db = await openDB(dbName, 1, {
+            upgrade(db) {
+                if (!db.objectStoreNames.contains(storeName)) {
+                    db.createObjectStore(storeName, { keyPath: 'id' });
+                }
+            }
+        });
+
+        // Ambil data buku dari IndexedDB
+        const book = await db.get(storeName, id);
+        
+        if (book) {
+            const updatedBook = { ...book };
+
+            // 1. PROSES DEKRIPSI PDF
+            if (book.pdfBlob) {
+                const pdfBlobDecrypted = await decryptBookData(book.pdfBlob, userId, "application/pdf");
+                if (pdfBlobDecrypted) {
+                    // Menghasilkan string URL 'blob:http...' untuk PDF Viewer
+                    updatedBook.pdfUrl = URL.createObjectURL(pdfBlobDecrypted);
+                }
+            }
+
+            // 2. PROSES DEKRIPSI POSTER
+            if (book.poster) {
+                const posterBlobDecrypted = await decryptBookData(book.poster, userId, "image/jpeg");
+                if (posterBlobDecrypted) {
+                    updatedBook.posterUrl = URL.createObjectURL(posterBlobDecrypted);
+                }
+            }
+
+            return updatedBook;
+        }
+
+        console.warn(`Buku dengan ID ${id} tidak ditemukan di penyimpanan offline.`);
+        return null;
+
     } catch (error) {
-        if (error.isAbort) return null;
-        throw error;
+        console.error("Gagal membaca atau mendekripsi dari IndexedDB:", error);
+        return null;
     }
-}
+};
+
+export const removeBookFromOffline = async (bookId, userId) => {
+    // 1. Validasi akun user
+    if (!userId) {
+        Swal.fire({ icon: 'error', title: 'Gagal', text: 'User tidak valid.' });
+        return false;
+    }
+
+    // 2. Arahkan ke database spesifik milik user tersebut
+    const dynamicDbName = `PocketBook_DB_user_${userId}`;
+    const storeName = 'offline_books';
+
+    try {
+        const db = await openDB(dynamicDbName, 1);
+
+        // 3. Eksekusi penghapusan berdasarkan key (id buku)
+        await db.delete(storeName, bookId);
+
+        Swal.fire({ 
+            icon: 'success', 
+            title: 'Berhasil Dihapus', 
+            text: 'Buku telah dihapus dari penyimpanan offline.',
+            timer: 1500, 
+            showConfirmButton: false 
+        });
+        
+        return true;
+    } catch (error) {
+        console.error("Gagal menghapus buku dari IndexedDB:", error);
+        Swal.fire({ icon: 'error', title: 'Gagal menghapus', text: error.message });
+        return false;
+    }
+};

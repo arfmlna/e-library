@@ -10,6 +10,34 @@
 
 <body>
   <div id="root"></div>
+  <script>
+      (function() {
+        const makePassive = (type, options) => {
+          if (type === 'touchstart' || type === 'touchmove') {
+            if (typeof options === 'boolean') return { capture: options, passive: true };
+            if (typeof options === 'object') return Object.assign({}, options, { passive: true });
+            return { passive: true };
+          }
+          return options;
+        };
+        try {
+          const orgElementAdd = Element.prototype.addEventListener;
+          Element.prototype.addEventListener = function(type, listener, options) {
+            orgElementAdd.call(this, type, listener, makePassive(type, options));
+          };
+          const orgDocAdd = Document.prototype.addEventListener;
+          Document.prototype.addEventListener = function(type, listener, options) {
+            orgDocAdd.call(this, type, listener, makePassive(type, options));
+          };
+          const orgWindowAdd = window.addEventListener;
+          window.addEventListener = function(type, listener, options) {
+            orgWindowAdd.call(this, type, listener, makePassive(type, options));
+          };
+        } catch (e) {
+          console.error("Gagal memuat sistem passive touch:", e);
+        }
+      })();
+    </script>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 

@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { lazy, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useDebounce } from 'use-debounce'
-import TemplateEBook from './TemplateCategory'
 import { pb } from '@/utils/pocketbase'
+
+const TemplateCategory = lazy(() => import('./TemplateCategory'))
 
 export default function Category() {
     const [searchItem, setSearchItem] = useState("")
@@ -19,6 +20,16 @@ export default function Category() {
         keepPreviousData: true
     });
     return (
-        <TemplateEBook title={"Category"} fullData={fullData} refreshData={refreshData} searchItem={searchItem} setSearchItem={setSearchItem} page={page} setPage={setPage} searchTerm={searchTerm} />
+        <TemplateCategory 
+        title={"data category"}
+        subtitle={"Kelola data kategori buku, dan pencarian kategori."}
+        fullData={fullData}
+        refreshData={refreshData}
+        searchItem={searchItem}
+        setSearchItem={setSearchItem}
+        page={page}
+        setPage={setPage}
+        searchTerm={searchTerm}
+        />
     )
 }

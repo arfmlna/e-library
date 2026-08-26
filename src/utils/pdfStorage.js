@@ -26,7 +26,6 @@ export const downloadPDF = async (url, filename) => {
 
         const db = await initDB()
         await db.put(storeName, PDFData)
-        console.log(`PDF ${filename} tersimpan!`);
         return PDFData;
     } catch (error) {
         console.error('Error Download: ', error)

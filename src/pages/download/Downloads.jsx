@@ -1,19 +1,27 @@
 import { getOfflineBooksList } from '@/constants/globals';
+import { pb } from '@/utils/pocketbase';
 import { useQuery } from '@tanstack/react-query';
-import React, { useState } from 'react'
-import LayoutBook from '../books/LayoutBook';
+import React, { lazy, useEffect, useState } from 'react'
 import { useDebounce } from 'use-debounce';
+
+const LayoutBook = lazy(() => import('./LayoutBook'));
 
 const Downloads = () => {
   const [searchItem, setSearchItem] = useState("")
   const [page, setPage] = useState(1)
 
   const [searchTerm] = useDebounce(searchItem, 500)
+  const myId = pb?.authStore?.record?.id
 
   const { data: books, refetch: refreshData } = useQuery({
     queryKey: ['books', searchTerm, page],
-    queryFn: () => getOfflineBooksList(page, 8, searchTerm),
-    placeholderData: (previousData) => previousData,
+    queryFn: () => getOfflineBooksList(page, 10, searchTerm, myId),
+    enabled: !!myId,
+    
+    placeholderData: (previousData) => previousData,  
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    staleTime: Infinity,
   });
 
   return (

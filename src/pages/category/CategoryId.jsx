@@ -1,23 +1,33 @@
 import { pb } from '@/utils/pocketbase'
 import { useQuery } from '@tanstack/react-query'
-import React, { useState } from 'react'
+import React, { lazy, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import LayoutBook from '../books/LayoutBook'
 import { useDebounce } from 'use-debounce'
+
+const LayoutBook = lazy(() => import('../books/LayoutBook'))
 
 export default function CategoryId() {
     const [searchItem, setSearchItem] = useState("")
     const [page, setPage] = useState(1)
 
     const [searchTerm] = useDebounce(searchItem, 500)
+    const { categoryName } = useParams()
+    
+    const filterConditions = [];
+    
+    if (categoryName) {
+        filterConditions.push(pb.filter("category.name ?~ {:catName}", { catName: categoryName }));
+    }
+    if (searchTerm) {
+        filterConditions.push(pb.filter("title ~ {:search}", { search: searchTerm }));
+    }
 
-    const { categoryId, categoryName } = useParams()
 
     const { data: category, refetch: refreshData } = useQuery({
-        queryKey: ['categoryId', categoryId, searchTerm, page],
-        queryFn: () => pb.collection('books').getList(page, 8, {
-            filter: `category ~ '${categoryId}' ${searchTerm ? `&& title ~ "${searchTerm}"` : ""}`,
-            expand: 'category',
+        queryKey: ['category', categoryName, searchTerm, page],
+        queryFn: () => pb.collection('books').getList(page, 10, {
+            filter: filterConditions.length > 0 ? filterConditions.join(" && ") : "",
+            expand: 'category,uploader,supplier',
             sort: '-created'
         }),
         keepPreviousData: true

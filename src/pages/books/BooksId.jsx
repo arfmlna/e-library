@@ -1,5 +1,5 @@
-import React, { lazy, Suspense, useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import React, { lazy, Suspense } from 'react'
+import { useLocation, useParams } from 'react-router-dom'
 import { pb } from '../../utils/pocketbase'
 import { useQuery } from '@tanstack/react-query';
 
@@ -7,19 +7,17 @@ const BookFlip = lazy(() => import('../../components/bookFlip/BookFlip'))
 
 export default function BooksId() {
     const { bookId } = useParams()
+    const location = useLocation()
 
-    const { data: book, isLoading } = useQuery({
-        queryKey: ['book', bookId],
-        queryFn: async () => await pb.collection('books').getOne(`${bookId}`, { requestKey: null }),
-        enabled: !!bookId,
-    });
+    const bookData = location.state?.bookData;
+    const bookState = pb.files.getURL(bookData, bookData.pdfFile)
 
-
-    const width = 400
-
+    const width = 500
     const config = {
-        minWidth: width,
-        minHeight: width * 1.414,
+        minWidth: 320,
+        minHeight: 450,
+        width: width,
+        height: width * 1.414,
         drawShadow: true,
         size: 'stretch',
         flipTime: 1000,
@@ -35,18 +33,32 @@ export default function BooksId() {
         renderOnlyPageLengthChange: true
     }
 
-    if (isLoading) {
-        return <div>Sedang memuat data buku...</div>;
-    }
+    const { data: getBook } = useQuery({
+        queryKey: ['book', bookId],
+        queryFn: async () => {
+            const data = pb.collection('books').getOne(`${bookId}`)
+            const pdfUrl = pb.files.getURL(data, data?.pdfFile)
+            return {
+                ...data,
+                pdfUrl: pdfUrl
+            }
+        },
+        staleTime: Infinity,
+        refetchOnWindowFocus: false, 
+    });
+
+    const book = bookState ? bookState : getBook?.pdfUrl
 
     return (
-        <div className='w-full h-full flex flex-col justify-center'>
+        <div className='w-full h-full flex flex-col'>
             <Suspense fallback={
                 <div className='min-h-screen w-full flex justify-center items-center'>
                     <p className='text-center font-bold text-4xl'>Loading...</p>
                 </div>
             }>
-                <BookFlip path={`${import.meta.env.VITE_POCKETBASE_URL}/api/files/${book.collectionId}/${book.id}/${book.pdfFile}`} options={config} />
+                <div className="min-h-screen">
+                    <BookFlip path={book} options={config} />
+                </div>
             </Suspense>
         </div>
     )
