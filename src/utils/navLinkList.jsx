@@ -75,12 +75,12 @@ export const navLinkList = [
     },
     // upload book
     {
-        name: "E-Books",
+        name: "Book Setting",
         path: "/manage-books",
         icon: <LibraryBig className='pr-1' />,
         roles: ["edmin", "petugas"],
         sublink: [
-        { name: "E-Books", path: "/e-books", icon: <Book className='pr-1' />, roles: ["edmin", "petugas"] },
+        { name: "Books", path: "/e-books", icon: <Book className='pr-1' />, roles: ["edmin", "petugas"] },
         { name: "Kategori", path: "/kategori", icon: <ChartColumnStacked className='pr-1' />, roles: ["edmin"] },
         { name: "Supplier", path: "/supplier", icon: <ChartColumnStacked className='pr-1' />, roles: ["edmin"] },
         ]

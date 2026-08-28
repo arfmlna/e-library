@@ -4,6 +4,7 @@ import { FaPeopleGroup } from 'react-icons/fa6'
 import { formatDate, timeAgo } from '@/constants/dateFormat'
 import { UserRound, UserRoundPlus, UserRoundX, Users } from 'lucide-react'
 import Swal from 'sweetalert2'
+import BatchUploadUser from './BatchUploadUser'
 
 const LayoutDashboard = lazy(() => import('@/components/ui/LayoutDashboard'))
 const DialogCreate = lazy(() => import('./DialogCreate'))
@@ -24,6 +25,7 @@ export default function TemplateControl({
 }) {
     const [selectedIds, setSelectedIds] = useState([]);
     const [openToggle, setOpenToggle] = useState(false)
+    const [showBatch, setShowBatch] = useState(false)
     const [avatar, setAvatar] = useState("")
     
     const [openDialogUpdate, setOpenDialogUpdate] = useState({
@@ -260,7 +262,13 @@ export default function TemplateControl({
             open={openDetail?.status} 
             onClose={() => setOpenDetail((prev) => ({ ...prev, status: false }))} 
             detail={openDetail?.data} 
-            setOpenEdit={setOpenDialogUpdate} />
+            setOpenEdit={setOpenDialogUpdate}
+            role={role}/>
+
+            <BatchUploadUser
+            show={showBatch}
+            setShow={setShowBatch}
+            />
 
             <LayoutDashboard 
             icon={<Users size={32} />}
@@ -274,9 +282,18 @@ export default function TemplateControl({
                     <button className='btn-sm md:btn-md btn btn-success' onClick={() => setOpenToggle(true)}>
                         <UserRoundPlus  />
                     </button>
-                    <button className='btn-sm md:btn-md btn btn-error' onClick={() => handleDelete()}>
-                        <UserRoundX />
-                    </button>
+
+                    { role === 'edmin' && (
+                        <>
+                            <button className='btn-sm md:btn-md btn btn-error' onClick={() => handleDelete()}>
+                                <UserRoundX />
+                            </button>
+                            <button className='btn-sm md:btn-md btn btn-secondary' onClick={() => setShowBatch(true)}>
+                                Batch Upload
+                            </button>
+                        </>
+                    ) }
+                    
                 </div>
                 { fullData?.items?.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-gray-500">
@@ -290,13 +307,15 @@ export default function TemplateControl({
                         <table className="hidden md:table shadow-md">
                         <thead>
                             <tr>
-                                <th>
-                                    <label>
-                                    <input type="checkbox" className="checkbox" onChange={handleCheckAll} checked={selectedIds?.length === fullData?.items?.length && fullData?.items?.length > 0} />
-                                    </label>
-                                </th>
+                                { role === 'edmin' && (
+                                    <th>
+                                        <label>
+                                        <input type="checkbox" className="checkbox" onChange={handleCheckAll} checked={selectedIds?.length === fullData?.items?.length && fullData?.items?.length > 0} />
+                                        </label>
+                                    </th>
+                                )}
                                 <th>Name</th>
-                                { title === 'all role' && (
+                                { role === 'edmin' && (
                                     <th>Position</th>
                                 ) }
                                 <th>Created</th>
@@ -309,11 +328,13 @@ export default function TemplateControl({
                             const avatarUrl = pb.files.getURL(data, data.avatar)
                             return (
                                 <tr key={data.id}>
-                                    <th>
-                                        <label>
-                                        <input type="checkbox" className="checkbox" checked={selectedIds.includes(data.id)} onChange={() => handleCheckItem(data.id)} />
-                                        </label>
-                                    </th>
+                                    { role === 'edmin' && (
+                                        <th>
+                                            <label>
+                                            <input type="checkbox" className="checkbox" checked={selectedIds.includes(data.id)} onChange={() => handleCheckItem(data.id)} />
+                                            </label>
+                                        </th>
+                                    )}
                                     <td>
                                         <div className="flex items-center gap-3">
                                         <div className="avatar">
@@ -339,7 +360,7 @@ export default function TemplateControl({
                                         </div>
                                         </div>
                                     </td>
-                                    { title === 'all role' && (
+                                    { role === 'edmin' && (
                                         <td className='capitalize'>{data?.role}</td>
                                     ) }
                                     <td>
@@ -365,11 +386,13 @@ export default function TemplateControl({
                         <table className="table md:hidden shadow-md">
                         <thead>
                             <tr>
-                                <th>
-                                    <label>
-                                    <input type="checkbox" className="checkbox" onChange={handleCheckAll} checked={selectedIds?.length === fullData?.items?.length && fullData?.items?.length > 0} />
-                                    </label>
-                                </th>
+                                { role === 'edmin' && (
+                                    <th>
+                                        <label>
+                                        <input type="checkbox" className="checkbox" onChange={handleCheckAll} checked={selectedIds?.length === fullData?.items?.length && fullData?.items?.length > 0} />
+                                        </label>
+                                    </th>
+                                )}
                                 <th>Name</th>
                                 <th></th>
                             </tr>
@@ -379,11 +402,13 @@ export default function TemplateControl({
                             const avatarUrl = pb.files.getURL(data, data.avatar)
                             return (
                                 <tr key={data.id}>
-                                    <th>
-                                        <label>
-                                        <input type="checkbox" className="checkbox" checked={selectedIds.includes(data.id)} onChange={() => handleCheckItem(data.id)} />
-                                        </label>
-                                    </th>
+                                    { role === 'edmin' && (
+                                        <th>
+                                            <label>
+                                            <input type="checkbox" className="checkbox" checked={selectedIds.includes(data.id)} onChange={() => handleCheckItem(data.id)} />
+                                            </label>
+                                        </th>
+                                    )}
                                     <td>
                                         <div className="flex items-center gap-3">
                                             <div className="avatar flex flex-col">
@@ -406,7 +431,7 @@ export default function TemplateControl({
                                                 <div className="text-xs opacity-50">
                                                     { data?.email ? data?.email : 'Hidden' }
                                                 </div>
-                                                { role && (
+                                                { role == 'edmin' && (
                                                     <div className="text-xs opacity-75">
                                                         { data?.role }
                                                     </div>

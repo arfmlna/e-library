@@ -1,9 +1,20 @@
 import { Dialog, DialogBackdrop, DialogClose, DialogDescription, DialogFooter, DialogHeader, DialogPanel, DialogTitle } from '@/components/animate-ui/primitives/headless/dialog'
 import { ChartColumnStacked, UserRoundPen, X } from 'lucide-react'
 import { formatDate, timeAgo } from '@/constants/dateFormat'
+import { useMemo } from 'react';
+import { pb } from '@/utils/pocketbase';
 
 export default function DialogDetail({ open, onClose, detail, setOpenEdit }){
     const theme = localStorage.getItem('theme')
+
+    const posterUrl = useMemo(() => {
+        const mockBookRecord = {
+            id: detail.latest_book_id,
+            collectionId: detail.latest_book_collection_id,
+            collectionName: 'books',
+        };
+        return detail?.latest_poster ? pb.files.getURL(mockBookRecord, detail?.latest_poster) : null;
+    }, [detail]);
     return (
         <Dialog data-theme={theme} open={open} onClose={onClose}>
             <DialogBackdrop className="fixed inset-0 z-50 bg-black/40" />
@@ -20,7 +31,7 @@ export default function DialogDetail({ open, onClose, detail, setOpenEdit }){
                     {detail?.latest_poster ? (
                     <img
                         className="w-full h-full object-cover"
-                        src={`${import.meta.env.VITE_POCKETBASE_URL}/api/files/${detail?.latest_book_collection_id}/${detail?.latest_book_id}/${detail?.latest_poster}`}
+                        src={posterUrl}
                         alt={detail?.name} 
                     />
                     ) : (

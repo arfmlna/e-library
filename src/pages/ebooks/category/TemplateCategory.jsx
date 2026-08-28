@@ -239,57 +239,64 @@ export default function TemplateEBook({
                         </thead>
                         <tbody>
                             { fullData?.items?.map((data) => {
-                            return (
-                                <tr key={data.id}>
-                                    <th>
-                                        <label>
-                                        <input type="checkbox" className="checkbox" checked={selectedIds.includes(data.id)} onChange={() => handleCheckItem(data.id)} />
-                                        </label>
-                                    </th>
-                                    <td className='capitalize'>
-                                        <div className="avatar">
-                                            <div className="mask mask-squircle h-12 w-12">
-                                            { data?.latest_poster ? (
-                                                <img
-                                                    src={`${import.meta.env.VITE_POCKETBASE_URL}/api/files/${data?.latest_book_collection_id}/${data?.latest_book_id}/${data?.latest_poster}`}
-                                                    alt={data?.name} />
-                                                ) : (
-                                                <div className="bg-[#a9a9a9] flex justify-center p-1">
-                                                    <ChartColumnStacked size={40} />
-                                                </div>
-                                            ) }
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className='capitalize'>
-                                            <div>
-                                                <div className="font-bold">
-                                                    {data?.name ? data?.name : 'N/A'}
-                                                </div>
-                                            </div>
-                                    </td>
-                                    <td className='capitalize'>
-                                            <div>
-                                                <div className="font-bold">
-                                                    {data?.total_books}
+                                const mockBookRecord = {
+                                    id: data.latest_book_id,
+                                    collectionId: data.latest_book_collection_id,
+                                    collectionName: 'books',
+                                };
+                                const posterUrl = data?.latest_poster ? pb.files.getURL(mockBookRecord, data?.latest_poster) : null;
+                                
+                                return (
+                                    <tr key={data.id}>
+                                        <th>
+                                            <label>
+                                            <input type="checkbox" className="checkbox" checked={selectedIds.includes(data.id)} onChange={() => handleCheckItem(data.id)} />
+                                            </label>
+                                        </th>
+                                        <td className='capitalize'>
+                                            <div className="avatar">
+                                                <div className="mask mask-squircle h-12 w-12">
+                                                { data?.latest_poster ? (
+                                                    <img
+                                                        src={posterUrl}
+                                                        alt={data?.name} />
+                                                    ) : (
+                                                    <div className="bg-[#a9a9a9] flex justify-center p-1">
+                                                        <ChartColumnStacked size={40} />
+                                                    </div>
+                                                ) }
                                                 </div>
                                             </div>
-                                    </td>
-                                    <td>
-                                        {formatDate(data?.created)}
-                                        <br />
-                                        <span className="badge badge-ghost badge-sm">{timeAgo(data?.created)}</span>
-                                    </td>
-                                    <td>
-                                        {formatDate(data?.updated)}
-                                        <br />
-                                        <span className="badge badge-ghost badge-sm">{timeAgo(data?.updated)}</span>
-                                    </td>
-                                    <th>
-                                        <button className="btn btn-neutral btn-xs" onClick={() => setOpenDetail((prev) => ({ ...prev, status: true, data: data }))}>details</button>
-                                    </th>
-                                </tr>
-                            )
+                                        </td>
+                                        <td className='capitalize'>
+                                                <div>
+                                                    <div className="font-bold">
+                                                        {data?.name ? data?.name : 'N/A'}
+                                                    </div>
+                                                </div>
+                                        </td>
+                                        <td className='capitalize'>
+                                                <div>
+                                                    <div className="font-bold">
+                                                        {data?.total_books}
+                                                    </div>
+                                                </div>
+                                        </td>
+                                        <td>
+                                            {formatDate(data?.created)}
+                                            <br />
+                                            <span className="badge badge-ghost badge-sm">{timeAgo(data?.created)}</span>
+                                        </td>
+                                        <td>
+                                            {formatDate(data?.updated)}
+                                            <br />
+                                            <span className="badge badge-ghost badge-sm">{timeAgo(data?.updated)}</span>
+                                        </td>
+                                        <th>
+                                            <button className="btn btn-neutral btn-xs" onClick={() => setOpenDetail((prev) => ({ ...prev, status: true, data: data }))}>details</button>
+                                        </th>
+                                    </tr>
+                                )
                             }) }
                         </tbody>
                         </table>
@@ -309,43 +316,49 @@ export default function TemplateEBook({
                         </thead>
                         <tbody>
                             { fullData?.items?.map((data) => {
-                            return (
-                                <tr key={data.id}>
-                                    <th>
-                                        <label>
-                                        <input type="checkbox" className="checkbox" checked={selectedIds.includes(data.id)} onChange={() => handleCheckItem(data.id)} />
-                                        </label>
-                                    </th>
-                                    <td>
-                                        <div className="flex items-center gap-3">
-                                            <div className="avatar flex flex-col">
-                                                <div className="mask mask-squircle h-12 w-12">
-                                                { data?.latest_poster ? (
-                                                    <img
-                                                        src={`${import.meta.env.VITE_POCKETBASE_URL}/api/files/${data?.latest_book_collection_id}/${data?.latest_book_id}/${data?.latest_poster}`}
-                                                        alt={data?.name} />
-                                                    ) : (
-                                                    <div className="bg-[#a9a9a9] flex justify-center p-1">
-                                                        <ChartColumnStacked size={40} />
+                                const mockBookRecord = {
+                                    id: data.latest_book_id,
+                                    collectionId: data.latest_book_collection_id,
+                                    collectionName: 'books',
+                                };
+                                const posterUrl = data?.latest_poster ? pb.files.getURL(mockBookRecord, data?.latest_poster) : null;
+                                return (
+                                    <tr key={data.id}>
+                                        <th>
+                                            <label>
+                                            <input type="checkbox" className="checkbox" checked={selectedIds.includes(data.id)} onChange={() => handleCheckItem(data.id)} />
+                                            </label>
+                                        </th>
+                                        <td>
+                                            <div className="flex items-center gap-3">
+                                                <div className="avatar flex flex-col">
+                                                    <div className="mask mask-squircle h-12 w-12">
+                                                    { data?.latest_poster ? (
+                                                        <img
+                                                            src={posterUrl}
+                                                            alt={data?.name} />
+                                                        ) : (
+                                                        <div className="bg-[#a9a9a9] flex justify-center p-1">
+                                                            <ChartColumnStacked size={40} />
+                                                        </div>
+                                                    ) }
                                                     </div>
-                                                ) }
+                                                </div>
+                                                <div className='flex flex-col gap-1 w-full'>
+                                                    <div className="font-bold">
+                                                        {data?.name ? data?.name : 'N/A'}
+                                                    </div>
+                                                    <div className="text-xs opacity-50">
+                                                        total : { data?.total_books }
+                                                    </div>
+                                                    <button className="btn btn-neutral btn-xs" onClick={() => setOpenDetail((prev) => ({ ...prev, status: true, data: data }))}>
+                                                        detail
+                                                    </button>
                                                 </div>
                                             </div>
-                                            <div className='flex flex-col gap-1 w-full'>
-                                                <div className="font-bold">
-                                                    {data?.name ? data?.name : 'N/A'}
-                                                </div>
-                                                <div className="text-xs opacity-50">
-                                                    total : { data?.total_books }
-                                                </div>
-                                                <button className="btn btn-neutral btn-xs" onClick={() => setOpenDetail((prev) => ({ ...prev, status: true, data: data }))}>
-                                                    detail
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )
+                                        </td>
+                                    </tr>
+                                )
                             }) }
                         </tbody>
                         </table>

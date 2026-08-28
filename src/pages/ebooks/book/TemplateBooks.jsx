@@ -3,7 +3,7 @@ import { pb } from '@/utils/pocketbase'
 import { FaPeopleGroup } from 'react-icons/fa6'
 import { Book, FileText, UserRoundPlus, UserRoundX, X } from 'lucide-react'
 import Swal from 'sweetalert2'
-import { generateKodeBuku } from '@/utils/generate'
+import BatchUploadBook from "./BatchUploadBook";
 
 const LayoutDashboard = lazy(() => import('@/components/ui/LayoutDashboard'))
 const DialogCreate = lazy(() => import('./DialogCreate'))
@@ -29,6 +29,7 @@ export default function TemplateControl({
     const [poster, setPoster] = useState("")
     const [file, setFile] = useState("")
     const [selectedCategories, setSelectedCategories] = useState([]);
+    const [show, setShow] = useState(false)
     
     const [openDialogUpdate, setOpenDialogUpdate] = useState({
         status: false,
@@ -86,161 +87,6 @@ export default function TemplateControl({
         }
         );
     };
-
-    const handleAdd = async (e) => {
-        e.preventDefault()
-        const allInputData = new FormData(e.target)
-        const data = Object.fromEntries(allInputData.entries())
-
-        const supplierRaw = allInputData.get('supplier');
-        if (!supplierRaw || supplierRaw === "choose supplier") {
-            return Swal.fire('Error', 'Silakan pilih supplier buku fisik!', 'error');
-        }
-        const [supplierId, supplierKode] = supplierRaw.split('|');
-        data.supplier = supplierId
-        data.publishDate = new Date()
-        data.uploader = pb?.authStore?.record?.id
-        if (data?.bookType === 'digital') {
-            if (selectedCategories.length === 0) {
-                return Swal.fire('Error', 'Pilih minimal satu kategori untuk buku digital!', 'error');
-            }
-            const kategoriUtamaKode = selectedCategories[0].kode;
-            data.kode_buku = await generateKodeBuku(kategoriUtamaKode, supplierKode);
-            data.category = selectedCategories.map(item => item.id);
-        } else {
-            const categoryRaw = allInputData.get('category');
-            if (!categoryRaw || categoryRaw === "choose category") {
-                return Swal.fire('Error', 'Silakan pilih kategori buku fisik!', 'error');
-            }
-            const [categoryId, categoryKode] = categoryRaw.split('|');
-            data.kode_buku = await generateKodeBuku(categoryKode, supplierKode);
-            data.category = [categoryId];
-        }
-        
-        Swal.fire({
-            title: 'Mohon Tunggu',
-            text: 'Sedang menyimpan data...',
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading()
-        });
-
-        try {
-            await pb.collection(tb).create(data);
-
-            await Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: 'Data baru telah ditambahkan.',
-                timer: 1500,
-                showConfirmButton: false
-            });
-
-            e.target.reset();
-            setPoster("")
-            setFile("")
-            refreshData()
-            setOpenToggle(false)
-        } catch (error) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal Menyimpan',
-                text: JSON.stringify(error.data) || error.message || 'Terjadi kesalahan pada server'
-            });
-        }
-    }
-
-    const handleUpdate = async (e, id) => {
-        e.preventDefault()
-        const allInputData = new FormData(e.target)
-        const data = Object.fromEntries(allInputData.entries())
-
-        const supplierRaw = allInputData.get('supplier');
-
-        let supplierId = openDialogUpdate?.data?.supplier;
-        let supplierKode = openDialogUpdate?.data?.expand?.supplier?.kode;
-
-        if (supplierRaw) {
-            const [id, kode] = supplierRaw.split('|');
-            supplierId = id;
-            supplierKode = kode;
-        }
-
-        data.supplier = supplierId;
-        
-        if (data?.bookType === 'digital') {
-            if (selectedCategories.length === 0) {
-                data.category = openDialogUpdate?.data?.category;
-                data.kode_buku = openDialogUpdate?.data?.kode_buku;
-            } else {
-                if (selectedCategories.length === 0) {
-                    return Swal.fire('Error', 'Pilih minimal satu kategori untuk buku digital!', 'error');
-                }
-                
-                const kategoriUtamaKode = selectedCategories[0].kode;
-                
-                data.category = selectedCategories.map(item => item.id);
-
-                if (openDialogUpdate?.data?.category?.[0] !== selectedCategories[0].id || openDialogUpdate?.data?.supplier !== supplierId) {
-                    data.kode_buku = await generateKodeBuku(kategoriUtamaKode, supplierKode);
-                } else {
-                    data.kode_buku = openDialogUpdate?.data?.kode_buku;
-                }
-            }
-        } else {
-            const categoryRaw = allInputData.get('category');
-            let categoryId = openDialogUpdate?.data?.category?.[0] || openDialogUpdate?.data?.category;
-            let categoryKode = openDialogUpdate?.data?.category_kode;
-
-            if (categoryRaw) {
-                const [id, kode] = categoryRaw.split('|');
-                categoryId = id;
-                categoryKode = kode;
-            }
-
-            data.category = Array.isArray(categoryId) ? categoryId : [categoryId];
-
-            if (categoryRaw || supplierRaw) {
-                if (openDialogUpdate?.data?.category !== categoryId || openDialogUpdate?.data?.supplier !== supplierId) {
-                    data.kode_buku = await generateKodeBuku(categoryKode, supplierKode);
-                } else {
-                    data.kode_buku = openDialogUpdate?.data?.kode_buku;
-                }
-            } else {
-                data.kode_buku = openDialogUpdate?.data?.kode_buku;
-            }
-        }
-        Swal.fire({
-            title: 'Mohon Tunggu',
-            text: 'Sedang memperbaharui data...',
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading()
-        });
-
-        try {
-            await pb.collection(tb).update(id, data);
-
-            await Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: 'Data telah update ditambahkan.',
-                timer: 1500,
-                showConfirmButton: false
-            });
-
-            e.target.reset();
-            setPoster("")
-            refreshData()
-            setOpenDialogUpdate((prev) => ({...prev, status: false}))
-            setOpenDetail((prev) => ({ ...prev, status: false }))
-        } catch (error) {
-            console.error("Error Detail:", error.data);
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal Memperbaharui',
-                text: error.message || 'Terjadi kesalahan pada server'
-            });
-        }
-    }
 
     const handleDelete = async () => {
         if (selectedIds.length === 0) {
@@ -310,34 +156,50 @@ export default function TemplateControl({
         <>  
             <DialogCreate 
             title={title} 
+            tb={tb}
+            refreshData={refreshData}
             selectedCategories={selectedCategories} 
             handleCheckboxChange={handleCheckboxChange} 
             openToggle={openToggle} 
             setOpenToggle={handleToggleClose} 
-            handleAdd={handleAdd} 
             handlePreviewPoster={(e) => handlePreviewPoster(e.target.files[0])} 
             poster={poster} 
+            setPoster={setPoster}
             handlePreviewFile={(e) => handlePreviewFile(e.target.files[0])} 
             file={file} 
+            setFile={setFile}
             />
 
-            <DialogUpdate title={title} 
+            <DialogUpdate 
+            title={title} 
+            tb={tb}
+            refreshData={refreshData}
             selectedCategories={selectedCategories} 
             setSelectedCategories={setSelectedCategories} 
             handleCheckboxChange={handleCheckboxChange} 
             openToggle={openDialogUpdate} 
             setOpenToggle={() => setOpenDialogUpdate((prev) => ({ status:false, data: [] }))} 
-            handleUpdate={handleUpdate} 
             handlePreviewPoster={(e) => handlePreviewPoster(e.target.files[0])} 
             poster={poster} 
+            setPoster={setPoster}
             handlePreviewFile={(e) => handlePreviewFile(e.target.files[0])} 
             file={file} 
+            setOpenDialogUpdate={setOpenDialogUpdate}
+            setOpenDetail={setOpenDetail}
             />
 
             <DialogDetail open={openDetail?.status} 
             onClose={() => setOpenDetail((prev) => ({ ...prev, status: false }))} 
             detail={openDetail?.data} 
             setOpenEdit={setOpenDialogUpdate} 
+            role={role}
+            />
+
+            <BatchUploadBook
+            refreshData={refreshData}
+            setOpenToggle={setOpenToggle}
+            show={show}
+            setShow={setShow}
             />
 
             <LayoutDashboard 
@@ -361,9 +223,16 @@ export default function TemplateControl({
                     <button className='btn-sm md:btn-md btn btn-success' onClick={() => setOpenToggle(true)}>
                         <UserRoundPlus  />
                     </button>
-                    <button className='btn-sm md:btn-md btn btn-error' onClick={() => handleDelete()}>
-                        <UserRoundX />
-                    </button>
+                    { role === 'edmin' && (
+                        <>
+                            <button className='btn-sm md:btn-md btn btn-error' onClick={() => handleDelete()}>
+                                <UserRoundX />
+                            </button>
+                            <button className='btn-sm md:btn-md btn btn-error' onClick={() => setShow(true)}>
+                                Upload Batch
+                            </button>
+                        </>
+                    )}
                 </div>
                 { fullData?.items?.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-gray-500">
@@ -377,11 +246,13 @@ export default function TemplateControl({
                         <table className="hidden md:table shadow-md">
                         <thead>
                             <tr>
-                                <th>
-                                    <label>
-                                    <input type="checkbox" className="checkbox" onChange={handleCheckAll} checked={selectedIds?.length === fullData?.items?.length && fullData?.items?.length > 0} />
-                                    </label>
-                                </th>
+                                { role === 'edmin' && (
+                                    <th>
+                                        <label>
+                                        <input type="checkbox" className="checkbox" onChange={handleCheckAll} checked={selectedIds?.length === fullData?.items?.length && fullData?.items?.length > 0} />
+                                        </label>
+                                    </th>
+                                )}
                                 <th>book</th>
                                 <th>file</th>
                                 <th>publish</th>
@@ -395,11 +266,13 @@ export default function TemplateControl({
                                 const poster = pb.files.getURL(data, data?.poster)
                             return (
                                 <tr key={data.id}>
-                                    <th>
-                                        <label>
-                                        <input type="checkbox" className="checkbox" checked={selectedIds.includes(data.id)} onChange={() => handleCheckItem(data.id)} />
-                                        </label>
-                                    </th>
+                                    { role === 'edmin' && (
+                                        <th>
+                                            <label>
+                                            <input type="checkbox" className="checkbox" checked={selectedIds.includes(data.id)} onChange={() => handleCheckItem(data.id)} />
+                                            </label>
+                                        </th>
+                                    )}
                                     <td className='w-72'>
                                         <div className="flex items-center gap-3">
                                             <div className="avatar">
@@ -468,11 +341,13 @@ export default function TemplateControl({
                         <table className="table md:hidden shadow-md">
                         <thead>
                             <tr>
-                                <th>
-                                    <label>
-                                    <input type="checkbox" className="checkbox" onChange={handleCheckAll} checked={selectedIds?.length === fullData?.items?.length && fullData?.items?.length > 0} />
-                                    </label>
-                                </th>
+                                { role === 'edmin' && (
+                                    <th>
+                                        <label>
+                                        <input type="checkbox" className="checkbox" onChange={handleCheckAll} checked={selectedIds?.length === fullData?.items?.length && fullData?.items?.length > 0} />
+                                        </label>
+                                    </th>
+                                )}
                                 <th>Name</th>
                                 <th></th>
                             </tr>
@@ -482,11 +357,13 @@ export default function TemplateControl({
                             const posterUrl = pb.files.getURL(data, data.poster)
                             return (
                                 <tr key={data.id}>
-                                    <th>
-                                        <label>
-                                        <input type="checkbox" className="checkbox" checked={selectedIds.includes(data.id)} onChange={() => handleCheckItem(data.id)} />
-                                        </label>
-                                    </th>
+                                    { role === 'edmin' && (
+                                        <th>
+                                            <label>
+                                            <input type="checkbox" className="checkbox" checked={selectedIds.includes(data.id)} onChange={() => handleCheckItem(data.id)} />
+                                            </label>
+                                        </th>
+                                    )}
                                     <td>
                                         <div className="flex items-center gap-3">
                                             <div className="avatar flex flex-col items-center">

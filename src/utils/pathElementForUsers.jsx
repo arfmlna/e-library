@@ -26,6 +26,7 @@ const TopBorrowedList = lazy(() => import('@/pages/discovery/TopBorrowBook'))
 const TopUsersList = lazy(() => import('@/pages/discovery/TopUsersList'))
 const AuthActivityLogs = lazy(() => import('@/pages/authactivity/AuthActivityLogs'))
 import Test from '@/pages/test/Test'
+import ReaderDownload from '@/components/bookReader/ReaderDownload'
 
 export const pathElementForUsers = [
     { path: '*', element: NotFound },
@@ -44,7 +45,7 @@ export const pathElementForUsers = [
     { path: '/verification', element: Verification },
     { path: '/flipbook/offline/:downloadId', element: DownloadsId },
     { path: '/flipbook/online/:bookId', element: BooksId },
-    { path: '/reader/offline/:id', element: Reader },
+    { path: '/reader/offline/:id', element: ReaderDownload  },
     { path: '/reader/online/:id', element: Reader },
     { path: '/setting', element: UsersSettings },
     { path: '/change-password', element: ChangePassword },

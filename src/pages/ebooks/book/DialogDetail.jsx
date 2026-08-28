@@ -125,20 +125,22 @@ export default function DialogDetail({ open, onClose, detail, setOpenEdit, role 
                     </div>
 
                     </div>
-                    <div className="card-actions justify-end mt-4 border-t border-base-200 pt-4">
-                    <button 
-                        type="button"
-                        className="btn btn-primary btn-sm md:btn-md gap-2" 
-                        onClick={(e) => setOpenEdit((prev) => ({
-                        ...prev,
-                        status: true,
-                        data: detail
-                        }))}
-                    >
-                        <UserRoundPen size={18} />
-                        <span>Edit Buku</span>
-                    </button>
-                    </div>
+                    { role === 'edmin' && (
+                        <div className="card-actions justify-end mt-4 border-t border-base-200 pt-4">
+                            <button 
+                                type="button"
+                                className="btn btn-primary btn-sm md:btn-md gap-2" 
+                                onClick={(e) => setOpenEdit((prev) => ({
+                                ...prev,
+                                status: true,
+                                data: detail
+                                }))}
+                            >
+                                <UserRoundPen size={18} />
+                                <span>Edit Buku</span>
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 </div>

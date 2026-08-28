@@ -8,7 +8,12 @@ import PdfToPoster from '@/components/poster/PdftoPoster'
 
 const CategoryItem = ({ data }) => {
     const posterUrl = useMemo(() => {
-        return `${import.meta.env.VITE_POCKETBASE_URL}/api/files/${data?.latest_book_collection_id}/${data?.latest_book_id}/${data?.latest_poster ? data?.latest_poster : data?.latest_pdf_file}`;
+        const mockBookRecord = {
+            id: data.latest_book_id,
+            collectionId: data.latest_book_collection_id,
+            collectionName: 'books',
+        };
+        return data?.latest_poster ? pb.files.getURL(mockBookRecord, data?.latest_poster) : null;
     }, [data]);
 
     return (

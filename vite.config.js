@@ -54,7 +54,7 @@ export default defineConfig({
         clientsClaim: false,
         skipWaiting: false,
         navigateFallbackDenylist: [/^\/__vite_ping/, /^\/@vite\/client/, /^\/node_modules/],
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,json,woff2}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,json,woff2,mjs}'],
         disableDevLogs: true, 
         cleanupOutdatedCaches: true,
         maximumFileSizeToCacheInBytes: 3000000,
@@ -118,5 +118,5 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     }
-  }
+  },
 })

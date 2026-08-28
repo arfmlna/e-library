@@ -1,21 +1,27 @@
 import { Dialog, DialogBackdrop, DialogClose, DialogDescription, DialogFooter, DialogHeader, DialogPanel, DialogTitle } from '@/components/animate-ui/primitives/headless/dialog'
+import { generateKodeBuku } from '@/utils/generate';
 import { pb } from '@/utils/pocketbase';
 import { useQuery } from '@tanstack/react-query';
 import { ExternalLink, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import Swal from 'sweetalert2';
 
 export default function DialogUpdate({
     title, 
+    tb,
+    refreshData,
     selectedCategories, 
     setSelectedCategories, 
     handleCheckboxChange, 
     openToggle, 
     setOpenToggle, 
-    handleUpdate, 
     poster, 
+    setPoster,
     handlePreviewPoster, 
     file, 
-    handlePreviewFile 
+    handlePreviewFile,
+    setOpenDialogUpdate,
+    setOpenDetail
 }){
     const [showInput, setShowInput] = useState({
         title: false,
@@ -68,6 +74,125 @@ export default function DialogUpdate({
         })
         setOpenToggle()
     }
+
+    const handleUpdate = async (e, id) => {
+        e.preventDefault();
+        const allInputData = new FormData(e.target);
+        const data = Object.fromEntries(allInputData.entries());
+
+        // 1. AMBIL DATA LAMA dari openToggle (Pastikan formatnya ID String Murni)
+        const oldSupplierId = openToggle?.data?.supplier || ""; 
+        
+        // Ambil ID kategori lama (handle multiple relation array atau string tunggal)
+        let oldCategoryId = "";
+        if (openToggle?.data?.category) {
+            if (Array.isArray(openToggle?.data?.category)) {
+                oldCategoryId = openToggle.data.category[0] || "";
+            } else {
+                oldCategoryId = openToggle.data.category;
+            }
+        }
+        
+        const oldKodeBuku = openToggle?.data?.kode_buku || "";
+
+        // 2. AMBIL DATA BARU DARI FORM
+        const categoryIdFromForm = allInputData.get('category') || "";
+        const supplierIdFromForm = allInputData.get('supplier') || "";
+
+        // Set data default untuk supplier ke payload
+        data.supplier = supplierIdFromForm;
+
+        // 3. LOGIKA DETEKSI PERUBAHAN & GENERATE KODE BUKU
+        if (data?.bookType === 'digital') {
+            if (selectedCategories.length === 0) {
+                // Jika user tidak memilih checkbox baru, gunakan data lama
+                data.category = Array.isArray(openToggle?.data?.category) 
+                    ? openToggle?.data?.category 
+                    : [oldCategoryId].filter(Boolean);
+                data.kode_buku = oldKodeBuku;
+            } else {
+                const oldCategoryArray = Array.isArray(openToggle?.data?.category) 
+                    ? openToggle?.data?.category 
+                    : (openToggle?.data?.category ? [openToggle?.data?.category] : []);
+
+                // Ambil item pertama dari array kategori lama sebagai ID string murni untuk pembanding
+                const oldSingleCategoryId = oldCategoryArray[0] || ""; 
+
+                // Ambil ID dan Kode dari checkbox digital pertama (Kategori Utama)
+                const kategoriUtamaId = selectedCategories[0]?.id || "";
+                const kategoriUtamaKode = selectedCategories[0]?.kode || "";
+                
+                data.category = selectedCategories.map(item => item.id);
+
+                // Cek perubahan data digital
+                const isCategoryChanged = kategoriUtamaId !== oldSingleCategoryId;
+                const isSupplierChanged = supplierIdFromForm !== oldSupplierId;
+
+                if (isCategoryChanged || isSupplierChanged) {
+                    // Mencari data kode dari state array `suppliers`
+                    const targetSupplier = supplier?.find(sup => sup.id === supplierIdFromForm);
+                    const supplierKode = targetSupplier?.kode || openToggle?.data?.expand?.supplier?.kode || "";
+                    
+                    // Generate ulang kode buku karena ada perubahan data nyata
+                    data.kode_buku = await generateKodeBuku(kategoriUtamaKode, supplierKode);
+                } else {
+                    // Pertahankan jika data sama
+                    data.kode_buku = oldKodeBuku;
+                }
+            }
+        } else {
+            // Logika untuk Buku Fisik (Dropdown tunggal)
+            data.category = categoryIdFromForm ? [categoryIdFromForm] : [];
+
+            // Cek perubahan data fisik (String vs String)
+            const isCategoryChanged = categoryIdFromForm !== oldCategoryId;
+            const isSupplierChanged = supplierIdFromForm !== oldSupplierId;
+
+            // --- CODE DEBUGGER ---
+            console.log("--- DEBUG UPDATE KODE ---");
+            console.log("Kategori Berubah?", isCategoryChanged, `[Lama: ${oldCategoryId} | Baru: ${categoryIdFromForm}]`);
+            console.log("Supplier Berubah?", isSupplierChanged, `[Lama: ${oldSupplierId} | Baru: ${supplierIdFromForm}]`);
+
+            if (isCategoryChanged || isSupplierChanged) {
+                const targetCategory = categories?.find(cat => cat.id === categoryIdFromForm);
+                // Mencari data dari tabel/state array `suppliers`
+                const targetSupplier = suppliers?.find(sup => sup.id === supplierIdFromForm);
+
+                const categoryKode = targetCategory?.kode || "";
+                const supplierKode = targetSupplier?.kode || openToggle?.data?.expand?.supplier?.kode || "";
+
+                data.kode_buku = await generateKodeBuku(categoryKode, supplierKode);
+            } else {
+                // JIKA SAMA, PERTAHANKAN KODE LAMA (Counter tidak akan meloncat naik)
+                data.kode_buku = oldKodeBuku;
+            }
+        }
+
+        // 4. SANITASI PAYLOAD UNTUK POCKETBASE
+        delete data.bookType;
+        // 5. PROSES UPDATE KE SERVER
+        Swal.fire({
+            title: 'Mohon Tunggu',
+            text: 'Sedang memperbaharui data...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        try {
+            await pb.collection(tb).update(id, data);
+            await Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Data telah diperbaharui.', timer: 1500, showConfirmButton: false });
+            
+            e.target.reset();
+            if (typeof setPoster === 'function') setPoster("");
+            setPoster("")
+            refreshData()
+            setOpenDialogUpdate((prev) => ({...prev, status: false}))
+            setOpenDetail((prev) => ({ ...prev, status: false }))
+        } catch (error) {
+            // console.error("Error Detail PocketBase:", error?.data);
+            Swal.fire({ icon: 'error', title: 'Gagal Memperbaharui', text: error.message || 'Terjadi kesalahan' });
+        }
+    };
 
     const posterUrl = pb.files.getURL(openToggle.data, openToggle.data.poster)
     const bookUrl = pb.files.getURL(openToggle.data, openToggle.data.pdfFile)
@@ -270,12 +395,18 @@ export default function DialogUpdate({
                             <label className="label cursor-pointer justify-start gap-2 p-1 rounded transition-colors">
                                 <span className="text-sm font-medium text-base-content/80">category</span>
                             </label>
-                            <select name="category" id="category" defaultValue={`${openToggle?.data?.category?.[0]}|${openToggle?.data?.expand?.category?.[0]?.kode}`} 
-                            className='input input-bordered w-full h-10 px-3 text-sm bg-base-100 shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10'>
-                                <option>choose category</option>
-                                { categories?.map((items) => (
-                                    <option key={items?.id} id={items?.id} value={`${items.id}|${items.kode}`}>{items?.name}</option>
-                                )) }
+                            <select 
+                            name="category" 
+                            id="category" 
+                            defaultValue={openToggle?.data?.category?.[0] || ""} 
+                            className='input input-bordered w-full h-10 px-3 text-sm bg-base-100 shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10'
+                            >
+                                <option value="">choose category</option>
+                                {categories?.map((item) => (
+                                    <option key={item?.id} value={item?.id}>
+                                        {item?.name}
+                                    </option>
+                                ))}
                             </select>
                         </div>
                         ) }
@@ -307,26 +438,34 @@ export default function DialogUpdate({
                     {/* supplier */}
                     <div className="flex flex-col gap-2">
                         <button 
-                        type="button"
-                        className={`btn btn-sm ${showInput?.supplier ? 'btn-active' : 'btn-outline'} w-full justify-start gap-2`}
-                        onClick={() => setShowInput((p) => ({...p, supplier: !showInput?.supplier}))}
+                            type="button"
+                            className={`btn btn-sm ${showInput?.supplier ? 'btn-active' : 'btn-outline'} w-full justify-start gap-2`}
+                            onClick={() => setShowInput((p) => ({...p, supplier: !showInput?.supplier}))}
                         >
-                        <span>{showInput?.supplier ? '✕ Cancel' : '✎ Set Supplier'}</span>
+                            <span>{showInput?.supplier ? '✕ Cancel' : '✎ Set Supplier'}</span>
                         </button>
                         {showInput?.supplier && (
-                        <div className="flex flex-col gap-1.5">
-                            <label className="label cursor-pointer justify-start gap-2 p-1 rounded transition-colors">
-                                <span className="text-sm font-medium text-base-content/80">Supplier</span>
-                            </label>
-                            <select name="supplier" id="supplier" 
-                            defaultValue={`${openToggle?.data?.supplier}|${openToggle?.data?.expand?.supplier?.kode}`}
-                            className='input input-bordered w-full h-10 px-3 text-sm bg-base-100 shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10'>
-                                <option>choose supplier</option>
-                                { supplier?.map((items) => (
-                                    <option key={items?.id} id={items?.id} value={`${items?.id}|${items.kode}`}>{items?.supplier}</option>
-                                )) }
-                            </select>
-                        </div>
+                            <div className="flex flex-col gap-1.5">
+                                <label className="label cursor-pointer justify-start gap-2 p-1 rounded transition-colors">
+                                    <span className="text-sm font-medium text-base-content/80">Supplier</span>
+                                </label>
+                                <select 
+                                    name="supplier" 
+                                    id="supplier" 
+                                    defaultValue={openToggle?.data?.supplier || ""} 
+                                    className='input input-bordered w-full h-10 px-3 text-sm bg-base-100 shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10'
+                                >
+                                    <option value="">choose supplier</option>
+                                    { supplier?.map((items) => (
+                                        <option 
+                                            key={items?.id} 
+                                            value={items?.id}
+                                        >
+                                            {items?.supplier}
+                                        </option>
+                                    )) }
+                                </select>
+                            </div>
                         )}
                     </div>
                     <button 

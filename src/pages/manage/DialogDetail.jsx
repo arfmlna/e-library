@@ -3,7 +3,7 @@ import { UserRound, UserRoundPen, X } from 'lucide-react'
 import { formatDate, timeAgo } from '@/constants/dateFormat'
 import { pb } from '@/utils/pocketbase'
 
-export default function DialogDetail({ open, onClose, detail, setOpenEdit }){
+export default function DialogDetail({ open, onClose, detail, setOpenEdit, role }){
     const theme = localStorage.getItem('theme')
     const avatarUrl = pb.files.getURL(detail, detail.avatar)
     return (
@@ -74,20 +74,22 @@ export default function DialogDetail({ open, onClose, detail, setOpenEdit }){
                         </div>
                         </div>
                     </div>
-                    <div className="card-actions justify-end mt-4 border-t border-base-200 pt-4">
-                        <button 
-                        type="button"
-                        className="btn btn-primary btn-sm md:btn-md gap-2" 
-                        onClick={(e) => setOpenEdit((prev) => ({
-                            ...prev,
-                            status: true,
-                            data: detail
-                        }))}
-                        >
-                        <UserRoundPen size={18} />
-                        <span>Edit Profil</span>
-                        </button>
-                    </div>
+                    { role === 'edmin' && (
+                        <div className="card-actions justify-end mt-4 border-t border-base-200 pt-4">
+                            <button 
+                            type="button"
+                            className="btn btn-primary btn-sm md:btn-md gap-2" 
+                            onClick={(e) => setOpenEdit((prev) => ({
+                                ...prev,
+                                status: true,
+                                data: detail
+                            }))}
+                            >
+                            <UserRoundPen size={18} />
+                            <span>Edit Profil</span>
+                            </button>
+                        </div>
+                    )}
                     </div>
                 </div>
 
