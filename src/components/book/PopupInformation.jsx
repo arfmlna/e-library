@@ -4,9 +4,11 @@ import { Download } from "lucide-react"
 import { NavLink } from "react-router-dom"
 import DialogInformation from "../ui/CardBook/DialogInformation"
 import { formatDate } from "@/constants/dateFormat"
+import { pb } from "@/utils/pocketbase"
 
 const PopupInformation = ({ data, clickId, setClickId }) => {
     const isOnline = useOnlineStatus()
+    const myId = pb.authStore.record.id
     return(
         <DialogInformation 
             title={"Informasi"}

@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { pdfjs, Document, Page } from 'react-pdf';
-import { documentOptions } from '../bookFlip/UtilsBook';
+import { pdfjs, Document, Page } from 'react-pdf'
+import { documentOptions } from '../bookFlip/UtilsBook'
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
     import.meta.url,
-)?.toString();
+).toString()
 
 export default function BookReader({
     getBook,
@@ -22,33 +22,31 @@ export default function BookReader({
     visibleRange,
     setVisibleRange
 }) {
-    const [pageHeight, setPageHeight] = useState(
-        pageWidth * 1.414
-    )
+    const [pageHeight, setPageHeight] = useState(pageWidth * 1.414)
 
     const textRenderer = useCallback((textItem) => {
-            if (!searchQuery) return textItem.str;
-            
-            const escapedQuery = searchQuery.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-            const regex = new RegExp(`(${escapedQuery})`, 'gi');
-            
-            return textItem.str.replace(regex, (match) => `<mark class="bg-yellow-400 text-black px-0.5 rounded-sm">${match}</mark>`);
-        },[searchQuery]);
+        if (!searchQuery) return textItem.str
 
-    function onDocumentLoadSuccess({ numPages }) {
-        setNumPages(numPages);
-        pageRefs.current = pageRefs.current.slice(0, numPages);
+        const escapedQuery = searchQuery.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')
+
+        const regex = new RegExp(`(${escapedQuery})`, 'gi')
+
+        return textItem.str.replace(regex, match => `<mark class="bg-yellow-400 text-black px-0.5 rounded-sm">${match}</mark>`)
+    }, [searchQuery])
+
+    const onDocumentLoadSuccess = useCallback(({ numPages }) => {
+        setNumPages(numPages)
+        pageRefs.current = pageRefs.current.slice(0, numPages)
+
         setVisibleRange({
             start: 1,
-            end: Math.min(
-                6,
-                numPages
-            )
+            end: Math.min(6, numPages)
         })
+
         setTimeout(() => {
-            setIsReady(true);
-        }, 300);
-    }
+            setIsReady(true)
+        }, 300)
+    }, [setNumPages, setVisibleRange, setIsReady, pageRefs])
 
     useEffect(() => {
         if (!getBook?.pdfUrl) return
@@ -57,9 +55,7 @@ export default function BookReader({
 
         async function getPageSize() {
             try {
-                const loadingTask =
-                    pdfjs.getDocument(getBook.pdfUrl)
-
+                const loadingTask = pdfjs.getDocument(getBook.pdfUrl)
                 const pdf = await loadingTask.promise
 
                 if (cancelled) {
@@ -68,18 +64,11 @@ export default function BookReader({
                 }
 
                 const page = await pdf.getPage(1)
-
-                const viewport = page.getViewport({
-                    scale: 1
-                })
-
+                const viewport = page.getViewport({ scale: 1 })
                 const ratio = viewport.height / viewport.width
 
                 if (!cancelled) {
-                    setPageHeight(
-                        pageWidth *
-                        ratio
-                    )
+                    setPageHeight(pageWidth * ratio)
                 }
 
                 page.cleanup()
@@ -97,84 +86,91 @@ export default function BookReader({
     }, [getBook?.pdfUrl, pageWidth])
 
     useEffect(() => {
-        const container = scrollContainerRef?.current;
+        const container = scrollContainerRef?.current
 
-        if (!container || !numPages || !isReady) {
-            return;
-        }
+        if (!container || !numPages || !isReady) return
 
-        let ticking = false;
+        let ticking = false
 
         const updateVisiblePages = () => {
-            if (isNavigatingRef.current) return; 
+            if (isNavigatingRef.current || ticking) return
 
-            if (ticking) return;
-            ticking = true;
+            ticking = true
 
             requestAnimationFrame(() => {
-                const scrollTop = container.scrollTop;
-                const viewportHeight = container.clientHeight;
+                const scrollTop = container.scrollTop
+                const viewportHeight = container.clientHeight
+                const currentHeight = pageHeight || pageWidth * 1.414
 
-                if (viewportHeight === 0) {
-                    ticking = false;
-                    return;
+                if (!viewportHeight || !currentHeight) {
+                    ticking = false
+                    return
                 }
 
-                const currentZoom = zoom || 1;
-                const currentHeight = pageHeight || (pageWidth * 1.414) || 800;
-                const estimatedPageHeight = (currentHeight * currentZoom) + 24;
+                const pageStep = currentHeight * zoom
+                let firstVisiblePage = Math.floor(scrollTop / pageStep) + 1
 
-                if (estimatedPageHeight <= 24) {
-                    ticking = false;
-                    return;
-                }
+                if (scrollTop < 50) firstVisiblePage = 1
 
-                let firstVisiblePage = Math.floor(scrollTop / estimatedPageHeight) + 1;
-                const visiblePageCount = Math.ceil(viewportHeight / estimatedPageHeight);
-                const buffer = 3;
+                firstVisiblePage = Math.max(
+                    1,
+                    Math.min(firstVisiblePage, numPages)
+                )
 
-                if (scrollTop < 50) {
-                    firstVisiblePage = 1;
-                }
+                const visiblePageCount =
+                    Math.ceil(viewportHeight / pageStep)
 
-                if (firstVisiblePage > numPages) firstVisiblePage = numPages;
-                if (firstVisiblePage < 1) firstVisiblePage = 1;
+                const buffer = 3
 
-                const start = Math.max(1, firstVisiblePage - buffer);
-                const end = Math.min(numPages, firstVisiblePage + visiblePageCount + buffer);
+                const start = Math.max(
+                    1,
+                    firstVisiblePage - buffer
+                )
 
-                setVisibleRange(previous => {
-                    if (previous.start === start && previous.end === end) {
-                        return previous;
+                const end = Math.min(
+                    numPages,
+                    firstVisiblePage + visiblePageCount + buffer
+                )
+
+                setVisibleRange(prev => {
+                    if (prev.start === start && prev.end === end) {
+                        return prev
                     }
-                    if (scrollTop < 100 && end === numPages && numPages > 6) {
-                        return previous; 
-                    }
-                    return { start, end };
-                });
 
-                ticking = false;
-            });
-        };
+                    return { start, end }
+                })
 
-        container.addEventListener('scroll', updateVisiblePages, { passive: true });
-        
-        const initTimeout = setTimeout(() => {
-            updateVisiblePages();
-        }, 100);
+                ticking = false
+            })
+        }
+
+        container.addEventListener(
+            'scroll',
+            updateVisiblePages,
+            { passive: true }
+        )
+
+        const timeout = setTimeout(updateVisiblePages, 100)
 
         return () => {
-            container.removeEventListener('scroll', updateVisiblePages);
-            clearTimeout(initTimeout);
-        };
-    }, [numPages, isReady, pageHeight, zoom, scrollContainerRef, pageWidth]);
+            container.removeEventListener(
+                'scroll',
+                updateVisiblePages
+            )
+            clearTimeout(timeout)
+        }
+    }, [numPages, isReady, pageHeight, zoom, pageWidth, scrollContainerRef, isNavigatingRef, setVisibleRange])
 
-    const memoizedDocumentOptions = useMemo(() => {
-        return documentOptions; 
-    }, []);
+    const memoizedDocumentOptions = useMemo(
+        () => documentOptions,
+        []
+    )
 
     return (
-        <div className="relative h-screen overflow-y-auto scroll-smooth" ref={scrollContainerRef}>
+        <div
+            className="relative h-screen overflow-y-auto"
+            ref={scrollContainerRef}
+        >
             <div className="inline-block min-w-full text-center">
                 <div className="flex justify-center w-full">
                     <Document
@@ -186,51 +182,58 @@ export default function BookReader({
                             <div className="h-screen w-screen flex justify-center items-center">
                                 Sedang memuat file...
                             </div>
-                        } 
+                        }
                         error={
                             <div className="h-screen w-screen flex justify-center items-center text-red-500 font-semibold">
                                 Gagal memuat file!
                             </div>
                         }
-                        className={'shadow-xl'}
+                        className="shadow-xl"
                     >
-                        {numPages && Array.from({length: numPages}, (_, i) => {
-                            const pageNum = i + 1;
-                            const shouldRender = pageNum >= visibleRange.start && pageNum <= visibleRange.end
+                        {numPages &&
+                            Array.from(
+                                { length: numPages },
+                                (_, i) => {
+                                    const pageNum = i + 1
+                                    const shouldRender =
+                                        pageNum >= visibleRange.start &&
+                                        pageNum <= visibleRange.end
 
-                            const currentZoom = zoom || 1;
-                            const estimatedHeight = pageWidth * 1.414; 
-                            const staticHeight = Math.floor(estimatedHeight * currentZoom);
-                            return (
-                                <div 
-                                    key={pageNum} 
-                                    ref={(el) => (pageRefs.current[i] = el)}
-                                    data-page-number={pageNum}
-                                    className='w-full flex justify-center shadow-2xl'
-                                    style={{ 
-                                        // height: `${staticHeight * zoom}px`,
-                                        // maxHeight: `${staticHeight * zoom}px`,
-                                        minHeight: shouldRender ? 'auto' : `${pageHeight * zoom}px`,
-                                        // marginBottom: '24px' 
-                                     }}
-                                >
-                                    { shouldRender ? (
-                                        <Page
-                                            pageNumber={pageNum}
-                                            // width={(pageWidth) * zoom}
-                                            scale={zoom}
-                                            _className="!m-0 !p-0"
-                                            renderAnnotationLayer={false}
-                                            renderTextLayer={true}
-                                            customTextRenderer={textRenderer} 
-                                        />
-                                    ) : (
-                                        <div className="w-full" 
-                                        style={{ height: pageHeight * zoom }} />
-                                    ) }
-                                </div>
-                            );
-                        })}
+                                    return (
+                                        <div
+                                            key={pageNum}
+                                            ref={el => {
+                                                pageRefs.current[i] = el
+                                            }}
+                                            data-page-number={pageNum}
+                                            className="w-full flex justify-center shadow-2xl"
+                                            style={{
+                                                minHeight: shouldRender
+                                                    ? 'auto'
+                                                    : `${pageHeight * zoom}px`
+                                            }}
+                                        >
+                                            {shouldRender ? (
+                                                <Page
+                                                    pageNumber={pageNum}
+                                                    scale={zoom}
+                                                    _className="m-0 p-0"
+                                                    renderAnnotationLayer={false}
+                                                    renderTextLayer={true}
+                                                    customTextRenderer={textRenderer}
+                                                />
+                                            ) : (
+                                                <div
+                                                    className="w-full"
+                                                    style={{
+                                                        height: pageHeight * zoom
+                                                    }}
+                                                />
+                                            )}
+                                        </div>
+                                    )
+                                }
+                            )}
                     </Document>
                 </div>
             </div>

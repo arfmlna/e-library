@@ -1,11 +1,11 @@
 import ErrorBoundary from '@/ErrorBoundary'
 import { pb } from '@/utils/pocketbase'
 import { useQuery } from '@tanstack/react-query'
-import React, { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import React, { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { pdfjs } from 'react-pdf'
 import { useParams } from 'react-router-dom'
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
+import 'react-pdf/dist/Page/AnnotationLayer.css'
+import 'react-pdf/dist/Page/TextLayer.css'
 
 const ToolsReader = lazy(() => import('./ToolsReader'))
 const BookReader = lazy(() => import('./BookReader'))
@@ -14,50 +14,54 @@ const LayoutReader = lazy(() => import('./LayoutReader'))
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
     import.meta.url,
-)?.toString();
+).toString()
 
 export default function Reader() {
     const [zoom, setZoom] = useState(1)
-    const [numPages, setNumPages] = useState(null);
+    const [numPages, setNumPages] = useState(null)
     const [pageWidth, setPageWidth] = useState(window.innerWidth)
-    const [currentPage, setCurrentPage] = useState(1);
-    const [isReady, setIsReady] = useState(false); 
-    const [searchQuery, setSearchQuery] = useState("");
+    const [currentPage, setCurrentPage] = useState(1)
+    const [isReady, setIsReady] = useState(false)
+    const [searchQuery, setSearchQuery] = useState('')
     const [pageTexts, setPageTexts] = useState([])
     const [showTools, setShowTools] = useState(true)
     const [visibleRange, setVisibleRange] = useState({
         start: 1,
         end: 5
     })
-    
-    const pageRefs = useRef([]);
-    const scrollContainerRef = useRef(null);
+
+    const pageRefs = useRef([])
+    const scrollContainerRef = useRef(null)
     const isNavigatingRef = useRef(false)
-    const bookSizeDefault = Number(localStorage.getItem('book-text-size') / 100)
+
+    const bookSizeDefault =
+        Number(localStorage.getItem('book-text-size') || 100) / 100
 
     const { id } = useParams()
 
     const { data: getBook } = useQuery({
         queryKey: ['book', id],
         queryFn: async () => {
-            const data = await pb.collection('books').getOne(`${id}`)
+            const data = await pb.collection('books').getOne(id)
             const pdfUrl = pb.files.getURL(data, data?.pdfFile)
+
             return {
                 ...data,
-                pdfUrl: pdfUrl
+                pdfUrl
             }
         }
     })
 
     useEffect(() => {
-        function handleResize() {
-            const dynamicWidth = window.innerWidth > 768 ? 720 : window.innerWidth;
-            setPageWidth(dynamicWidth);
+        const handleResize = () => {
+            setPageWidth(window.innerWidth > 768 ? 720 : window.innerWidth)
         }
-        handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+
+        handleResize()
+        window.addEventListener('resize', handleResize)
+
+        return () => window.removeEventListener('resize', handleResize)
+    }, [])
 
     useEffect(() => {
         setNumPages(null)
@@ -65,7 +69,7 @@ export default function Reader() {
         setIsReady(false)
         setSearchQuery('')
         setPageTexts([])
-
+        setVisibleRange({ start: 1, end: 5 })
         pageRefs.current = []
     }, [id])
 
@@ -101,17 +105,12 @@ export default function Reader() {
                     page.cleanup()
                 }
 
-                if (!cancelled) {
-                    setPageTexts(texts)
-                }
+                if (!cancelled) setPageTexts(texts)
 
                 await pdf.destroy()
             } catch (error) {
                 if (!cancelled) {
-                    console.error(
-                        'Gagal membaca teks PDF:',
-                        error
-                    )
+                    console.error('Gagal membaca teks PDF:', error)
                 }
             }
         }
@@ -120,32 +119,26 @@ export default function Reader() {
 
         return () => {
             cancelled = true
-
-            if (loadingTask) {
-                loadingTask.destroy()
-            }
+            loadingTask?.destroy()
         }
     }, [getBook?.pdfUrl])
 
-
+    // Menentukan halaman berdasarkan posisi aktual DOM
     useEffect(() => {
         const container = scrollContainerRef.current
 
-        if (!container || !numPages || !isReady) {
-            return
-        }
+        if (!container || !numPages || !isReady) return
 
         let ticking = false
 
         const handleScroll = () => {
-            if (ticking) return
+            if (ticking || isNavigatingRef.current) return
 
             ticking = true
 
             requestAnimationFrame(() => {
-                const containerRect = container.getBoundingClientRect()
-
-                const targetPosition = containerRect.top + container.clientHeight * 0.3
+                const rect = container.getBoundingClientRect()
+                const targetPosition = rect.top + container.clientHeight * 0.3
 
                 let closestPage = 1
                 let closestDistance = Infinity
@@ -153,11 +146,9 @@ export default function Reader() {
                 pageRefs.current.forEach((element, index) => {
                     if (!element) return
 
-                    const rect = element.getBoundingClientRect()
-
-                    const pageCenter = rect.top + rect.height / 2
-
-                    const distance = Math.abs( pageCenter - targetPosition)
+                    const pageRect = element.getBoundingClientRect()
+                    const pageCenter = pageRect.top + pageRect.height / 2
+                    const distance = Math.abs(pageCenter - targetPosition)
 
                     if (distance < closestDistance) {
                         closestDistance = distance
@@ -165,82 +156,72 @@ export default function Reader() {
                     }
                 })
 
-                if (closestPage >= 1 && closestPage <= numPages) {
-                    setCurrentPage(closestPage)
-                }
+                setCurrentPage(prev =>
+                    prev === closestPage ? prev : closestPage
+                )
 
                 ticking = false
             })
         }
 
         container.addEventListener('scroll', handleScroll, { passive: true })
-
         handleScroll()
 
-        return () => { 
+        return () => {
             container.removeEventListener('scroll', handleScroll)
         }
-    }, [numPages, isReady, currentPage])
-
-    useEffect(() => {
-        if (!isNavigatingRef.current) return
-
-        const timeout = setTimeout(() => {
-            isNavigatingRef.current = false
-        }, 700)
-
-        return () => clearTimeout(timeout)
-    }, [currentPage])
-
-    const handlePageChange = useCallback((page) => {
-        setCurrentPage(page)
-    }, [])
+    }, [numPages, isReady])
 
     return (
         <LayoutReader
-        currentPage={currentPage}
-        numPages={numPages}
-        showTools={showTools}
-        setShowTools={setShowTools}>
-            { showTools && (
+            currentPage={currentPage}
+            numPages={numPages}
+            showTools={showTools}
+            setShowTools={setShowTools}
+        >
+            {showTools && (
                 <ToolsReader
-                pageWidth={pageWidth}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                numPages={numPages}
-                pageRefs={pageRefs}
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                zoom={zoom}
-                setZoom={setZoom}
-                isReady={isReady}
-                scrollContainerRef={scrollContainerRef}
-                pageTexts={pageTexts}
-                isNavigatingRef={isNavigatingRef}
-                setVisibleRange={setVisibleRange}
-                />
-            ) }
-            <ErrorBoundary>
-                <Suspense fallback={
-                    <div className="h-screen w-full flex flex-col justify-center items-center bg-zinc-950">
-                        <p className="text-center font-bold text-2xl text-zinc-400 animate-pulse">Memuat Pembaca...</p>
-                    </div>
-                }>
-                    <BookReader
-                    getBook={getBook}
+                    pageWidth={pageWidth}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
                     numPages={numPages}
                     pageRefs={pageRefs}
-                    pageWidth={pageWidth}
                     searchQuery={searchQuery}
-                    setIsReady={setIsReady}
-                    setNumPages={setNumPages}
-                    zoom={zoom * bookSizeDefault}
-                    scrollContainerRef={scrollContainerRef}
-                    onPageChange={handlePageChange}
+                    setSearchQuery={setSearchQuery}
+                    zoom={zoom}
+                    setZoom={setZoom}
                     isReady={isReady}
+                    scrollContainerRef={scrollContainerRef}
+                    pageTexts={pageTexts}
                     isNavigatingRef={isNavigatingRef}
-                    visibleRange={visibleRange}
                     setVisibleRange={setVisibleRange}
+                />
+            )}
+
+            <ErrorBoundary>
+                <Suspense
+                    fallback={
+                        <div className="h-screen w-full flex flex-col justify-center items-center bg-zinc-950">
+                            <p className="text-center font-bold text-2xl text-zinc-400 animate-pulse">
+                                Memuat Pembaca...
+                            </p>
+                        </div>
+                    }
+                >
+                    <BookReader
+                        getBook={getBook}
+                        numPages={numPages}
+                        pageRefs={pageRefs}
+                        pageWidth={pageWidth}
+                        searchQuery={searchQuery}
+                        setIsReady={setIsReady}
+                        setNumPages={setNumPages}
+                        zoom={zoom * bookSizeDefault}
+                        scrollContainerRef={scrollContainerRef}
+                        isReady={isReady}
+                        isNavigatingRef={isNavigatingRef}
+                        visibleRange={visibleRange}
+                        setVisibleRange={setVisibleRange}
                     />
                 </Suspense>
             </ErrorBoundary>
