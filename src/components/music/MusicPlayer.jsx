@@ -1,6 +1,7 @@
 import { useLocalStorage } from "@/constants/useLocalStorage";
-import { ArrowLeft, ArrowRight, Delete, Music, Pause, Play, Repeat, Search, Shuffle, Trash, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Music, Pause, Play, Repeat, Search, Shuffle, Trash, X } from "lucide-react";
 import React, { useState, useRef, useEffect } from "react";
+import Swal from "sweetalert2";
 
 const DB_NAME = "LocalMusicPlayerDB";
 const STORE_NAME = "tracks";
@@ -67,6 +68,7 @@ export default function MusicPlayer({
         return () => {
             createdUrls.forEach(url => URL.revokeObjectURL(url));
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleFolderScan = (event) => {
@@ -74,7 +76,10 @@ export default function MusicPlayer({
         const audioFiles = files.filter((file) => file.type.startsWith("audio/"));
 
         if (audioFiles.length === 0) {
-            alert("Tidak ditemukan file musik di dalam folder ini!");
+            Swal.fire({
+                icon: 'error',
+                text: 'Tidak ditemukan file musik di dalam folder ini!'
+            })
             return;
         }
 
@@ -182,7 +187,10 @@ export default function MusicPlayer({
             setIsPlaying(false);
             setCurrentTime(0)
             setDuration(0)
-            alert("Playlist lokal berhasil dihapus dari browser.");
+            Swal.fire({
+                icon: 'success',
+                text: 'Playlist lokal berhasil dihapus dari browser.'
+            })
         };
     };
 
@@ -224,7 +232,8 @@ export default function MusicPlayer({
             console.warn("Media Session API gagal dimuat atau tidak didukung penuh:", error);
             }
         }
-    }, [currentIndex, playlist, isPlaying]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentIndex, playlist, isPlaying, changeTrack]);
 
     return (
          <div 

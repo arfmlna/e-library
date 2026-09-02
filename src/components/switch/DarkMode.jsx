@@ -1,13 +1,12 @@
 import React, { useContext } from 'react'
 import './darkmode.css'
 import { ConfigContext, updateConfig } from '@/constants/configProvider'
-// import { ConfigContext, updateConfig } from '../../constants/globals'
 
 export default function DarkMode() {
   const { config } = useContext(ConfigContext)
   const theme = localStorage.getItem('theme')
   
-  const handleTheme = (e) => {
+  const handleTheme = () => {
     if (theme) {
       localStorage.setItem('theme', theme == 'dark' ? 'light' : 'dark')
     } else {

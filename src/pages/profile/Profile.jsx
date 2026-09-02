@@ -4,15 +4,17 @@ import avatarNA from '/anonim.jpg'
 import { useMutation, useQuery } from '@tanstack/react-query';
 import Swal from 'sweetalert2';
 import { ArrowBigLeftDash, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { NavLink } from 'react-router-dom';
 import { dateOnlyFormatted } from '@/constants/dateFormat';
+import { validateFileSize } from '@/constants/validationFileSize';
 
 export default function Profile() {
     const myData = pb.authStore.record
     const avatar = pb.files.getURL(myData, myData.avatar)
     const [image, setImage] = useState(null)
     const navigate = useNavigate()
+    const { settings } = useOutletContext()
 
     const { data: profile } = useQuery({
         queryKey: ['profile'],
@@ -49,9 +51,18 @@ export default function Profile() {
 
     useEffect(() => {
         if (image) {
-            updateAvatar(image);
+            const validation = validateFileSize(image, settings?.max_upload_size); 
+            if (validation.isValid) {
+                updateAvatar(image);
+            } else {
+                setImage(null)
+                Swal.fire({
+                    icon: 'error',
+                    text: validation.error
+                })
+            }
         }
-    }, [image, updateAvatar]);
+    }, [image, updateAvatar, settings?.max_upload_size]);
 
     return (
         <div className="w-full pt-5 md:pt-10 flex flex-col justify-center items-center px-4 min-h-full">
@@ -81,8 +92,9 @@ export default function Profile() {
                                 />
                                 </div>
                             </div>
+                            <span className='mt-1.5'>max size : {settings?.max_upload_size}mb</span>
                             <label htmlFor="profileImage">
-                                <span className="btn btn-xs btn-outline btn-primary rounded-md mt-5">
+                                <span className="btn btn-xs btn-outline btn-primary rounded-md mt-1">
                                     Ubah Foto
                                 </span>
                             </label>

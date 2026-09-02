@@ -5,8 +5,6 @@ import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 
 export default function SearchLoan({ 
-  searchId, 
-  setSearchId, 
   loanDetailData, 
   setLoanDetailData, 
   setIsLate 
@@ -35,6 +33,7 @@ export default function SearchLoan({
     // Format struktur data agar siap digunakan oleh komponen ReturnBook
     const formattedData = {
       id: loan.id,
+      loan_id: loan.loan_id,
       book_id: loan.book_id,
       book_title: loan.expand?.book_id?.title || "Buku Tidak Diketahui",
       bookType: loan.expand?.book_id?.bookType || "physical",

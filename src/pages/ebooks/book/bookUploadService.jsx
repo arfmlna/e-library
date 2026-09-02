@@ -53,7 +53,7 @@ export const fetchIdByCode = async (collectionName, codeValue) => {
     try {
         const record = await pb.collection(collectionName).getFirstListItem(`kode = "${cleanCode}"`);
         return record.id;
-    } catch (error) {
+    } catch {
         throw new Error(`Kode "${cleanCode}" tidak terdaftar di database koleksi [${collectionName}]!`);
     }
 };
@@ -76,7 +76,7 @@ export const fetchLastNomorUrut = async (kodeKategori, KodeSupplier) => {
             }
         }
         return 1
-    } catch (error) {
+    } catch {
         return 1;
     }
 };

@@ -1,10 +1,12 @@
 import { lazy, useEffect, useState } from 'react'
 import { pb } from '@/utils/pocketbase'
 import { FaPeopleGroup } from 'react-icons/fa6'
-import { formatDate, timeAgo } from '@/constants/dateFormat'
 import { UserRound, UserRoundPlus, UserRoundX, Users } from 'lucide-react'
 import Swal from 'sweetalert2'
 import BatchUploadUser from './BatchUploadUser'
+import { useOutletContext } from 'react-router-dom'
+import { validateFileSize } from '@/constants/validationFileSize'
+import ImagePreviewModal from '../pengajuanaccount/ImagePreviewModal'
 
 const LayoutDashboard = lazy(() => import('@/components/ui/LayoutDashboard'))
 const DialogCreate = lazy(() => import('./DialogCreate'))
@@ -14,12 +16,12 @@ const DialogUpdate = lazy(() => import('./DialogUpdate'))
 export default function TemplateControl({ 
     title, 
     subtitle,
+    pageState,
     role=false, 
     fullData, 
     refreshData, 
     searchItem, 
     setSearchItem, 
-    page, 
     setPage, 
     searchTerm 
 }) {
@@ -27,7 +29,11 @@ export default function TemplateControl({
     const [openToggle, setOpenToggle] = useState(false)
     const [showBatch, setShowBatch] = useState(false)
     const [avatar, setAvatar] = useState("")
-    
+    const [showNOID, setShowNOID] = useState({
+        status: false,
+        data: [],
+        verifData: []
+    })
     const [openDialogUpdate, setOpenDialogUpdate] = useState({
         status: false,
         data: []
@@ -36,27 +42,29 @@ export default function TemplateControl({
         status: false,
         data: []
     })
-    const [password, setPassword] = useState({
-        password: "",
-        passwordConfirm: ""
-    })
+
+    const { settings } = useOutletContext()
 
     useEffect(() => {
         setPage(1)
-    }, [searchTerm])
+    }, [searchTerm, setPage])
 
     const handlePreviewAvatar = (file) => {
         if (file) {
-            const previewURL = URL.createObjectURL(file)
-            setAvatar(previewURL)
+            const validation = validateFileSize(file, settings?.max_upload_size); 
+            if (validation.isValid) {
+                const previewURL = URL.createObjectURL(file)
+                setAvatar(previewURL)
+            } else {
+                setAvatar("")
+                Swal.fire({
+                    icon: 'error',
+                    text: validation.error
+                })
+            }
         }
     }
 
-    const handlePasswordChange = (e) => {
-        const { name, value } = e.target;
-        setPassword(prev => ({ ...prev, [name]: value }));
-    };
-    
     const handleCheckAll = (e) => {
         if (e.target.checked) {
         const allIds = fullData?.items?.map((item) => item.id);
@@ -73,107 +81,6 @@ export default function TemplateControl({
         }
         );
     };
-
-    const handleAdd = async (e) => {
-        e.preventDefault()
-        const allInputData = new FormData(e.target)
-        const data = Object.fromEntries(allInputData.entries())
-
-        if (role !== 'edmin') {
-            data.role = 'users'
-        }
-
-        data.emailVisibility = true
-        data.verified = true
-        data.passwordConfirm = data.password
-        
-        Swal.fire({
-            title: 'Mohon Tunggu',
-            text: 'Sedang menyimpan data...',
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading()
-        });
-
-        try {
-            await pb.collection('users').create(data);
-
-            await Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: 'Data baru telah ditambahkan.',
-                timer: 1500,
-                showConfirmButton: false
-            });
-
-            e.target.reset();
-            setAvatar("")
-            setPassword({
-                password: "",
-                passwordConfirm: ""
-            })
-            refreshData()
-            setOpenToggle(false)
-        } catch (error) {
-            console.error("Error Detail:", error.data);
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal Menyimpan',
-                text: error.message || 'Terjadi kesalahan pada server'
-            });
-        }
-    }
-
-    const handleUpdate = async (e, id) => {
-        e.preventDefault()
-        const allInputData = new FormData(e.target)
-        const data = Object.fromEntries(allInputData.entries())
-
-        data.passwordConfirm = data.password
-
-        if (data.role) {
-            if (title === 'petugas') {
-                data.role = 'petugas'
-            } else if (title === 'siswa'){
-                data.role = 'users'
-            }
-        }
-
-        Swal.fire({
-            title: 'Mohon Tunggu',
-            text: 'Sedang memperbaharui data...',
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading()
-        });
-
-        try {
-            await pb.collection('users').update(id, data);
-
-            await Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: 'Data telah update ditambahkan.',
-                timer: 1500,
-                showConfirmButton: false
-            });
-
-            e.target.reset();
-            setAvatar("")
-            setPassword({
-                password: "",
-                passwordConfirm: ""
-            })
-            refreshData()
-            setOpenDialogUpdate((prev) => ({...prev, status: false}))
-            setOpenDetail((prev) => ({ ...prev, status: false }))
-        } catch (error) {
-            console.error("Error Detail:", error.data);
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal Memperbaharui',
-                text: error.message || 'Terjadi kesalahan pada server'
-            });
-        }
-    }
 
     const handleDelete = async () => {
         if (selectedIds.length === 0) {
@@ -217,6 +124,7 @@ export default function TemplateControl({
                     refreshData()
                 });
             } catch (err) {
+                console.log(err.originalError)
                 Swal.fire(
                     'Gagal!',
                     'Terjadi kesalahan saat menghapus data: ' + err.message,
@@ -238,24 +146,23 @@ export default function TemplateControl({
             title={title} 
             openToggle={openToggle} 
             role={role} 
+            refreshData={refreshData}
             setOpenToggle={handleToggleClose} 
-            handleAdd={handleAdd} 
             handlePreviewAvatar={(e) => handlePreviewAvatar(e.target.files[0])} 
             avatar={avatar} 
-            setPassword={handlePasswordChange} 
-            password={password.password !== password.passwordConfirm || !password.password} 
             />
 
             <DialogUpdate 
             title={title} 
+            pageState={pageState}
             role={role}
+            refreshData={refreshData}
             openToggle={openDialogUpdate} 
-            setOpenToggle={() => setOpenDialogUpdate((prev) => ({ status:false, data: [] }))} 
-            handleUpdate={handleUpdate} 
+            setOpenToggle={setOpenDialogUpdate} 
+            setOpenDetail={setOpenDetail}
             handlePreviewAvatar={(e) => handlePreviewAvatar(e.target.files[0])} 
             avatar={avatar} 
-            setPassword={handlePasswordChange} 
-            password={password.password !== password.passwordConfirm || !password.password} 
+            setAvatar={setAvatar}
             />
 
             <DialogDetail 
@@ -315,17 +222,18 @@ export default function TemplateControl({
                                     </th>
                                 )}
                                 <th>Name</th>
+                                <th>No. Identitas</th>
+                                <th>Type Users</th>
                                 { role === 'edmin' && (
                                     <th>Position</th>
                                 ) }
-                                <th>Created</th>
-                                <th>Updated</th>
                                 <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             { fullData?.items?.map((data) => {
                             const avatarUrl = pb.files.getURL(data, data.avatar)
+                            const verifData = data.expand.verification_via_users
                             return (
                                 <tr key={data.id}>
                                     { role === 'edmin' && (
@@ -335,83 +243,9 @@ export default function TemplateControl({
                                             </label>
                                         </th>
                                     )}
-                                    <td>
+                                    <td className='w-48 truncate'>
                                         <div className="flex items-center gap-3">
-                                        <div className="avatar">
-                                            <div className="mask mask-squircle h-12 w-12">
-                                            { data?.avatar ? (
-                                                <img
-                                                    src={avatarUrl}
-                                                    alt={data?.name} />
-                                                ) : (
-                                                <div className="bg-[#a9a9a9] flex justify-center p-1">
-                                                    <UserRound size={40} />
-                                                </div>
-                                            ) }
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="font-bold">
-                                                {data?.name ? data?.name : 'N/A'}
-                                            </div>
-                                            <div className="text-sm opacity-50">
-                                                { data?.email ? data?.email : 'Hidden' }
-                                            </div>
-                                        </div>
-                                        </div>
-                                    </td>
-                                    { role === 'edmin' && (
-                                        <td className='capitalize'>{data?.role}</td>
-                                    ) }
-                                    <td>
-                                        {formatDate(data?.created)}
-                                        <br />
-                                        <span className="badge badge-ghost badge-sm">{timeAgo(data?.created)}</span>
-                                    </td>
-                                    <td>
-                                        {formatDate(data?.updated)}
-                                        <br />
-                                        <span className="badge badge-ghost badge-sm">{timeAgo(data?.updated)}</span>
-                                    </td>
-                                    <th>
-                                        <button className="btn btn-neutral btn-xs" onClick={() => setOpenDetail((prev) => ({ ...prev, status: true, data: data }))}>details</button>
-                                    </th>
-                                </tr>
-                            )
-                            }) }
-                        </tbody>
-                        </table>
-                        
-                        {/* mobile */}
-                        <table className="table md:hidden shadow-md">
-                        <thead>
-                            <tr>
-                                { role === 'edmin' && (
-                                    <th>
-                                        <label>
-                                        <input type="checkbox" className="checkbox" onChange={handleCheckAll} checked={selectedIds?.length === fullData?.items?.length && fullData?.items?.length > 0} />
-                                        </label>
-                                    </th>
-                                )}
-                                <th>Name</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            { fullData?.items?.map((data) => {
-                            const avatarUrl = pb.files.getURL(data, data.avatar)
-                            return (
-                                <tr key={data.id}>
-                                    { role === 'edmin' && (
-                                        <th>
-                                            <label>
-                                            <input type="checkbox" className="checkbox" checked={selectedIds.includes(data.id)} onChange={() => handleCheckItem(data.id)} />
-                                            </label>
-                                        </th>
-                                    )}
-                                    <td>
-                                        <div className="flex items-center gap-3">
-                                            <div className="avatar flex flex-col">
+                                            <div className="avatar">
                                                 <div className="mask mask-squircle h-12 w-12">
                                                 { data?.avatar ? (
                                                     <img
@@ -424,29 +258,121 @@ export default function TemplateControl({
                                                 ) }
                                                 </div>
                                             </div>
-                                            <div className='flex flex-col gap-1 w-full'>
+                                            <div>
                                                 <div className="font-bold">
                                                     {data?.name ? data?.name : 'N/A'}
                                                 </div>
-                                                <div className="text-xs opacity-50">
+                                                <div className="text-sm opacity-50">
                                                     { data?.email ? data?.email : 'Hidden' }
                                                 </div>
-                                                { role == 'edmin' && (
-                                                    <div className="text-xs opacity-75">
-                                                        { data?.role }
-                                                    </div>
-                                                ) }
-                                                <button className="btn btn-neutral btn-xs" onClick={() => setOpenDetail((prev) => ({ ...prev, status: true, data: data }))}>
-                                                    detail
-                                                </button>
                                             </div>
                                         </div>
                                     </td>
+                                    <td className='uppercase'>
+                                        <button onClick={() => setShowNOID({ status: true, data: data, verifData: verifData })} 
+                                        className={`btn btn-sm 
+                                            ${verifData?.no_identity ? 'btn-neutral' : 'btn-disabled'}`}>
+                                            {verifData?.no_identity || 'N/A'}
+                                        </button>
+                                    </td>
+                                    <td className='capitalize'>
+                                        <span className={`badge badge-sm 
+                                            ${verifData?.users_type === 'student' ? 'badge-primary' 
+                                            : verifData?.users_type === 'teacher' ?  'badge-success'
+                                            : 'badge-soft'}`}>
+                                            {verifData?.users_type || 'Unknow'}
+                                        </span>
+                                    </td>
+                                    { role === 'edmin' && (
+                                        <td className='capitalize'>
+                                            <span className={`badge badge-sm ${data.role === 'users' ? 'badge-primary' : 'badge-warning'}`}>
+                                                {data?.role}
+                                            </span>
+                                        </td>
+                                    ) }
+                                    <th>
+                                        <button className="btn btn-neutral btn-xs" onClick={() => setOpenDetail((prev) => ({ ...prev, status: true, data: data }))}>details</button>
+                                    </th>
                                 </tr>
                             )
                             }) }
                         </tbody>
                         </table>
+                        
+                        {/* mobile */}
+                        <table className="table md:hidden shadow-md">
+                            <thead>
+                                <tr>
+                                    { role === 'edmin' && (
+                                        <th>
+                                            <label>
+                                            <input type="checkbox" className="checkbox" onChange={handleCheckAll} checked={selectedIds?.length === fullData?.items?.length && fullData?.items?.length > 0} />
+                                            </label>
+                                        </th>
+                                    )}
+                                    <th>Name</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                { fullData?.items?.map((data) => {
+                                const avatarUrl = pb.files.getURL(data, data.avatar)
+                                return (
+                                    <tr key={data.id}>
+                                        { role === 'edmin' && (
+                                            <th>
+                                                <label>
+                                                <input type="checkbox" className="checkbox" checked={selectedIds.includes(data.id)} onChange={() => handleCheckItem(data.id)} />
+                                                </label>
+                                            </th>
+                                        )}
+                                        <td>
+                                            <div className="flex items-center gap-3">
+                                                <div className="avatar flex flex-col">
+                                                    <div className="mask mask-squircle h-12 w-12">
+                                                    { data?.avatar ? (
+                                                        <img
+                                                            src={avatarUrl}
+                                                            alt={data?.name} />
+                                                        ) : (
+                                                        <div className="bg-[#a9a9a9] flex justify-center p-1">
+                                                            <UserRound size={40} />
+                                                        </div>
+                                                    ) }
+                                                    </div>
+                                                </div>
+                                                <div className='flex flex-col gap-1 w-40'>
+                                                    <div className="font-bold truncate">
+                                                        {data?.name ? data?.name : 'N/A'}
+                                                    </div>
+                                                    <div className="text-xs opacity-50 truncate">
+                                                        { data?.email ? data?.email : 'Hidden' }
+                                                    </div>
+                                                    { role == 'edmin' && (
+                                                        <div className="text-xs opacity-75">
+                                                            { data?.role }
+                                                        </div>
+                                                    ) }
+                                                    <button className="btn btn-neutral btn-xs" onClick={() => setOpenDetail((prev) => ({ ...prev, status: true, data: data }))}>
+                                                        detail
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )
+                                }) }
+                            </tbody>
+                        </table>
+                        
+                        { showNOID.status && (
+                            <ImagePreviewModal
+                            isOpen={showNOID.status}
+                            onClose={() => setShowNOID({ status: false, data: [] })}
+                            userName={showNOID.data.name}
+                            fileUrl={pb.files.getURL(showNOID.verifData, showNOID.verifData.proof_identity)}
+                            />
+                        ) }
 
                         <div className="flex flex-col items-center gap-2 my-4">
                             <div className="join">

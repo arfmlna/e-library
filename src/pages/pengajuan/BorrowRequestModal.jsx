@@ -27,12 +27,44 @@ export default function BorrowRequestModal({ isOpen, book, userId, onClose, onSu
 
         setLoading(true);
         Swal.fire({
-            title: 'Mengirim Pengajuan...',
+            title: 'Memverifikasi Data...',
             allowOutsideClick: false,
             didOpen: () => Swal.showLoading()
         });
 
         try {
+            const setting = await pb.collection("settings").getFirstListItem("", {
+                fields: 'max_borrow'
+            });
+            const batasMaksimal = parseInt(setting.max_borrow, 10) || 0;
+
+            const activeLoans = await pb.collection("loan_details").getFullList({
+                filter: `loan_id.borrower = "${userId}" && status = "borrowed"`,
+                fields: 'id',
+            });
+
+            const pendingBorrows = await pb.collection("borrows").getFullList({
+                filter: `user_id = "${userId}" && status = "pending"`,
+                fields: 'id',
+            });
+
+            const totalDipinjam = activeLoans.length + pendingBorrows.length;
+            
+            if (totalDipinjam >= batasMaksimal) {
+                Swal.fire({
+                    title: "Batas Peminjaman Terlampaui!",
+                    text: `Anda memiliki ${activeLoans.length} buku sedang dipinjam dan ${pendingBorrows.length} pengajuan pending. Batas maksimal sistem adalah ${batasMaksimal} buku.`,
+                    icon: "warning",
+                    confirmButtonText: "Mengerti",
+                    confirmButtonColor: "#f59e0b"
+                });
+                setLoading(false);
+                return;
+            }
+
+            Swal.showLoading();
+            Swal.update({ title: 'Mengirim Pengajuan...' });
+
             const data = {
                 book_id: book.id,
                 user_id: userId,
@@ -54,9 +86,16 @@ export default function BorrowRequestModal({ isOpen, book, userId, onClose, onSu
 
             if (onSuccess) onSuccess();
             onClose();
+
         } catch (error) {
-            console.error("Gagal mengajukan peminjaman:", error);
-            Swal.fire({ icon: 'error', title: 'Gagal', text: error.message });
+            console.error("Detail Error:", error.originalError || error);
+            Swal.fire({
+                title: "Gagal Memproses Data!",
+                text: error.message || "Terjadi kesalahan koneksi saat memverifikasi status ke server.",
+                icon: "error",
+                confirmButtonText: "Mengerti",
+                confirmButtonColor: "#ef4444"
+            });
         } finally {
             setLoading(false);
         }

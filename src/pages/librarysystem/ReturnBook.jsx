@@ -10,124 +10,131 @@ export default function ReturnBook({ isLate, setIsLate, bookCondition, setBookCo
 
     useEffect(() => {
         if (isLate || bookCondition === 'damaged' || bookCondition === 'lost') {
-        setHasFine(true);
+            setHasFine(true);
         } else {
-        setHasFine(false);
+            setHasFine(false);
         }
     }, [isLate, bookCondition]);
 
     const handleProcessReturn = async () => {
-    if (!loanDetailData?.id) {
-        return Swal.fire("Peringatan", "Data transaksi peminjaman tidak valid.", "warning");
-    }
-
-    const confirm = await Swal.fire({
-        title: "Konfirmasi Pengembalian",
-        text: `Apakah Anda yakin ingin mengembalikan buku dengan kondisi "${bookCondition === 'good' ? 'Bagus' : bookCondition === 'damaged' ? 'Rusak' : 'Hilang'}"?`,
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Ya, Selesai!",
-        cancelButtonText: "Batal"
-    });
-
-    if (!confirm.isConfirmed) return;
-
-    Swal.fire({
-        title: "Menyimpan Transaksi...",
-        text: "Mohon tunggu sebentar.",
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
-    });
-
-    try {
-        const daysOverdue = getDaysOverdue(loanDetailData.duedate);
-        let fineAmount = 0;
-        let fineReasons = [];
-
-        if (isLate) {
-            fineAmount += daysOverdue > 0 ? daysOverdue * 2000 : 0;
-            fineReasons.push("Keterlambatan");
+        if (!loanDetailData?.id) {
+            return Swal.fire("Peringatan", "Data transaksi peminjaman tidak valid.", "warning");
         }
 
-        if (bookCondition === "damaged") {
-            fineAmount += 15000; 
-            fineReasons.push("Buku Rusak");
-        } else if (bookCondition === "lost") {
-            fineAmount += 50000;
-            fineReasons.push("Buku Hilang");
-        }
-
-        await pb.collection("loan_details").update(loanDetailData.id, {
-            status: "returned",
-            return_date: new Date(),
-            condition_on_return: bookCondition
+        const confirm = await Swal.fire({
+            title: "Konfirmasi Pengembalian",
+            text: `Apakah Anda yakin ingin mengembalikan buku dengan kondisi "${bookCondition === 'good' ? 'Bagus' : bookCondition === 'damaged' ? 'Rusak' : 'Hilang'}"?`,
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Ya, Selesai!",
+            cancelButtonText: "Batal"
         });
 
-        if (loanDetailData.bookType !== "digital" && bookCondition !== "lost") {
-            try {
-                const currentBook = await pb.collection("books").getOne(loanDetailData.book_id);
-                await pb.collection("books").update(loanDetailData.book_id, {
-                    stock: (currentBook.stock ?? 0) + 1
-                });
-            } catch (stockErr) {
-                console.error("Gagal memperbarui stok buku:", stockErr);
-            }
-        }
+        if (!confirm.isConfirmed) return;
 
-        if (fineAmount > 0) {
-            await pb.collection("fines").create({
-                loan_detail_id: loanDetailData.id,
-                borrower: loanDetailData.borrower_id,
-                amount: fineAmount,
-                reason: fineReasons.join(", "),
-                status: isPaidDirectly ? "paid" : "unpaid",
-                staff: pb?.authStore?.record?.id 
-            });
-        }
-
-        const parentLoanId = loanDetailData.loan_id_raw;
-        if (parentLoanId) {
-            const allDetailsInLoan = await pb.collection("loan_details").getFullList({
-                filter: `loan_id = "${parentLoanId}"`
-            });
-
-            const stillBorrowed = allDetailsInLoan.some(detail => detail.status === "borrowed");
-
-            if (!stillBorrowed) {
-                await pb.collection("loans").update(parentLoanId, {
-                    status: "completed"
-                });
-            }
-        }
-
-        let successMessage = "Buku berhasil dikembalikan tepat waktu.";
-        if (fineAmount > 0) {
-            successMessage = isPaidDirectly 
-            ? `Buku kembali. Denda Rp ${fineAmount.toLocaleString('id-ID')} LUNAS diterima oleh staf.`
-            : `Buku kembali. Denda Rp ${fineAmount.toLocaleString('id-ID')} BELUM DIBAYAR (Masuk Hutang).`;
-        }
-
-        await Swal.fire({
-            icon: "success",
-            title: "Berhasil!",
-            text: successMessage,
-            confirmButtonColor: "#3085d6"
-        });
-
-        if (onSuccess) onSuccess();
-        setIsPaidDirectly(true)
-
-    } catch (error) {
-        console.error("Detail Error Pengembalian:", error);
         Swal.fire({
-            icon: "error",
-            title: "Transaksi Gagal",
-            text: "Terjadi kesalahan sistem saat memperbarui data ke PocketBase.",
-            confirmButtonColor: "#d33"
+            title: "Menyimpan Transaksi...",
+            text: "Mohon tunggu sebentar.",
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
         });
-    }};
+
+        try {
+            const setting = await pb.collection("settings").getFirstListItem("", {
+                fields: 'penalty_fee,fee_damage,fee_lost'
+            });
+            const daysOverdue = getDaysOverdue(loanDetailData.dueDate);
+            let fineAmount = 0;
+            let fineReasons = [];
+
+            const penaltyFee = parseInt(setting?.penalty_fee, 10) || 0;
+            const feeDamage = parseInt(setting?.fee_damage, 10) || 0;
+            const feeLost = parseInt(setting?.fee_lost, 10) || 0;
+
+            if (isLate) {
+                const hitungHari = daysOverdue > 0 ? daysOverdue : 1;
+                fineAmount += (hitungHari * penaltyFee);
+                fineReasons.push("Keterlambatan");
+            }
+
+            if (bookCondition === "damaged") {
+                fineAmount += feeDamage; 
+                fineReasons.push("Buku Rusak");
+            } else if (bookCondition === "lost") {
+                fineAmount += feeLost;
+                fineReasons.push("Buku Hilang");
+            }
+                
+            await pb.collection("loan_details").update(loanDetailData.id, {
+                status: "returned",
+                return_date: new Date(),
+                condition_on_return: bookCondition
+            });
+
+            if (loanDetailData.bookType !== "digital" && bookCondition !== "lost") {
+                try {
+                    const currentBook = await pb.collection("books").getOne(loanDetailData.book_id);
+                    await pb.collection("books").update(loanDetailData.book_id, {
+                        stock: (currentBook.stock ?? 0) + 1
+                    });
+                } catch (stockErr) {
+                    console.error("Gagal memperbarui stok buku:", stockErr);
+                }
+            }
+
+            if (fineAmount > 0) {
+                await pb.collection("fines").create({
+                    loan_detail_id: loanDetailData.id,
+                    borrower: loanDetailData.borrower_id,
+                    amount: fineAmount,
+                    reason: fineReasons.join(", "),
+                    status: isPaidDirectly ? "paid" : "unpaid",
+                    staff: pb?.authStore?.record?.id 
+                });
+            }
+
+            const parentLoanId = loanDetailData.loan_id;
+            if (parentLoanId) {
+                const allDetailsInLoan = await pb.collection("loan_details").getFullList({
+                    filter: `loan_id = "${parentLoanId}"`
+                });
+
+                const stillBorrowed = allDetailsInLoan.some(detail => detail.status === "borrowed");
+                if (!stillBorrowed) {
+                    await pb.collection("loans").update(parentLoanId, {
+                        status: "completed"
+                    });
+                }
+            }
+
+            let successMessage = "Buku berhasil dikembalikan tepat waktu.";
+            if (fineAmount > 0) {
+                successMessage = isPaidDirectly 
+                ? `Buku kembali. Denda Rp ${fineAmount.toLocaleString('id-ID')} LUNAS diterima oleh staf.`
+                : `Buku kembali. Denda Rp ${fineAmount.toLocaleString('id-ID')} BELUM DIBAYAR (Masuk Hutang).`;
+            }
+
+            await Swal.fire({
+                icon: "success",
+                title: "Berhasil!",
+                text: successMessage,
+                confirmButtonColor: "#3085d6"
+            });
+
+            if (onSuccess) onSuccess();
+            setIsPaidDirectly(true)
+
+        } catch (error) {
+            console.error(error.originalError);
+            Swal.fire({
+                icon: "error",
+                title: "Transaksi Gagal",
+                text: "Terjadi kesalahan sistem saat memperbarui data ke PocketBase.",
+                confirmButtonColor: "#d33"
+            });
+        }};
 
     return (
         <div className="space-y-6">

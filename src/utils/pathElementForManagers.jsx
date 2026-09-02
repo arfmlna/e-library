@@ -10,8 +10,6 @@ const Profile = lazy(() => import('@/pages/profile/Profile.jsx'))
 const DownloadsId = lazy(() => import('@/pages/download/DownloadsId.jsx'))
 const NotFound = lazy(() => import('@/NotFound'))
 const BooksControl = lazy(() => import('@/pages/ebooks/book/BooksControl'))
-const BorrowBook = lazy(() => import('@/pages/borrowbook/BorrowBook'))
-const ReturnBook = lazy(() => import('@/pages/returnbook/ReturnBook'))
 const ArticleDetail = lazy(() => import('@/pages/informationboard/ArticleDetail'))
 const ArticlesControls = lazy(() => import('@/pages/articlescontrols/ArticlesControls'))
 const Reader = lazy(() => import('@/components/bookReader/Reader'))
@@ -22,10 +20,16 @@ const TopBooksReport = lazy(() => import('@/pages/topbooksreport/TopBooksReport'
 const TopMembersReport = lazy(() => import('@/pages/topmembersreport/TopMembersReport'))
 const Agendas = lazy(() => import('@/pages/agendas/Agendas'))
 const BookListRequest = lazy(() => import('@/pages/pengajuan/BookListRequest'))
+const AdminVerificationPage = lazy(() => import('@/pages/pengajuanaccount/AdminVerificationPage'))
+const AuthActivityLogs = lazy(() => import('@/pages/authactivity/AuthActivityLogs'))
+// const AdmSettings = lazy(() => import('@/pages/settings/AdmSettings'))
+const UsersSettings = lazy(() => import('@/pages/settings/UsersSettings'))
 
 export const pathElementForManagers = [
     { path: '*', element: NotFound },
     { path: '/profile', element: Profile },
+    { path: '/auth-logs', element: AuthActivityLogs },
+    { path: '/setting', element: UsersSettings },
     
     { path: '/downloads', element: Downloads },
     { path: '/downloads/:downloadId', element: DownloadsId },
@@ -36,8 +40,6 @@ export const pathElementForManagers = [
     { path: '/dashboard', element: Dashboard },
     { path: '/list-siswa', element: ControlStudents },
     { path: '/e-books', element: BooksControl },
-    { path: '/borrow', element: BorrowBook },
-    { path: '/return', element: ReturnBook },
     { path: '/lib-system', element: LibrarySystem },
     { path: '/article-controls', element: ArticlesControls },
     { path: '/detail-article/:id', element: ArticleDetail },
@@ -50,4 +52,5 @@ export const pathElementForManagers = [
     { path: '/article-controls', element: ArticlesControls },
     { path: '/detail-article/:id', element: ArticleDetail },
     { path: '/request-book', element: BookListRequest },
+    { path: '/user-verification', element: AdminVerificationPage },
 ]

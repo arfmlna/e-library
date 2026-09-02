@@ -1,4 +1,4 @@
-export default function ListBook({data, hoverId, setHoverId, setClickId, popupInformation, poster}) {
+export default function ListBook({data, setClickId, popupInformation, poster}) {
     return (
         <div key={data?.id} onClick={() => setClickId({
                 id: data.id,

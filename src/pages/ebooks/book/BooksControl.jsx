@@ -1,4 +1,4 @@
-import { lazy, useState } from 'react'
+import { lazy, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { pb } from '@/utils/pocketbase'
 import { useDebounce } from 'use-debounce'
@@ -19,7 +19,7 @@ export default function BooksControl() {
             const conditions = [];
 
             if (bookType) {
-                conditions.push(pb.filter("bookType ~ {:type}", { type: bookType }))
+                conditions.push(pb.filter("bookType = {:type}", { type: bookType }))
             }
             if (searchTerm) {
                 conditions.push(pb.filter("title ~ {:search}", { search: searchItem }))
@@ -36,6 +36,10 @@ export default function BooksControl() {
         },
         keepPreviousData: true
     });
+
+    useEffect(() => {
+        setPage(1); 
+    }, [bookType]);
     return (
         <>
             <TemplateBooks 
@@ -46,7 +50,6 @@ export default function BooksControl() {
             refreshData={refreshData} 
             searchItem={searchItem} 
             setSearchItem={setSearchItem} 
-            page={page} 
             setPage={setPage} 
             searchTerm={searchTerm} 
             setBookType={setBookType}

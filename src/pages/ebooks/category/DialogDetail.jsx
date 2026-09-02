@@ -83,7 +83,7 @@ export default function DialogDetail({ open, onClose, detail, setOpenEdit }){
                     <button 
                         type="button"
                         className="btn btn-primary btn-sm md:btn-md gap-2" 
-                        onClick={(e) => setOpenEdit((prev) => ({
+                        onClick={() => setOpenEdit((prev) => ({
                         ...prev,
                         status: true,
                         data: detail

@@ -13,7 +13,6 @@ export default function LibrarySystem() {
   const [bookId, setBookId] = useState('');
   const [borrowList, setBorrowList] = useState([]);
   
-  const [searchId, setSearchId] = useState('');
   const [loanDetailData, setLoanDetailData] = useState(null);
   const [bookCondition, setBookCondition] = useState('good');
   const [isLate, setIsLate] = useState(false);
@@ -30,7 +29,6 @@ export default function LibrarySystem() {
   };
 
   const handleResetAfterReturn = () => {
-    setSearchId("");
     setLoanDetailData(null);
     setIsLate(false);
     setBookCondition("good");
@@ -55,8 +53,6 @@ export default function LibrarySystem() {
           {activeTab === 'return' && (
             <div className="space-y-6 max-w-xl mx-auto">
               <SearchLoan 
-                searchId={searchId}
-                setSearchId={setSearchId}
                 loanDetailData={loanDetailData}
                 setLoanDetailData={setLoanDetailData}
                 setIsLate={setIsLate}

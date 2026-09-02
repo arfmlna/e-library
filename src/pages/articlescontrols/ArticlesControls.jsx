@@ -16,12 +16,12 @@ export default function ArticlesControls() {
     const fetchArticles = async () => {
         setLoading(true);
         try {
-        const records = await pb.collection('articles').getFullList({ sort: '-created' });
-        setArticles(records);
-        } catch (err) {
-        Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal memuat artikel.' });
+            const records = await pb.collection('articles').getFullList({ sort: '-created' });
+            setArticles(records);
+        } catch {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal memuat artikel.' });
         } finally {
-        setLoading(false);
+            setLoading(false);
         }
     };
 
@@ -55,7 +55,7 @@ export default function ArticlesControls() {
             await pb.collection('articles').delete(id);
             Swal.fire({ icon: 'success', title: 'Terhapus!', background: isDark ? '#1d232a' : '#ffffff', color: isDark ? '#a6adbb' : '#1f2937' });
             fetchArticles();
-        } catch (err) {
+        } catch {
             Swal.fire({ icon: 'error', title: 'Gagal', text: 'Gagal menghapus artikel.' });
         }
         }

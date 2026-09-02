@@ -52,7 +52,7 @@ export default function Layout({
         </header>
           { searchItem !== false && (
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-6">
-              <SearchData searchItem={searchItem} setSearchItem={handleChange} />
+              <SearchData setSearchItem={handleChange} />
               <div className="flex items-center gap-2 self-end sm:self-center">
                 <button 
                 onClick={() => setViewMode('grid')}

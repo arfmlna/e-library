@@ -4,6 +4,9 @@ import CirculationForm from './CirculationForm';
 import CloudStorageInfo from './CloudStorageInfo';
 import SystemBackupSetting from './SystemBackupSetting';
 import { fetchLibrarySettings, updateLibrarySettings } from '@/utils/fetchLibrarySetting';
+import UsersSettings from './UsersSettings';
+import Swal from 'sweetalert2';
+import AccessSettings from './AccessSettings';
 
 export default function AdmSettings() {
     const queryClient = useQueryClient();
@@ -13,12 +16,14 @@ export default function AdmSettings() {
         max_borrow: 3,
         borrow_duration: 7,
         penalty_fee: 1000,
+        fee_damage: 15000,
+        fee_lost: 50000,
         extend_limit: 2,
         allow_offline_download: true,
         auto_lock_account: true,
-        max_upload_size: '20 MB (Rekomendasi)',
+        max_upload_size: '20',
         auto_backup: true,
-        backup_schedule: 'Setiap Minggu (Hari Minggu)'
+        backup_schedule: 'sunday'
     });
 
     const { data: serverSettings, isLoading } = useQuery({
@@ -32,6 +37,8 @@ export default function AdmSettings() {
             max_borrow: serverSettings.max_borrow,
             borrow_duration: serverSettings.borrow_duration,
             penalty_fee: serverSettings.penalty_fee,
+            fee_damage: serverSettings.fee_damage,
+            fee_lost: serverSettings.fee_lost,
             extend_limit: serverSettings.extend_limit,
             allow_offline_download: serverSettings.allow_offline_download,
             auto_lock_account: serverSettings.auto_lock_account,
@@ -46,9 +53,19 @@ export default function AdmSettings() {
         mutationFn: updateLibrarySettings,
         onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['librarySettings'] });
-        alert("Konfigurasi panel admin berhasil diperbarui!");
+        Swal.fire({
+            icon: 'success',
+            title: 'Settings',
+            text: 'Konfigurasi panel admin berhasil diperbarui!'
+        })
         },
-        onError: () => alert("Terjadi kesalahan, gagal memperbarui konfigurasi.")
+        onError: () => {
+            Swal.fire({
+                icon: 'error',
+                title: 'settings',
+                text: 'Terjadi kesalahan, gagal memperbarui konfigurasi.'
+            })
+        }
     });
 
     const handleInputChange = (e) => {
@@ -85,27 +102,40 @@ export default function AdmSettings() {
                 <button type="button" onClick={() => setActiveTab('umum')} className={`tab ${activeTab === 'umum' ? 'tab-active' : ''}`}>Umum & Profil</button>
                 <button type="button" onClick={() => setActiveTab('sirkulasi')} className={`tab ${activeTab === 'sirkulasi' ? 'tab-active' : ''}`}>Aturan Sirkulasi</button>
                 <button type="button" onClick={() => setActiveTab('hak_akses')} className={`tab ${activeTab === 'hak_akses' ? 'tab-active' : ''}`}>Hak Akses & Pengguna</button>
-                <button type="button" onClick={() => setActiveTab('sistem')} className={`tab ${activeTab === 'sistem' ? 'tab-active' : ''}`}>Sistem & Backup</button>
+                <button type="button" onClick={() => setActiveTab('sistem')} className={`tab ${activeTab === 'sistem' ? 'tab-active' : ''}`}>Sistem</button>
             </div>
 
             <form onSubmit={handleSave}>
                 {/* Menyembunyikan/menampilkan form secara dinamis berdasarkan tab yang dipilih admin */}
                 {activeTab === 'sirkulasi' && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <CirculationForm formData={formData} onChange={handleInputChange} />
+                    <div className="col-span-2">
+                        <CirculationForm formData={formData} onChange={handleInputChange} />
+                        <div className="my-6"></div>
+                        <AccessSettings formData={formData} onChange={handleInputChange} />
+                    </div>
                     <div className="space-y-6">
-                    <CloudStorageInfo value={formData.max_upload_size} onChange={handleInputChange} />
-                    <SystemBackupSetting autoBackup={formData.auto_backup} backupSchedule={formData.backup_schedule} onChange={handleInputChange} />
+                        <CloudStorageInfo value={formData.max_upload_size} onChange={handleInputChange} />
+                        <SystemBackupSetting autoBackup={formData.auto_backup} backupSchedule={formData.backup_schedule} onChange={handleInputChange} />
                     </div>
                 </div>
                 )}
 
-                {activeTab === 'umum' && <div className="p-4 bg-base-200 rounded-xl text-sm">Form Pengaturan Umum & Profil (Dapat diisi nanti)</div>}
-                {activeTab === 'hak_akses' && <div className="p-4 bg-base-200 rounded-xl text-sm">Form Manajemen Hak Akses Pengguna (Dapat diisi nanti)</div>}
-                {activeTab === 'sistem' && <div className="p-4 bg-base-200 rounded-xl text-sm">Informasi Log Infrastruktur Server (Dapat diisi nanti)</div>}
+                {activeTab === 'umum' && (
+                    <UsersSettings />
+                )}
+                {activeTab === 'hak_akses' && (
+                    <AccessSettings formData={formData} onChange={handleInputChange} />
+                )}
+                {activeTab === 'sistem' && (
+                    <div className="grid grid-cols-2 gap-6">
+                        <CloudStorageInfo value={formData.max_upload_size} onChange={handleInputChange} />
+                        <SystemBackupSetting autoBackup={formData.auto_backup} backupSchedule={formData.backup_schedule} onChange={handleInputChange} />
+                    </div>
+                )}
                 
                 {/* Tombol Aksi Simpan Global */}
-                {activeTab === 'sirkulasi' && (
+                {(activeTab !== 'umum') && (
                 <div className="flex justify-end mt-4">
                     <button type="submit" disabled={mutation.isPending} className="btn btn-primary px-8">
                     {mutation.isPending ? "Menyimpan..." : "Simpan Semua Konfigurasi"}

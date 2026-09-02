@@ -1,7 +1,6 @@
 import { pb } from '@/utils/pocketbase'
 import { useQuery } from '@tanstack/react-query'
-import React, { useMemo, useState } from 'react'
-import anonim from '/sketch.png'
+import React, { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import Layout from '@/components/ui/layout'
 import PdfToPoster from '@/components/poster/PdftoPoster'
@@ -79,11 +78,10 @@ const CategoryItem = ({ data }) => {
 };
 
 export default function Categories() {
-    const [page, setPage] = useState(1)
     const { data: category } = useQuery({
         queryKey: ['category'],
         queryFn: async () => {
-            const res = pb.collection('categories').getList(page, 15, {
+            const res = pb.collection('categories').getList(1, 15, {
                 sort: '-created'
             })
             return res

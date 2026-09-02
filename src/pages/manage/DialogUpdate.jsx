@@ -2,17 +2,20 @@ import { Dialog, DialogBackdrop, DialogClose, DialogDescription, DialogFooter, D
 import { pb } from '@/utils/pocketbase'
 import { X } from 'lucide-react'
 import { useState } from 'react'
+import Swal from 'sweetalert2'
 
 export default function DialogUpdate({
     title, 
     role=null,
+    pageState,
+    refreshData,
     openToggle, 
     setOpenToggle, 
-    handleUpdate, 
-    password, 
-    setPassword, 
+    setOpenDetail,
     avatar, 
-    handlePreviewAvatar 
+    setAvatar,
+    handlePreviewAvatar,
+    handlePasswordChange
 }){
     const [showInput, setShowInput] = useState({
         email: false,
@@ -23,6 +26,58 @@ export default function DialogUpdate({
     })
 
     const theme = localStorage.getItem('theme')
+    const avatarUrl = pb.files.getURL(openToggle.data, openToggle.data.avatar)
+    
+    const handleUpdate = async (e) => {
+        e.preventDefault()
+        const allInputData = new FormData(e.target)
+        const data = Object.fromEntries(allInputData.entries())
+
+        if (data.password) {
+            data.passwordConfirm = data.password
+        }
+
+        if (data.role) {
+            if (pageState === 'petugas') {
+                data.role = 'petugas'
+            } else if (pageState === 'users'){
+                data.role = 'users'
+            }
+        }
+
+        Swal.fire({
+            title: 'Mohon Tunggu',
+            text: 'Sedang memperbaharui data...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        try {
+            await pb.collection('users').update(openToggle?.data?.id, data);
+
+            await Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: 'Data telah update ditambahkan.',
+                timer: 1500,
+                showConfirmButton: false
+            });
+
+            e.target.reset();
+            setAvatar("")
+            refreshData()
+            setOpenToggle((prev) => ({...prev, status: false}))
+            setOpenDetail((prev) => ({ ...prev, status: false }))
+        } catch (error) {
+            console.error(error.originalError);
+            const errorMessage = error?.data?.message || error?.message || 'Terjadi kesalahan pada server';
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal Memperbaharui',
+                text: errorMessage || 'Terjadi kesalahan pada server'
+            });
+        }
+    }
 
     const handleSetOpenToggle = () => {
         setShowInput({
@@ -32,10 +87,8 @@ export default function DialogUpdate({
             email: false,
             password: false
         })
-        setOpenToggle()
+        setOpenToggle(() => ({ status:false, data: [] }))
     }
-
-    const avatarUrl = pb.files.getURL(openToggle.data, openToggle.data.avatar)
     
     return (
         <Dialog data-theme={theme} open={openToggle?.status} onClose={handleSetOpenToggle}>
@@ -66,7 +119,7 @@ export default function DialogUpdate({
 
                 {/* Form Konten dengan Scroll Aman */}
                 <div className="overflow-y-auto max-h-[65vh] pr-1">
-                    <form onSubmit={(e) => handleUpdate(e, openToggle?.data?.id)} method="post" className="flex flex-col gap-4">
+                    <form onSubmit={handleUpdate} method="post" className="flex flex-col gap-4">
                     
                     {/* Kelompok Input: Email */}
                     <div className="flex flex-col gap-2">
@@ -206,7 +259,7 @@ export default function DialogUpdate({
                             placeholder="Insert Password..." 
                             required 
                             autoComplete='new-password'
-                            onChange={setPassword}
+                            onChange={handlePasswordChange}
                             className="input input-bordered w-full h-10 px-3 text-sm bg-base-100 shadow-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
                             />
                         </div>

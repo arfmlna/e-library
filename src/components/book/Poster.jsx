@@ -1,13 +1,10 @@
-import { useMemo } from "react";
 import BookPoster from "../ui/CardBook/Poster";
 import { pb } from "@/utils/pocketbase";
 
 const Poster = ({data, height, width}) => {
-    const posterUrl = useMemo(() => {
-        const isPoster = data.poster ? data?.poster : data?.pdfFile
-        const posterUrl = pb.files.getURL(data, isPoster)
-        return posterUrl;
-    }, [data.poster, data?.pdfFile, data.collectionId, data.id])
+    
+    const isPoster = data.posterUrl ? data?.posterUrl : data?.poster ? data?.poster : data?.pdfUrl ? data?.pdfUrl : data?.pdfFile
+    const posterUrl = pb.files.getURL(data, isPoster)
 
     return (
         <BookPoster 

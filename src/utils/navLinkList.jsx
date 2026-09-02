@@ -112,7 +112,8 @@ export const navLinkList = [
         icon: <RefreshCcwDot className='pr-1' />,
         roles: ["edmin", "petugas"],
         sublink: [
-            { name: "Pengajuan", path: "/request-book", icon: <GitPullRequest className='pr-1' />, roles: ["edmin", "petugas"] },
+            { name: "Pengajuan Buku", path: "/request-book", icon: <GitPullRequest className='pr-1' />, roles: ["edmin", "petugas"] },
+            { name: "Pengajuan Akun", path: "/user-verification", icon: <GitPullRequest className='pr-1' />, roles: ["edmin", "petugas"] },
         ]
     },
     {

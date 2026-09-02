@@ -17,15 +17,14 @@ export default function BatchUploadUser({ show, setShow }) {
     const uploadMutation = useMutation({
         mutationFn: async (users) => {
         const promises = users.map((user) => {
-            // Data format sesuai schema tabel 'users' di PocketBase
             return pb.collection("users").create({
                 email: user.Email,
                 emailVisibility: true,
-                password: user.Password || "User12345!", // Default password jika kosong
+                password: user.Password || "User12345!",
                 passwordConfirm: user.Password || "User12345!",
-                verified: true,
                 name: user.Nama,
-                role: 'users'
+                role: 'users',
+                status: 'verified',
             });
         });
         // Menjalankan semua request secara paralel
@@ -107,6 +106,7 @@ export default function BatchUploadUser({ show, setShow }) {
                         accept=".xlsx, .xls, .csv"
                         onChange={handleFileChange}
                         className="file-input file-input-bordered file-input-primary w-full max-w-xs"
+                        defaultValue={excelData}
                         />
                         
                         <button
@@ -125,6 +125,7 @@ export default function BatchUploadUser({ show, setShow }) {
                         </button>
 
                         <button className="btn btn-error" 
+                        disabled={excelData < 1}
                         onClick={() => setExcelData([])}>
                             Reset
                         </button>

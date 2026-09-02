@@ -3,6 +3,7 @@ import DarkMode from '../switch/DarkMode';
 import { BiChevronDown, BiSolidLogOut } from 'react-icons/bi';
 import { NavLink } from 'react-router-dom';
 import anonim from '/anonim.jpg'
+import { pb } from '@/utils/pocketbase';
 
 export default function AdminNav({
     isOnline,
@@ -14,6 +15,7 @@ export default function AdminNav({
     handleLogout
 }) {
     const [openSubMenu, setOpenSubMenu] = useState(null);
+    const avatarUrl = pb.files.getURL(userRecord, userRecord?.avatar)
 
     const navCondition = (data) => data?.name === 'Profile' || data?.name === 'Auth Logs Activity' || data?.name === 'Settings'
 
@@ -21,6 +23,7 @@ export default function AdminNav({
         setOpenSubMenu(openSubMenu === index ? null : index);
         setHoverNav(true);
     };
+
     return (
         <>
             <div className="hidden md:block">
@@ -34,7 +37,7 @@ export default function AdminNav({
                             <div className={`avatar ${isOnline ? 'avatar-online' : 'avatar-offline'} select-none`}>
                                 <div className="w-10 rounded-full ring-2 ring-primary ring-offset-base-100 ring-offset-2">
                                     {userRecord?.avatar ? (
-                                        <img src={getAvatar} alt={userRecord?.avatar} />
+                                        <img src={avatarUrl} alt={userRecord?.avatar} />
                                     ) : (
                                         <img src={anonim} alt='React' />
                                     )}

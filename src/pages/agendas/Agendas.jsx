@@ -13,7 +13,7 @@ export default function Agendas() {
 
     const { data: fullData, refetch: refreshData } = useQuery({
         queryKey: ['all', searchTerm, page], 
-        queryFn: () => pb.collection('agendas').getList(page, 8, {
+        queryFn: () => pb.collection('agendas').getList(page, 7, {
             filter: `${searchTerm ? `title ~ "${searchTerm}"` : ""}`,
             sort: '-created'
         }),
@@ -28,7 +28,6 @@ export default function Agendas() {
         refreshData={refreshData}
         searchItem={searchItem}
         setSearchItem={setSearchItem}
-        page={page}
         setPage={setPage}
         searchTerm={searchTerm}
         />

@@ -1,9 +1,9 @@
-import { Dialog, DialogBackdrop, DialogClose, DialogDescription, DialogFooter, DialogHeader, DialogPanel, DialogTitle } from '@/components/animate-ui/primitives/headless/dialog'
+import { Dialog, DialogBackdrop, DialogHeader, DialogPanel, DialogTitle } from '@/components/animate-ui/primitives/headless/dialog'
 import { generateKodeBuku } from '@/utils/generate';
 import { pb } from '@/utils/pocketbase';
 import { useQuery } from '@tanstack/react-query';
 import { ExternalLink, X } from 'lucide-react'
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Swal from 'sweetalert2';
 
 export default function DialogCreate({
@@ -230,7 +230,7 @@ export default function DialogCreate({
                             <input 
                                 type="checkbox" 
                                 className="checkbox checkbox-primary checkbox-sm"
-                                checked={selectedCategories.some(item => item.id === cat.id)}
+                                checked={selectedCategories?.some(item => item?.id === cat?.id)}
                                 onChange={() => handleCheckboxChange(cat)}
                             />
                             <span className="text-sm text-base-content capitalize truncate">{cat.name}</span>

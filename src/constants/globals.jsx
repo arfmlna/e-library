@@ -11,6 +11,32 @@ export const saveBookToOffline = async (book, userId) => {
         return false;
     }
 
+    try {
+        const setting = await pb.collection("settings").getFirstListItem("", {
+            fields: 'allow_offline_download'
+        });
+        if (setting.allow_offline_download === false) {
+            Swal.fire({
+                title: "Unduhan Dinonaktifkan!",
+                text: "Mohon maaf, fitur unduhan offline sedang dimatikan oleh sistem.",
+                icon: "error",
+                confirmButtonText: "Mengerti",
+                confirmButtonColor: "#ef4444"
+            });
+            return;
+        }
+    } catch (error) {
+        console.log(error.originalError)
+        Swal.fire({
+            title: "Gagal Ambil Data Setting!",
+            text: "Gagal mengambil data setting dari server untuk membuka feature download buku offline.",
+            icon: "error",
+            confirmButtonText: "Mengerti",
+            confirmButtonColor: "#ef4444"
+        });
+        return;
+    }
+
     const dbName = `PocketBook_DB_user_${userId}`;
 
     const { id, kode_buku, title, author, expand, poster, pdfFile, bookType, publishDate } = book;
@@ -50,11 +76,8 @@ export const saveBookToOffline = async (book, userId) => {
 
         const downloadPromises = [];
 
-        // 1. Proses Unduh & Enkripsi PDF
         if (pdfFile && typeof pdfFile === 'string' && pdfFile.trim() !== '') {
-            // Pastikan 'pb' sudah di-import/tersedia di file ini
             const fileUrl = pb.files.getURL(book, pdfFile); 
-            console.log("Mencoba unduh PDF dari URL:", fileUrl); // DEBUG LINE
 
             downloadPromises.push(
                 fetch(fileUrl, { mode: 'cors' })
@@ -62,10 +85,8 @@ export const saveBookToOffline = async (book, userId) => {
                         if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
                         const rawBlob = await res.blob();
                         bookData.pdfBlob = await encryptBlob(rawBlob, cryptoKey);
-                        console.log("PDF Berhasil diunduh dan dienkripsi."); // DEBUG LINE
                     })
                     .catch((e) => {
-                        console.error("Gagal proses PDF:", e);
                         throw new Error(`Gagal mengunduh PDF: ${e.message}`);
                     })
             );
@@ -74,7 +95,6 @@ export const saveBookToOffline = async (book, userId) => {
         // 2. Proses Unduh & Enkripsi Poster
         if (poster && typeof poster === 'string' && poster.trim() !== '') {
             const posterUrl = pb.files.getURL(book, poster);
-            console.log("Mencoba unduh Poster dari URL:", posterUrl); // DEBUG LINE
 
             downloadPromises.push(
                 fetch(posterUrl, { mode: 'cors' })
@@ -82,11 +102,9 @@ export const saveBookToOffline = async (book, userId) => {
                         if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
                         const rawBlob = await res.blob();
                         bookData.poster = await encryptBlob(rawBlob, cryptoKey);
-                        console.log("Poster Berhasil diunduh dan dienkripsi."); // DEBUG LINE
                     })
                     .catch((e) => {
                         console.error("Gagal proses Poster:", e);
-                        // Tidak melempar error keras agar jika hanya poster yang gagal, buku tetap tersimpan
                     })
             );
         }

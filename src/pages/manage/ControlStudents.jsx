@@ -25,6 +25,7 @@ export default function ControlStudents() {
       <TemplateControl 
       title={"data siswa"} 
       subtitle={"Kelola data akun siswa, hak akses, dan pelacakan aktivitas terbaru."} 
+      pageState={'users'}
       role={pb?.authStore?.record?.role}
       fullData={fullData} 
       refreshData={refreshData} 

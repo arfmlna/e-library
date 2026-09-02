@@ -205,7 +205,6 @@ export default function ReaderDownload() {
         setShowTools={setShowTools}>
             { showTools && (
                 <ToolsReader
-                pageWidth={pageWidth}
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
                 numPages={numPages}

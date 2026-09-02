@@ -1,18 +1,16 @@
-import React, { useMemo } from "react";
-import { Page } from "react-pdf";
+import React, { useMemo } from 'react';
+import { Page } from 'react-pdf'; // Sesuaikan jika nama import Page berbeda
 
 const PagePDF = React?.memo(
     React?.forwardRef((props, ref) => {
-        if (!props?.number) {
-            return null;
-        }
-
+        // 🛠️ Pindahkan Hook ke paling atas (sebelum early return)
         const searchRegex = useMemo(() => {
             if (!props?.searchQuery?.trim()) {
                 return null;
             }
             const query = props.searchQuery.trim();
-            const escapedQuery = query.replace(/[.*+?^${}()|[\]\\\/]/g, '\\$&');
+            // 🛠️ Perbaikan no-useless-escape: hilangkan backslash di dekat /
+            const escapedQuery = query.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
             return new RegExp(`(${escapedQuery})`, 'gi');
         }, [props?.searchQuery]);
         
@@ -30,6 +28,11 @@ const PagePDF = React?.memo(
                 );
             };
         }, [searchRegex]);
+
+        // 🛠️ Early return dipindahkan ke bawah setelah semua Hook dideklarasikan
+        if (!props?.number) {
+            return null;
+        }
 
         if (props?.isVisible === false) {
             return (
@@ -64,4 +67,4 @@ const PagePDF = React?.memo(
     })
 );
 
-export default PagePDF
+export default PagePDF;

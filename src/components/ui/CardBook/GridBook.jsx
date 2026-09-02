@@ -63,21 +63,19 @@ export default function GridBook({data, hoverId, setHoverId, setClickId, popupIn
                 <div className="flex-1 flex flex-col gap-2">
                     
                     <div className="flex flex-wrap gap-1.5 overflow-hidden">
-                    {(data?.expand?.category || data?.category) ? (
-                        (data?.expand?.category || data?.category).map((cat) => (
-                        <span
-                            key={cat?.id} 
-                            className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-md capitalize transition-colors duration-200 bg-slate-300 dark:bg-white text-black"
-                        >
-                            <Tag size={10} className="shrink-0" /> 
-                            {cat?.name}
-                        </span>
-                        ))
-                    ) : (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-medium text-base-content/40 bg-base-200 px-2 py-1 rounded-md">
-                        N/A
-                        </span>
-                    )}
+                        {(data?.expand?.category || data?.category)?.map((cat) => (
+                            <span
+                                key={cat?.id} 
+                                className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-md capitalize transition-colors duration-200 bg-slate-300 dark:bg-white text-black"
+                            >
+                                <Tag size={10} className="shrink-0" /> 
+                                {cat?.name}
+                            </span>
+                        )) || (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-medium text-base-content/40 bg-base-200 px-2 py-1 rounded-md">
+                            N/A
+                            </span>
+                        )}
                     </div>
 
                     {/* JUDUL DAN PENULIS */}

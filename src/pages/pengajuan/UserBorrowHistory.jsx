@@ -12,35 +12,35 @@ export default function UserBorrowHistory() {
 
     const userId = pb.authStore.record.id
 
-    const fetchBorrowRequests = async () => {
-        if (!userId) return;
-        try {
-            const records = await pb.collection('borrows').getFullList({
-                filter: `user_id = "${userId}"`,
-                sort: '-created',
-                expand: 'book_id',
-            });
-            setBorrowRequests(records);
-        } catch (error) {
-            console.error("Gagal memuat data pengajuan:", error);
-        }
-    };
-
-    const fetchLoanHistory = async () => {
-        if (!userId) return;
-        try {
-            const records = await pb.collection('loan_details').getFullList({
-                filter: `loan_id.borrower = "${userId}"`,
-                sort: '-created',
-                expand: 'loan_id,book_id',
-            });
-            setLoanHistory(records);
-        } catch (error) {
-            console.error("Gagal memuat riwayat peminjaman:", error);
-        }
-    };
-
     useEffect(() => {
+        const fetchBorrowRequests = async () => {
+            if (!userId) return;
+            try {
+                const records = await pb.collection('borrows').getFullList({
+                    filter: `user_id = "${userId}"`,
+                    sort: '-created',
+                    expand: 'book_id',
+                });
+                setBorrowRequests(records);
+            } catch (error) {
+                console.error("Gagal memuat data pengajuan:", error);
+            }
+        };
+
+        const fetchLoanHistory = async () => {
+            if (!userId) return;
+            try {
+                const records = await pb.collection('loan_details').getFullList({
+                    filter: `loan_id.borrower = "${userId}"`,
+                    sort: '-created',
+                    expand: 'loan_id,book_id',
+                });
+                setLoanHistory(records);
+            } catch (error) {
+                console.error("Gagal memuat riwayat peminjaman:", error);
+            }
+        };
+        
         const loadData = async () => {
             setLoading(true);
             if (activeTab === 'pengajuan') {

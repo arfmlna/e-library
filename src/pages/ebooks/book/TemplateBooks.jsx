@@ -18,7 +18,6 @@ export default function TemplateControl({
     refreshData, 
     searchItem, 
     setSearchItem, 
-    page, 
     setPage, 
     searchTerm ,
     setBookType,
@@ -44,7 +43,7 @@ export default function TemplateControl({
 
     useEffect(() => {
         setPage(1)
-    }, [searchTerm])
+    }, [searchTerm, setPage])
 
     const handleCheckboxChange = (cat) => {
         setSelectedCategories((prevSelected) => {
@@ -178,7 +177,7 @@ export default function TemplateControl({
             setSelectedCategories={setSelectedCategories} 
             handleCheckboxChange={handleCheckboxChange} 
             openToggle={openDialogUpdate} 
-            setOpenToggle={() => setOpenDialogUpdate((prev) => ({ status:false, data: [] }))} 
+            setOpenToggle={() => setOpenDialogUpdate(() => ({ status:false, data: [] }))} 
             handlePreviewPoster={(e) => handlePreviewPoster(e.target.files[0])} 
             poster={poster} 
             setPoster={setPoster}

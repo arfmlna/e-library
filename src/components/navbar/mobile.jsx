@@ -1,10 +1,11 @@
-import React, { Suspense, useEffect, useRef } from 'react'
+import React, { Suspense, useRef } from 'react'
 import { FaBars, FaChevronDown, FaXmark } from 'react-icons/fa6';
 import DarkMode from '../switch/DarkMode';
 import { NavLink } from 'react-router-dom';
 import anonim from '/anonim.jpg'
 import { LogOut } from 'lucide-react';
 import { useClickOutside } from '@/constants/useClickOutside';
+import { pb } from '@/utils/pocketbase';
 
 export default function Mobile({ 
     isOnline,
@@ -13,9 +14,11 @@ export default function Mobile({
     setNavBtn,
     openSubIndex,
     toggleSublink,
-    handleLogout
+    handleLogout,
+    userRecord
     }) {
     const dropdownRef = useRef(null);
+    const urlAvatar = pb.files.getURL(userRecord, userRecord?.avatar)
 
     useClickOutside(dropdownRef, () => setNavBtn(false));
 
@@ -42,7 +45,11 @@ export default function Mobile({
                             </Suspense>
                             <div className={`avatar ${isOnline ? 'avatar-online' : 'avatar-offline'} select-none`}>
                                 <div className="w-9 h-9 rounded-full ring-2 ring-primary/20 ring-offset-2 ring-offset-base-100">
-                                    <img src={anonim} alt='react logo' />
+                                    { userRecord?.avatar ? (
+                                        <img src={urlAvatar} alt='react logo' />
+                                    ) : (
+                                        <img src={anonim} alt='react logo' />
+                                    ) }
                                 </div>
                             </div>
                         </div>

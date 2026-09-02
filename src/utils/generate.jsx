@@ -18,7 +18,7 @@ export async function generateKodeBuku(kodeKategori, kodeSumber) {
                 nomorUrutBaru = nomorUrutTerakhir + 1;
             }
         }
-    } catch (error) {
+    } catch {
         nomorUrutBaru = 1;
     }
 
@@ -36,7 +36,7 @@ export async function generateKodeBuku(kodeKategori, kodeSumber) {
             
             // Jika ketemu (tidak error), berarti nomor urut ini SUDAH PERNAH DIPAKAI. Naikkan counter!
             nomorUrutBaru++;
-        } catch (error) {
+        } catch {
             // Jika error 404 (Not Found), berarti nomor urut ini benar-benar kosong & aman digunakan
             isUnique = true;
         }

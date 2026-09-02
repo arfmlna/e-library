@@ -25,8 +25,8 @@ const TopDigitalBook = lazy(() => import('@/pages/discovery/TopDigitalBook'))
 const TopBorrowedList = lazy(() => import('@/pages/discovery/TopBorrowBook'))
 const TopUsersList = lazy(() => import('@/pages/discovery/TopUsersList'))
 const AuthActivityLogs = lazy(() => import('@/pages/authactivity/AuthActivityLogs'))
+const ReaderDownload = lazy(() => import('@/components/bookReader/ReaderDownload'))
 import Test from '@/pages/test/Test'
-import ReaderDownload from '@/components/bookReader/ReaderDownload'
 
 export const pathElementForUsers = [
     { path: '*', element: NotFound },

@@ -5,9 +5,17 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores([
+    'dist',
+    'dev-dist',
+    'node_modules',
+    'pnpm-lock.yaml',
+    'bun.lockb'
+  ]),
   {
-    files: ['**/*.{js,jsx}'],
+    files: [
+      '**/*.{js,jsx}',
+    ],
     extends: [
       js.configs.recommended,
       reactHooks.configs['recommended-latest'],
@@ -26,4 +34,14 @@ export default defineConfig([
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
   },
+  {
+    files: [
+      'src/components/animate-ui/**/*.{js,jsx}',
+      'src/components/ui/**/*.{js,jsx}'
+    ],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+      'no-unused-vars': 'off', 
+    }
+  }
 ])

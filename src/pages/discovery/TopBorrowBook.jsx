@@ -110,7 +110,6 @@ export default function TopBorrowedBooks() {
                                                 </div>
                                             </td>
 
-                                            {/* Kolom Total Peminjaman */}
                                             <td className="text-center font-mono font-bold text-sm">
                                                 <span className="px-2.5 py-1 rounded-md bg-gray-800 text-white dark:bg-gray-300 dark:text-black">
                                                     {book.readersCount} Kali

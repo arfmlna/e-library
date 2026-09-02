@@ -2,7 +2,6 @@ import React, { Fragment, lazy, useState } from 'react'
 import useOnlineStatus from '../../constants/useOnlineStatus'
 import Swal from 'sweetalert2'
 import { pb } from '../../utils/pocketbase'
-import { UserKey } from 'lucide-react'
 
 const GuestNav = lazy(() => import('./guestnav'))
 const Mobile = lazy(() => import('./mobile'))
@@ -13,6 +12,8 @@ export default function Navbar({role, navlink}) {
     const [navBtn, setNavBtn] = useState(false)
     const [hoverNav, setHoverNav] = useState(false)
     const [openSubIndex, setOpenSubIndex] = useState(null);
+
+    const dataku = pb.authStore.record
 
     const toggleSublink = (index) => {
         setOpenSubIndex(openSubIndex === index ? null : index);
@@ -58,6 +59,7 @@ export default function Navbar({role, navlink}) {
                     isOnline={isOnline}
                     navlink={navlink}
                     handleLogout={handleLogout}
+                    userRecord={dataku}
                     />
                     { role === "users" ? (
                     <UserNavigation
@@ -75,7 +77,7 @@ export default function Navbar({role, navlink}) {
                         navlink={navlink}
                         role={role}
                         setHoverNav={setHoverNav}
-                        userRecord={UserKey}
+                        userRecord={dataku}
                         handleLogout={handleLogout}
                     />
                     )}

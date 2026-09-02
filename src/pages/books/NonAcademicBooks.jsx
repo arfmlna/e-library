@@ -1,4 +1,4 @@
-import React, { lazy, useState } from 'react'
+import React, { lazy, useEffect, useState } from 'react'
 import { pb } from '../../utils/pocketbase'
 import { useDebounce } from 'use-debounce'
 import { useQuery } from '@tanstack/react-query'
@@ -36,6 +36,10 @@ export default function NonAcademicBooks() {
         // staleTime: Infinity,
         // refetchOnWindowFocus: false, 
     })
+
+    useEffect(() => {
+        setPage(1); 
+    }, [category, searchTerm]);
     
     return (
         <>
@@ -47,8 +51,6 @@ export default function NonAcademicBooks() {
             searchItem={searchItem} 
             setSearchItem={setSearchItem} 
             page={page} setPage={setPage} 
-            searchTerm={searchTerm} 
-            category={category} 
             setCategory={setCategory} 
             />
         </>

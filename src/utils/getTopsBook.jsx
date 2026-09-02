@@ -4,7 +4,7 @@ export const fetchTopDigitalBooks = async () => {
     const logs = await pb.collection('history_reads').getFullList({
         filter: 'book.bookType = "digital"',
         expand: 'book',
-        fields: 'expand.book.id,expand.book.collectionId,expand.book.title,expand.book.poster' 
+        fields: 'expand.book.id,expand.book.collectionId,expand.book.title,expand.book.poster,expand.book.pdfFile' 
     });
 
     const countMap = {};
@@ -17,7 +17,8 @@ export const fetchTopDigitalBooks = async () => {
                 id: bookData.id,
                 collectionId: bookData.collectionId,
                 title: bookData.title,
-                cover: bookData.poster,
+                poster: bookData.poster,
+                pdfFile: bookData.pdfFile,
                 readersCount: 0
             };
         }

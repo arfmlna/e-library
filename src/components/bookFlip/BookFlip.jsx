@@ -3,7 +3,7 @@ import { Document, pdfjs } from 'react-pdf'
 import HTMLFlipBook from 'react-pageflip';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
-import { ChevronLeft, ChevronRight, Menu, X } from 'lucide-react'; 
+import { ChevronLeft, ChevronRight, Menu } from 'lucide-react'; 
 import SideBarControls from './SideBarControls';
 import { documentOptions, handleResizeBook } from './UtilsBook';
 import PageNavigationHint from './PageClickNavigation';
@@ -16,7 +16,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     import.meta.url,
 )?.toString();
 
-export default function BookFlip({ path, options }) {
+export default function BookFlip({ path }) {
     const flipBookRef = useRef(null);
     const textCacheRef = useRef(new Map());
 

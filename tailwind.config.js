@@ -1,3 +1,6 @@
+import daisyui from 'daisyui'
+import tailwindTypography from '@tailwindcss/typography'
+
 /** @type {import('tailwindcss').Config} */
 export default {
     content: [
@@ -8,7 +11,7 @@ export default {
         extend: {},
     },
     plugins: [
-        require('@tailwindcss/typography'), // 👈 Masukkan ini di sini
-        require('daisyui'),                 // (Jika Anda pakai daisyUI)
+        tailwindTypography,
+        daisyui,
     ],
 }

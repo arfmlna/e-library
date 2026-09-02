@@ -2,7 +2,7 @@ import React, { Suspense } from 'react'
 import DarkMode from '../switch/DarkMode';
 import { NavLink } from 'react-router-dom';
 import anonim from '/anonim.jpg'
-import { LogOut, Settings } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { pb } from '@/utils/pocketbase';
 
 export default function UserNav({
@@ -16,7 +16,7 @@ export default function UserNav({
     const info = pb.authStore.record
     const avatar = pb.files.getURL(info, info.avatar)
     const navCondition = (data) => data?.name === 'Profile' || data?.name === 'Auth Logs Activity' || data?.name === 'Downloads' || data?.name === 'Settings' || data?.name === 'Request & History Borrow Book'
-    const toggleSubMenu = (index) => {
+    const toggleSubMenu = () => {
         setHoverNav(true);
     };
     return (

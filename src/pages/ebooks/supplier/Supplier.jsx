@@ -28,7 +28,6 @@ export default function Supplier() {
         refreshData={refreshData}
         searchItem={searchItem}
         setSearchItem={setSearchItem}
-        page={page}
         setPage={setPage}
         searchTerm={searchTerm}
         />

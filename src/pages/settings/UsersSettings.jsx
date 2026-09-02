@@ -138,7 +138,7 @@ export default function UsersSettings() {
           </div>
         </div>
       </div>
-      <div className="mb-6">
+      {/* <div className="mb-6">
         <span className="text-xs font-semibold px-2 text-base-content/50 uppercase tracking-wider">Notifikasi</span>
         <div className="bg-base-100 rounded-box shadow-sm mt-2 divide-y divide-base-200">
           <div className="flex items-center justify-between p-4">
@@ -150,7 +150,7 @@ export default function UsersSettings() {
             <input type="checkbox" className="toggle toggle-primary toggle-sm" />
           </div>
         </div>
-      </div>
+      </div> */}
       <button className="btn btn-error btn-outline w-full gap-2 mt-4"
       onClick={handleLogout}>
         <LogOut size={16} absoluteStrokeWidth />

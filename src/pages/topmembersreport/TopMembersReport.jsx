@@ -59,6 +59,7 @@ export default function TopMembersReport() {
 
     useEffect(() => {
         fetchActiveMembers();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedMonth]);
 
     return (

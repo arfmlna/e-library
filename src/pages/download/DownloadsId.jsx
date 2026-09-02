@@ -1,7 +1,7 @@
 import { getOfflineBookById } from '@/constants/globals'
 import { pb } from '@/utils/pocketbase'
 import { useQuery } from '@tanstack/react-query'
-import React, { lazy, Suspense, useEffect, useMemo } from 'react'
+import React, { lazy } from 'react'
 import { useParams } from 'react-router-dom'
 
 const BookFlip = lazy(() => import('@/components/bookFlip/BookFlip'))

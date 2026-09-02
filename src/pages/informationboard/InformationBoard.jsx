@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom';
 
-export default function informationboard() {
+export default function Informationboard() {
     const [mainQuote, setMainQuote] = useState([]);
     const [sidebarQuotes, setSidebarQuotes] = useState([]);
     const [showLiterature, setLiterature] = useState(false)
@@ -13,10 +13,6 @@ export default function informationboard() {
         queryKey: ['information'],
         queryFn: async () => {
             const today = new Date();
-            const formatSQL = today.toISOString()
-            .replace('T', ' ')    // Mengganti T menjadi spasi
-            .substring(0, 19);    // Memotong agar membuang milidetik .025Z
-
 
             const [articles, agendas] = await Promise.all([
                 pb.collection('articles').getList(1, 6, {
@@ -78,6 +74,7 @@ export default function informationboard() {
 
     useEffect(() => {
         shuffleQuotes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

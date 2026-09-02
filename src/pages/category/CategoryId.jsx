@@ -35,7 +35,15 @@ export default function CategoryId() {
 
     return (
         <div>
-            <LayoutBook title={categoryName} books={category} refreshData={refreshData} searchItem={searchItem} setSearchItem={setSearchItem} page={page} setPage={setPage} searchTerm={searchTerm} />
+            <LayoutBook 
+            title={categoryName} 
+            books={category} 
+            refreshData={refreshData} 
+            searchItem={searchItem} 
+            setSearchItem={setSearchItem} 
+            page={page} 
+            setPage={setPage} 
+            />
         </div>
     )
 }

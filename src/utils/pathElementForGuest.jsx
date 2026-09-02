@@ -1,5 +1,6 @@
 import { lazy } from 'react'
 
+const ForgotPassword = lazy(() => import('@/pages/signs/ForgotPassword'))
 const Verification = lazy(() => import('@/pages/signs/Verification'))
 const App = lazy(() => import('@/App.jsx')) 
 const NotFound = lazy(() => import('@/NotFound'))
@@ -18,4 +19,5 @@ export const pathElementForGuest = [
     { path: '/home', element: LandingPage },
     { path: '/info-board', element: InformationBoard },
     { path: '/detail-article/:id', element: ArticleDetail },
+    { path: '/forgot-password', element: ForgotPassword },
 ]

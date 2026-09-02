@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { User, CheckCircle, X, Loader2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { pb } from '@/utils/pocketbase';
+import Swal from 'sweetalert2';
 
 export default function MemberValidator({ memberId, setMemberId }) {
   const [keyword, setKeyword] = useState("");
   const [selectedMember, setSelectedMember] = useState(null);
 
-  const { data: members, isFetching, isError, isSuccess } = useQuery({
+  const { data: members, isFetching, isSuccess } = useQuery({
     queryKey: ["membersSearch", keyword],
     queryFn: async () => {
       const resultList = await pb?.collection("users")?.getList(1, 5, {
@@ -29,17 +30,24 @@ export default function MemberValidator({ memberId, setMemberId }) {
     setKeyword(inputVal);
   };
 
-  const handleInputChange = (e) => {
-    // Reset state utama jika user mulai mengetik ulang
+  const handleInputChange = () => {
     if (memberId) setMemberId("");
     if (selectedMember) setSelectedMember(null);
     if (keyword) setKeyword("");
   };
 
   const handleSelectMember = (member) => {
-    setSelectedMember(member);
-    setMemberId(member.id); // Set ID utama ke komponen parent
-    setKeyword(""); // Bersihkan keyword agar list dropdown tertutup
+    if (member.status === 'verified') {
+      setSelectedMember(member);
+      setMemberId(member.id);
+      setKeyword("");
+    } else {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Select Member!',
+        text: 'Pilih member dengan status yang sudah terverifikasi...'
+      })
+    }
   };
 
   return (
@@ -56,6 +64,7 @@ export default function MemberValidator({ memberId, setMemberId }) {
               name="memberInput"
               placeholder="Ketik nama atau ID anggota..."
               onChange={handleInputChange}
+              defaultValue={keyword}
               className="w-full pl-9 pr-4 py-2.5 text-sm border border-slate-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-500 transition-colors placeholder-slate-400 dark:placeholder-gray-500"
             />
           </div>
@@ -82,8 +91,12 @@ export default function MemberValidator({ memberId, setMemberId }) {
                 <p className="font-medium">{item.name || "Tanpa Nama"}</p>
                 <p className="text-xs text-slate-500 dark:text-gray-400">ID: {item.id}</p>
               </div>
-              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${item.verified ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300'}`}>
-                {item.verified ? 'AKTIF' : 'NON AKTIF'}
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded 
+                ${item.status === 'verified' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' 
+                : item.status === 'process' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-300'
+                : item.status === 'unverified' ? 'bg-slate-100 text-slate-800 dark:bg-slate-950 dark:text-slate-300' 
+                : 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300'}`}>
+                {item.status}
               </span>
             </button>
           ))}
@@ -98,15 +111,33 @@ export default function MemberValidator({ memberId, setMemberId }) {
       )}
 
       {selectedMember && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-900/60 rounded-lg text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2 transition-colors">
+        <div className={`p-3 rounded-lg text-xs flex items-center gap-2 transition-colors
+          ${selectedMember?.status === 'verified' ? 'bg-emerald-50 border border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-900/60 text-emerald-800 dark:text-emerald-300' : 
+            selectedMember?.status === 'process' ? 'bg-yellow-50 border border-yellow-200 dark:bg-yellow-950/20 dark:border-yellow-900/60 text-yellow-800 dark:text-yellow-300' : 
+            selectedMember?.status === 'unverified' ? 'bg-slate-50 border border-slate-200 dark:bg-slate-950/20 dark:border-slate-900/60 text-slate-800 dark:text-slate-300' : 
+            'bg-red-50 border border-red-200 dark:bg-red-950/20 dark:border-red-900/60 text-red-800 dark:text-red-300'} 
+        `}>
           <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           <span>
             Anggota Terpilih: <strong className="text-slate-900 dark:text-white">{selectedMember?.name}</strong> | ID: <strong>{selectedMember?.id}</strong> | Status:{' '}
-            {selectedMember?.verified === true ? (
-              <span className="bg-emerald-600 dark:bg-emerald-500 text-white px-1.5 py-0.5 rounded font-bold text-[10px]">AKTIF</span>
-            ) : (
-              <span className="bg-red-600 dark:bg-red-500 text-white px-1.5 py-0.5 rounded font-bold text-[10px]">NON AKTIF</span>
-            )}
+            { selectedMember?.status === 'verified' ? (
+                <span className="bg-emerald-600 dark:bg-emerald-500 text-white px-1.5 py-0.5 rounded font-bold text-[10px]">
+                  {selectedMember.status}
+                </span>
+              ) : selectedMember?.status === 'process' ? (
+                <span className="bg-yellow-600 dark:bg-yellow-500 text-white px-1.5 py-0.5 rounded font-bold text-[10px]">
+                  {selectedMember.status}
+                </span>
+              ) : selectedMember?.status === 'unverified' ? (
+                <span className="bg-slate-600 dark:bg-slate-500 text-white px-1.5 py-0.5 rounded font-bold text-[10px]">
+                  {selectedMember.status}
+                </span>
+              ) : (
+                <span className="bg-red-600 dark:bg-red-500 text-white px-1.5 py-0.5 rounded font-bold text-[10px]">
+                  {selectedMember?.status}
+                </span>
+              )
+            }
           </span>
         </div>
       )}

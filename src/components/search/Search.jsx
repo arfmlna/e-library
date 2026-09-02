@@ -1,7 +1,7 @@
 import { Search } from "lucide-react"
 import { useState } from "react"
 
-const SearchData = ({searchItem, setSearchItem}) => {
+const SearchData = ({setSearchItem}) => {
     const [getWrite, setWrite] = useState()
     const handleSubmit = (e) => {
         e.preventDefault()

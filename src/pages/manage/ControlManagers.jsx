@@ -25,6 +25,7 @@ export default function ControlManagers() {
       <TemplateControl 
       title={"data petugas"} 
       subtitle={"Kelola data akun petugas, hak akses, dan pelacakan aktivitas terbaru."}
+      pageState={'petugas'}
       role={pb?.authStore?.record?.role}
       fullData={fullData} 
       refreshData={refreshData} 

@@ -7,45 +7,42 @@ export default function TopBooksReport() {
     const [loading, setLoading] = useState(true);
     const [limitFilter, setLimitFilter] = useState(5); // Default menampilkan Top 5
 
-    const fetchTopBorrowedBooks = async () => {
-        setLoading(true);
-        try {
-        // 1. Ambil semua rekaman detail peminjaman dari database
-        const records = await pb.collection('loan_details').getFullList({
-            expand: 'book_id'
-        });
-
-        // 2. Hitung frekuensi peminjaman menggunakan JavaScript Reduce
-        const bookCountMap = records.reduce((acc, current) => {
-            const book = current.expand?.book_id;
-            if (!book) return acc; // Lewati jika data buku sudah terhapus
-
-            if (!acc[book.id]) {
-            acc[book.id] = {
-                id: book.id,
-                title: book.title,
-                type: book.type === 'academic' ? 'Akademik' : 'Non-Akademik',
-                borrowCount: 0
-            };
-            }
-            acc[book.id].borrowCount += 1;
-            return acc;
-        }, {});
-
-        // 3. Ubah objek map menjadi Array, urutkan dari yang terbesar (Top Borrowed)
-        const sortedBooks = Object.values(bookCountMap)
-            .sort((a, b) => b.borrowCount - a.borrowCount)
-            .slice(0, parseInt(limitFilter, 10)); // Potong sesuai limit filter (Top 5, 10, 20)
-
-        setTopBooks(sortedBooks);
-        } catch (error) {
-        console.error("Gagal menghitung statistik buku terpopuler:", error);
-        } finally {
-        setLoading(false);
-        }
-    };
-
     useEffect(() => {
+        const fetchTopBorrowedBooks = async () => {
+            setLoading(true);
+            try {
+            const records = await pb.collection('loan_details').getFullList({
+                expand: 'book_id'
+            });
+
+            const bookCountMap = records.reduce((acc, current) => {
+                const book = current.expand?.book_id;
+                if (!book) return acc;
+
+                if (!acc[book.id]) {
+                acc[book.id] = {
+                    id: book.id,
+                    title: book.title,
+                    type: book.type === 'academic' ? 'Akademik' : 'Non-Akademik',
+                    borrowCount: 0
+                };
+                }
+                acc[book.id].borrowCount += 1;
+                return acc;
+            }, {});
+
+            const sortedBooks = Object.values(bookCountMap)
+                .sort((a, b) => b.borrowCount - a.borrowCount)
+                .slice(0, parseInt(limitFilter, 10));
+
+            setTopBooks(sortedBooks);
+            } catch (error) {
+            console.error("Gagal menghitung statistik buku terpopuler:", error);
+            } finally {
+            setLoading(false);
+            }
+        };
+
         fetchTopBorrowedBooks();
     }, [limitFilter]);
 

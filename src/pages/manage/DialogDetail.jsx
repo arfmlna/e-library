@@ -8,7 +8,7 @@ export default function DialogDetail({ open, onClose, detail, setOpenEdit, role 
     const avatarUrl = pb.files.getURL(detail, detail.avatar)
     return (
         <Dialog open={open} onClose={onClose} data-theme={theme}>
-            <DialogBackdrop className="fixed inset-0 z-50 bg-black/40" />
+            {/* <DialogBackdrop className="fixed inset-0 z-50 bg-black/40" /> */}
             <DialogPanel className="fixed left-1/2 top-1/2 z-50 w-[95vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl border border-base-200 shadow-2xl sm:w-full overflow-hidden">
                 <div className="w-full bg-base-100 text-base-content relative">
                 <button 
@@ -40,38 +40,38 @@ export default function DialogDetail({ open, onClose, detail, setOpenEdit, role 
                     </div>
                     <div className="flex flex-col gap-3 text-sm border-t border-base-200 pt-4">
                         <div className="flex justify-between items-start gap-4">
-                        <span className="text-base-content/60 font-medium min-w-[80px]">Email</span>
-                        <span className="text-right break-all">{detail?.email}</span>
+                            <span className="text-base-content/60 font-medium min-w-[80px]">Email</span>
+                            <span className="text-right break-all">{detail?.email}</span>
                         </div>
                         <div className="flex justify-between items-center gap-4">
-                        <span className="text-base-content/60 font-medium">Status</span>
-                        {detail?.emailVisibility ? (
-                            <span className="badge badge-success badge-sm text-xs font-semibold px-2 py-2 text-white">Terverifikasi</span>
-                        ) : (
-                            <span className="badge badge-error badge-sm text-xs font-semibold px-2 py-2 text-white">Belum Verifikasi</span>
-                        )}
+                            <span className="text-base-content/60 font-medium">Status</span>
+                            {detail?.verified ? (
+                                <span className="badge badge-success badge-sm text-xs font-semibold px-2 py-2 text-white">Email Terverifikasi</span>
+                            ) : (
+                                <span className="badge badge-error badge-sm text-xs font-semibold px-2 py-2 text-white">Email Belum Verifikasi</span>
+                            )}
                         </div>
                         <div className="flex justify-between items-center gap-4">
-                        <span className="text-base-content/60 font-medium">Position</span>
-                        <span className="capitalize font-semibold">{detail?.role}</span>
+                            <span className="text-base-content/60 font-medium">Position</span>
+                            <span className="capitalize font-semibold">{detail?.role}</span>
                         </div>
                         <div className="flex justify-between items-start gap-4 border-t border-base-200/50 pt-2 mt-1">
-                        <span className="text-base-content/60 font-medium">Created</span>
-                        <div className="text-right flex flex-col">
-                            <span>{detail?.created ? formatDate(detail?.created) : '-'}</span>
-                            <span className="text-xs text-base-content/50 mt-0.5">
-                            {detail?.created ? timeAgo(detail?.created) : ''}
-                            </span>
-                        </div>
+                            <span className="text-base-content/60 font-medium">Created</span>
+                            <div className="text-right flex flex-col">
+                                <span>{detail?.created ? formatDate(detail?.created) : '-'}</span>
+                                <span className="text-xs text-base-content/50 mt-0.5">
+                                {detail?.created ? timeAgo(detail?.created) : ''}
+                                </span>
+                            </div>
                         </div>
                         <div className="flex justify-between items-start gap-4">
-                        <span className="text-base-content/60 font-medium">Updated</span>
-                        <div className="text-right flex flex-col">
-                            <span>{detail?.updated ? formatDate(detail?.updated) : '-'}</span>
-                            <span className="text-xs text-base-content/50 mt-0.5">
-                            {detail?.updated ? timeAgo(detail?.updated) : ''}
-                            </span>
-                        </div>
+                            <span className="text-base-content/60 font-medium">Updated</span>
+                            <div className="text-right flex flex-col">
+                                <span>{detail?.updated ? formatDate(detail?.updated) : '-'}</span>
+                                <span className="text-xs text-base-content/50 mt-0.5">
+                                {detail?.updated ? timeAgo(detail?.updated) : ''}
+                                </span>
+                            </div>
                         </div>
                     </div>
                     { role === 'edmin' && (
@@ -79,7 +79,7 @@ export default function DialogDetail({ open, onClose, detail, setOpenEdit, role 
                             <button 
                             type="button"
                             className="btn btn-primary btn-sm md:btn-md gap-2" 
-                            onClick={(e) => setOpenEdit((prev) => ({
+                            onClick={() => setOpenEdit((prev) => ({
                                 ...prev,
                                 status: true,
                                 data: detail
@@ -92,7 +92,6 @@ export default function DialogDetail({ open, onClose, detail, setOpenEdit, role 
                     )}
                     </div>
                 </div>
-
                 </div>
             </DialogPanel>
         </Dialog>

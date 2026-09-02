@@ -59,6 +59,7 @@ export default function DialogUpdate({
             setSelectedCategories([]); 
             setBookType('digital')
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [openToggle]);
 
     const handleSetOpenToggle = () => {
@@ -148,15 +149,10 @@ export default function DialogUpdate({
             const isCategoryChanged = categoryIdFromForm !== oldCategoryId;
             const isSupplierChanged = supplierIdFromForm !== oldSupplierId;
 
-            // --- CODE DEBUGGER ---
-            console.log("--- DEBUG UPDATE KODE ---");
-            console.log("Kategori Berubah?", isCategoryChanged, `[Lama: ${oldCategoryId} | Baru: ${categoryIdFromForm}]`);
-            console.log("Supplier Berubah?", isSupplierChanged, `[Lama: ${oldSupplierId} | Baru: ${supplierIdFromForm}]`);
-
             if (isCategoryChanged || isSupplierChanged) {
                 const targetCategory = categories?.find(cat => cat.id === categoryIdFromForm);
                 // Mencari data dari tabel/state array `suppliers`
-                const targetSupplier = suppliers?.find(sup => sup.id === supplierIdFromForm);
+                const targetSupplier = supplier?.find(sup => sup.id === supplierIdFromForm);
 
                 const categoryKode = targetCategory?.kode || "";
                 const supplierKode = targetSupplier?.kode || openToggle?.data?.expand?.supplier?.kode || "";

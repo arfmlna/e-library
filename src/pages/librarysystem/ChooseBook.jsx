@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CheckCircle, X, Loader2, Book, Search } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { pb } from '@/utils/pocketbase';
+import Swal from 'sweetalert2';
 
 export default function ChooseBook({ memberId, bookId, setBookId, handleAddBook, borrowList = [] }) {
   const [status, setStatus] = useState({ success: false, msg: "" });
@@ -31,7 +32,7 @@ export default function ChooseBook({ memberId, bookId, setBookId, handleAddBook,
     retry: false,
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!inputVal.trim()) return;
 
@@ -39,9 +40,8 @@ export default function ChooseBook({ memberId, bookId, setBookId, handleAddBook,
     setSearchKeyword(inputVal.trim());
   };
 
-
-  const handleSelectBook = (book) => {
-    if (borrowList.some(item => item.id?.toLowerCase() === book.id?.toLowerCase())) {
+  const handleSelectBook = async (book) => {
+    if (borrowList.some(item => item.id?.toLowerCase() === bookId?.toLowerCase())) {
       setSearchKeyword("");
       return setStatus({ success: false, msg: `Buku "${book.title}" sudah di keranjang!` });
     }
@@ -56,14 +56,55 @@ export default function ChooseBook({ memberId, bookId, setBookId, handleAddBook,
       return setStatus({ success: false, msg: `Buku "${book.title}" gagal ditambahkan, stock habis` });
     }
 
-    setBookId(book.id);
-    handleAddBook(book);
-    setStatus({ success: true, msg: book.title });
-    
-    setSearchKeyword("");
-    setInputVal("");
-  };
+    try {
+      const setting = await pb.collection("settings").getFirstListItem("", {
+        fields: 'max_borrow'
+      });
+      const batasMaksimal = parseInt(setting.max_borrow, 10) || 0;
 
+      const activeLoans = await pb.collection("loan_details").getFullList({
+        filter: `loan_id.borrower = "${memberId}" && status = "borrowed"`,
+        fields: 'id',
+      });
+
+      const pendingBorrows = await pb.collection("borrows").getFullList({
+        filter: `user_id = "${memberId}" && status = "pending"`,
+        fields: 'id',
+      });
+
+      const totalDipinjamRumah = activeLoans.length;
+      const totalPending = pendingBorrows.length;
+      const totalDiKeranjang = borrowList.length;
+
+      const totalAkumulasi = totalDipinjamRumah + totalPending + totalDiKeranjang;
+
+      if (totalAkumulasi >= batasMaksimal) {
+        Swal.fire({
+            title: "Batas Peminjaman Terlampaui!",
+            text: `Anda memiliki ${totalDipinjamRumah} buku sedang dipinjam, ${totalPending} pengajuan pending, dan ${totalDiKeranjang} buku di keranjang. Batas maksimal sistem adalah ${batasMaksimal} buku.`,
+            icon: "warning",
+            confirmButtonText: "Mengerti",
+            confirmButtonColor: "#f59e0b"
+        });
+        return; 
+      }
+
+      setBookId(bookId);
+      handleAddBook(book);
+      setStatus({ success: true, msg: book.title });
+      setSearchKeyword("");
+      setInputVal("");
+    } catch (error) {
+      console.error("Original Error:", error.originalError || error);
+      Swal.fire({
+          title: "Gagal Memproses Data!",
+          text: "Terjadi kesalahan saat memverifikasi status peminjaman Anda ke server.",
+          icon: "error",
+          confirmButtonText: "Mengerti",
+          confirmButtonColor: "#ef4444"
+      });
+    }
+  };
 
   const handleInputChange = (e) => {
     setInputVal(e.target.value);
@@ -102,7 +143,7 @@ export default function ChooseBook({ memberId, bookId, setBookId, handleAddBook,
         <div className="absolute z-10 w-full md:w-[66%] bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-lg shadow-lg max-h-56 overflow-y-auto divide-y divide-slate-100 dark:divide-gray-800">
           {searchResults.map((book) => (
             <button
-              key={book.id}
+              key={bookId}
               type="button"
               onClick={() => handleSelectBook(book)}
               className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-gray-800 flex justify-between items-center transition-colors text-slate-900 dark:text-white"
@@ -110,7 +151,7 @@ export default function ChooseBook({ memberId, bookId, setBookId, handleAddBook,
               <div className="pr-4 truncate">
                 <p className="font-medium truncate">{book.title}</p>
                 <p className="text-xs text-slate-500 dark:text-gray-400 truncate">
-                  {book.author ? `Penulis: ${book.author}` : 'No Author'} | Kode: {book.kode_buku || book.id}
+                  {book.author ? `Penulis: ${book.author}` : 'No Author'} | Kode: {book.kode_buku || bookId}
                 </p>
               </div>
               <div className="flex flex-col items-end gap-1 flex-shrink-0">

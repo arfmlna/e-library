@@ -5,7 +5,6 @@ const DirectPageReader = lazy(() => import('./DirectPageReader'))
 const ZoomReader = lazy(() => import('./ZoomReader'))
 
 export default function ToolsReader({
-    pageWidth,
     zoom,
     setZoom,
     numPages,

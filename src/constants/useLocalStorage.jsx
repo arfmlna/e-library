@@ -25,6 +25,7 @@ export function useLocalStorage(key, initialValue) {
             window.removeEventListener('storage', handleStorage);
             window.removeEventListener('local-storage-update', handleStorage);
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [key]);
 
     const setLiveValue = (newValue) => {

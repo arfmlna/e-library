@@ -4,7 +4,7 @@ import { HashLink as NavLink } from 'react-router-hash-link'
 export default function GuestNav({ navlink }) {
     const location = useLocation()
     const path = location.pathname
-    if (path === '/sign-in' || path === '/sign-up' ) {
+    if (path === '/sign-in' || path === '/sign-up' || path === '/forgot-password' ) {
         return null
     }
     return (

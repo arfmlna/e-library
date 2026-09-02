@@ -101,7 +101,10 @@ export default function LoanReport() {
     };
 
 
-    useEffect(() => { fetchReportData(); }, [statusFilter, bookType, startDate, endDate, searchQuery]);
+    useEffect(() => { 
+        fetchReportData(); 
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [statusFilter, bookType, startDate, endDate, searchQuery]);
 
 
 

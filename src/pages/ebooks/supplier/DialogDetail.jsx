@@ -1,5 +1,5 @@
-import { Dialog, DialogBackdrop, DialogClose, DialogDescription, DialogFooter, DialogHeader, DialogPanel, DialogTitle } from '@/components/animate-ui/primitives/headless/dialog'
-import { ChartColumnStacked, UserRoundPen, X } from 'lucide-react'
+import { Dialog, DialogBackdrop, DialogPanel } from '@/components/animate-ui/primitives/headless/dialog'
+import { UserRoundPen, X } from 'lucide-react'
 import { formatDate, timeAgo } from '@/constants/dateFormat'
 
 export default function DialogDetail({ open, onClose, detail, setOpenEdit }){
@@ -66,7 +66,7 @@ export default function DialogDetail({ open, onClose, detail, setOpenEdit }){
                     <button 
                         type="button"
                         className="btn btn-primary btn-sm md:btn-md gap-2" 
-                        onClick={(e) => setOpenEdit((prev) => ({
+                        onClick={() => setOpenEdit((prev) => ({
                         ...prev,
                         status: true,
                         data: detail

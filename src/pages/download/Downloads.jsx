@@ -1,7 +1,7 @@
 import { getOfflineBooksList } from '@/constants/globals';
 import { pb } from '@/utils/pocketbase';
 import { useQuery } from '@tanstack/react-query';
-import React, { lazy, useEffect, useState } from 'react'
+import React, { lazy, useState } from 'react'
 import { useDebounce } from 'use-debounce';
 
 const LayoutBook = lazy(() => import('./LayoutBook'));
@@ -19,13 +19,21 @@ const Downloads = () => {
     enabled: !!myId,
     
     placeholderData: (previousData) => previousData,  
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
     refetchOnMount: true,
     staleTime: Infinity,
   });
 
   return (
-    <LayoutBook title={'Books Offline'} books={books} refreshData={refreshData} searchItem={searchItem} setSearchItem={setSearchItem} page={page} setPage={setPage} searchTerm={searchTerm} />
+    <LayoutBook 
+    title={'Books Offline'} 
+    books={books} 
+    refreshData={refreshData} 
+    searchItem={searchItem} 
+    setSearchItem={setSearchItem} 
+    page={page} 
+    setPage={setPage} 
+    />
   );
 };
 

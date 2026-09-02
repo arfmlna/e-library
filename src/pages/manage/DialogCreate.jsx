@@ -1,8 +1,63 @@
 import { Dialog, DialogBackdrop, DialogClose, DialogDescription, DialogFooter, DialogHeader, DialogPanel, DialogTitle } from '@/components/animate-ui/primitives/headless/dialog'
+import { pb } from '@/utils/pocketbase'
 import { X } from 'lucide-react'
+import Swal from 'sweetalert2'
 
-export default function DialogCreate({title, role=false, openToggle, setOpenToggle, handleAdd, password, setPassword, avatar, handlePreviewAvatar }){
+export default function DialogCreate({
+    title, 
+    role=false, 
+    refreshData,
+    openToggle, 
+    setOpenToggle, 
+    avatar, 
+    handlePreviewAvatar,
+    handlePasswordChange
+}){
     const theme = localStorage.getItem('theme')
+
+    const handleAdd = async (e) => {
+        e.preventDefault()
+        const allInputData = new FormData(e.target)
+        const data = Object.fromEntries(allInputData.entries())
+
+        if (role !== 'edmin') {
+            data.role = 'users'
+        }
+
+        data.emailVisibility = true
+        data.status = 'verified'
+        data.passwordConfirm = data.password
+        
+        Swal.fire({
+            title: 'Mohon Tunggu',
+            text: 'Sedang menyimpan data...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        try {
+            await pb.collection('users').create(data);
+
+            await Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: 'Data baru telah ditambahkan.',
+                timer: 1500,
+                showConfirmButton: false
+            });
+
+            e.target.reset();
+            refreshData()
+            setOpenToggle()
+        } catch (error) {
+            console.error("Error Detail:", error.data);
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal Menyimpan',
+                text: error.message || 'Terjadi kesalahan pada server'
+            });
+        }
+    }
     return (
         <Dialog open={openToggle} onClose={setOpenToggle} data-theme={theme} >
             <DialogBackdrop className="fixed inset-0 z-50 bg-black/40" />
@@ -93,7 +148,7 @@ export default function DialogCreate({title, role=false, openToggle, setOpenTogg
                         id="password" 
                         placeholder="Insert Password..." 
                         required 
-                        onChange={setPassword}
+                        onChange={handlePasswordChange}
                         autoComplete='new-password'
                         className="input input-bordered w-full h-10 px-3 text-sm bg-base-100 shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                         />

@@ -1,7 +1,6 @@
-import { Dialog, DialogBackdrop, DialogClose, DialogDescription, DialogFooter, DialogHeader, DialogPanel, DialogTitle } from '@/components/animate-ui/primitives/headless/dialog'
+import { Dialog, DialogBackdrop, DialogPanel } from '@/components/animate-ui/primitives/headless/dialog'
 import { Book, UserRoundPen, X } from 'lucide-react'
 import { formatDate, timeAgo } from '@/constants/dateFormat'
-import { Link } from 'react-router-dom'
 import { pb } from '@/utils/pocketbase'
 
 export default function DialogDetail({ open, onClose, detail, setOpenEdit, role }){
@@ -130,7 +129,7 @@ export default function DialogDetail({ open, onClose, detail, setOpenEdit, role 
                             <button 
                                 type="button"
                                 className="btn btn-primary btn-sm md:btn-md gap-2" 
-                                onClick={(e) => setOpenEdit((prev) => ({
+                                onClick={() => setOpenEdit((prev) => ({
                                 ...prev,
                                 status: true,
                                 data: detail

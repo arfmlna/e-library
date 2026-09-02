@@ -27,7 +27,6 @@ export default function Category() {
         refreshData={refreshData}
         searchItem={searchItem}
         setSearchItem={setSearchItem}
-        page={page}
         setPage={setPage}
         searchTerm={searchTerm}
         />

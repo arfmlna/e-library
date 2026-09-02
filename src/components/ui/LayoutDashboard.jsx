@@ -30,7 +30,7 @@ export default function LayoutDashboard({
                 </header>
                 <main className="w-full">
                     <div className="mt-3 mb-7 gap-5 flex flex-col md:flex-row justify-center md:justify-end">
-                        <SearchData searchItem={searchItem} setSearchItem={handleChange} />
+                        <SearchData setSearchItem={handleChange} />
                         <div className="ml-auto">
                             <div className="flex gap-2">
                             { searchItem && (

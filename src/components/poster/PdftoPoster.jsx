@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 
 // pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
@@ -22,11 +22,14 @@ export default function PdfToPoster({ pdfFile, targetPage = 1, height = 384, wid
     }), []);
 
     const loadingElement = (
-        <div className="absolute inset-0 bg-base-200 flex flex-col items-center justify-center gap-3">
+        <div className="absolute inset-0 bg-base-200 flex flex-col items-center justify-center gap-3"
+            style={{ 
+                width: `${width}px`, height: `${height}px` 
+            }} 
+        >
             <span className="loading loading-spinner loading-lg text-primary"></span>
-            <p className="text-xs font-semibold opacity-70 animate-pulse">Loading File...</p>
         </div>
-    )
+    );
 
     return (
          <div className="relative overflow-hidden" style={{ 

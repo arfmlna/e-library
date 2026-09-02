@@ -1,7 +1,12 @@
 import { Dialog, DialogBackdrop, DialogClose, DialogDescription, DialogFooter, DialogHeader, DialogPanel, DialogTitle } from '@/components/animate-ui/primitives/headless/dialog'
 import { X } from 'lucide-react'
 
-export default function DialogUpdate({title, openToggle, setOpenToggle, handleUpdate, password, setPassword, avatar, handlePreviewAvatar }){
+export default function DialogUpdate({
+    title, 
+    openToggle, 
+    setOpenToggle, 
+    handleUpdate, 
+}){
     const theme = localStorage.getItem('theme')
 
     const handleSetOpenToggle = () => {
@@ -43,7 +48,6 @@ export default function DialogUpdate({title, openToggle, setOpenToggle, handleUp
                     </div>
                     <button 
                         type="submit" 
-                        disabled={password}
                         className="btn btn-primary w-full h-10 mt-2 inline-flex items-center justify-center rounded-lg text-sm font-medium shadow transition-colors"
                     >
                         Save Changes

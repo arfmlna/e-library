@@ -1,9 +1,10 @@
 import Test from '@/pages/test/Test'
 import { lazy } from 'react'
 
+const AdminVerificationPage = lazy(() => import('@/pages/pengajuanaccount/AdminVerificationPage'))
 const AuthActivityLogs = lazy(() => import('@/pages/authactivity/AuthActivityLogs'))
-// const AdmSettings = lazy(() => import('@/pages/settings/AdmSettings'))
-const UsersSettings = lazy(() => import('@/pages/settings/UsersSettings'))
+const AdmSettings = lazy(() => import('@/pages/settings/AdmSettings'))
+// const UsersSettings = lazy(() => import('@/pages/settings/UsersSettings'))
 const Agendas = lazy(() => import('@/pages/agendas/Agendas'))
 const ArticlesControls = lazy(() => import('@/pages/articlescontrols/ArticlesControls'))
 const Supplier = lazy(() => import('@/pages/ebooks/supplier/Supplier'))
@@ -27,8 +28,6 @@ const Profile = lazy(() => import('@/pages/profile/Profile.jsx'))
 const DownloadsId = lazy(() => import('@/pages/download/DownloadsId.jsx'))
 const NotFound = lazy(() => import('@/NotFound'))
 const BooksControl = lazy(() => import('@/pages/ebooks/book/BooksControl'))
-const BorrowBook = lazy(() => import('@/pages/borrowbook/BorrowBook'))
-const ReturnBook = lazy(() => import('@/pages/returnbook/ReturnBook'))
 const ArticleDetail = lazy(() => import('@/pages/informationboard/ArticleDetail'))
 const Reader = lazy(() => import('@/components/bookReader/Reader'))
 const BookListRequest = lazy(() => import('@/pages/pengajuan/BookListRequest'))
@@ -51,8 +50,6 @@ export const pathElementForAdmin = [
     { path: '/kategori', element: Category },
     { path: '/list-all', element: ControlAll },
     { path: '/e-books', element: BooksControl },
-    { path: '/borrow', element: BorrowBook },
-    { path: '/return', element: ReturnBook },
     { path: '/lib-system', element: LibrarySystem },
     { path: '/loan-report', element: LoanReport },
     { path: '/overdue-report', element: OverdueReportManager },
@@ -65,8 +62,9 @@ export const pathElementForAdmin = [
     { path: '/detail-article/:id', element: ArticleDetail },
     { path: '/reader/online/:id', element: Reader },
     { path: '/request-book', element: BookListRequest },
-    // { path: '/setting', element: AdmSettings },
-    { path: '/setting', element: UsersSettings },
+    { path: '/user-verification', element: AdminVerificationPage },
+    { path: '/setting', element: AdmSettings },
+    // { path: '/setting', element: UsersSettings },
 
     { path: '/test', element: Test },
 ]

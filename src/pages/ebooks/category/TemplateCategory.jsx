@@ -1,4 +1,4 @@
-import { lazy, useEffect, useMemo, useState } from 'react'
+import { lazy, useEffect, useState } from 'react'
 import { pb } from '@/utils/pocketbase'
 import { FaPeopleGroup } from 'react-icons/fa6'
 import { formatDate, timeAgo } from '@/constants/dateFormat'
@@ -6,7 +6,6 @@ import { ChartColumnStacked, UserRoundPlus, UserRoundX, X } from 'lucide-react'
 import Swal from 'sweetalert2'
 
 const LayoutDashboard = lazy(() => import('@/components/ui/LayoutDashboard'))
-const SearchData = lazy(() => import('@/components/search/Search'))
 const DialogCreate = lazy(() => import('./DialogCreate'))
 const DialogDetail = lazy(() => import('./DialogDetail'))
 const DialogUpdate = lazy(() => import('./DialogUpdate'))
@@ -17,8 +16,7 @@ export default function TemplateEBook({
     fullData, 
     refreshData, 
     searchItem, 
-    setSearchItem, 
-    page, 
+    setSearchItem,  
     setPage, 
     searchTerm 
 }) {
@@ -36,7 +34,7 @@ export default function TemplateEBook({
 
     useEffect(() => {
         setPage(1)
-    }, [searchTerm])
+    }, [searchTerm, setPage])
 
     const handleCheckAll = (e) => {
         if (e.target.checked) {
@@ -186,14 +184,29 @@ export default function TemplateEBook({
     }
     return (
         <>  
-            <DialogCreate title={title} openToggle={openToggle} setOpenToggle={handleToggleClose} handleAdd={handleAdd} />
+            <DialogCreate 
+            title={title} 
+            openToggle={openToggle} 
+            setOpenToggle={handleToggleClose} 
+            handleAdd={handleAdd} 
+            />
 
-            <DialogUpdate title={title} openToggle={openDialogUpdate} setOpenToggle={() => setOpenDialogUpdate((prev) => ({
+            <DialogUpdate 
+            title={title} 
+            openToggle={openDialogUpdate} 
+            setOpenToggle={() => setOpenDialogUpdate(() => ({
                 status:false,
                 data: []
-            }))} handleUpdate={handleUpdate} />
+            }))} 
+            handleUpdate={handleUpdate} 
+            />
 
-            <DialogDetail open={openDetail?.status} onClose={() => setOpenDetail((prev) => ({ ...prev, status: false }))} detail={openDetail?.data} setOpenEdit={setOpenDialogUpdate} />
+            <DialogDetail 
+            open={openDetail?.status} 
+            onClose={() => setOpenDetail((prev) => ({ ...prev, status: false }))} 
+            detail={openDetail?.data} 
+            setOpenEdit={setOpenDialogUpdate} 
+            />
 
             <LayoutDashboard 
             icon={<ChartColumnStacked size={32} />}

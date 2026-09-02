@@ -15,7 +15,8 @@ export default function ControlAll() {
         queryKey: ['all', searchTerm, page], 
         queryFn: () => pb.collection('users').getList(page, 8, {
             filter: `role != "admin" ${searchTerm ? `&& name ~ "${searchTerm}"` : ""}`,
-            sort: '-created'
+            sort: '-created',
+            expand: 'verification_via_users'
         }),
         keepPreviousData: true
     });
@@ -25,6 +26,7 @@ export default function ControlAll() {
             <TemplateControl 
             title={"data users"} 
             subtitle={"Kelola data akun siswa, petugas, hak akses, dan pelacakan aktivitas terbaru."}
+            pageState={'all'}
             fullData={fullData} 
             role={pb?.authStore?.record?.role}
             refreshData={refreshData} 

@@ -53,10 +53,13 @@ export default function BorrowTable({ memberId, setMemberId, list, setList, onRe
         loan_date: new Date(),
         status: 'borrowed',
       });
+      const setting = await pb.collection("settings").getFirstListItem("", {
+        fields: 'borrow_duration'
+      });
 
       const detailPromises = list.map(async (book) => {
         const dueDateObj = new Date(book?.dueDate || new Date());
-        dueDateObj.setDate(dueDateObj.getDate() + 7);
+        dueDateObj.setDate(dueDateObj.getDate() + setting.borrow_duration);
 
         const createDetail = pb.collection('loan_details').create({
           loan_id: loanRecord?.id,

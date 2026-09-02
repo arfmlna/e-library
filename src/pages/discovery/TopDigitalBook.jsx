@@ -2,7 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Trophy, BookOpen, Flame } from 'lucide-react';
 import { fetchTopDigitalBooks } from '@/utils/getTopsBook';
-import { pb } from '@/utils/pocketbase';
+import Poster from '@/components/book/Poster';
 
 export default function TopDigitalBooks() {
     const { data: topBooks = [], isLoading, error } = useQuery({
@@ -21,12 +21,6 @@ export default function TopDigitalBooks() {
     }
 
     if (error) return <div className="text-error text-center p-5 text-sm">Gagal memuat data buku populer.</div>;
-
-    // Fungsi pembantu untuk mendapatkan URL cover buku dari PocketBase
-    const getCoverUrl = (bookId, collectionId, filename) => {
-        if (!filename) return "https://placehold.co"; // placeholder jika tidak ada cover
-        return `${pb.baseURL}/api/files/${collectionId}/${bookId}/${filename}`;
-    };
 
     const getOrdinal = (n) => {
         const s = ["th", "st", "nd", "rd"];
@@ -84,11 +78,16 @@ export default function TopDigitalBooks() {
                                                 <div className="flex items-center gap-3">
                                                     <div className="avatar">
                                                         <div className="mask mask-squircle w-11 h-14 bg-base-300 shadow-sm">
-                                                            <img 
-                                                                src={getCoverUrl(book.id, book.collectionId, book.cover)} 
+                                                            <Poster
+                                                            data={book}
+                                                            width={50}
+                                                            height={50}
+                                                            />
+                                                            {/* <img 
+                                                                src={getCoverUrl(book.id, book.collectionId, book.poster)} 
                                                                 alt={book.title} 
                                                                 className="object-cover"
-                                                            />
+                                                            /> */}
                                                         </div>
                                                     </div>
                                                     <div>

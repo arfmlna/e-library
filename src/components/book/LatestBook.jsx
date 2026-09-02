@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Users, ChevronLeft, ChevronRight, FilePlusCorner } from 'lucide-react';
-import { pb } from '@/utils/pocketbase';
 import { fetchLatestDigitalBooks } from '@/utils/fetchRecommendedDigitalBooks';
 import PopupInformation from './PopupInformation';
 import Poster from './Poster';
@@ -63,11 +62,6 @@ export default function LatestBook() {
     }
 
     if (error) return <div className="text-error text-center text-sm p-4">Gagal memuat rekomendasi.</div>;
-
-    const getCoverUrl = (bookId, collectionId, filename) => {
-        if (!filename) return "https://placehold.co";
-        return `${pb.baseURL}/api/files/${collectionId}/${bookId}/${filename}`;
-    };
 
     return (
         <div className="w-full max-w-6xl mx-auto px-4 my-8">

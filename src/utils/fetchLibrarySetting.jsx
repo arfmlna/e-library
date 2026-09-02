@@ -1,6 +1,5 @@
 import { pb } from "./pocketbase";
 
-
 export const fetchLibrarySettings = async () => {
     try {
         const records = await pb.collection('settings').getFullList(1);
@@ -11,12 +10,11 @@ export const fetchLibrarySettings = async () => {
     }
 };
 
-// Update pengaturan berdasarkan ID record
 export const updateLibrarySettings = async ({ id, data }) => {
     try {
         return await pb.collection('settings').update(id, data);
     } catch (error) {
-        console.error("Gagal memperbarui pengaturan:", error);
+        console.error(error.originalError);
         throw error;
     }
 };
