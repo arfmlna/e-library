@@ -4,6 +4,8 @@ import { FaPeopleGroup } from 'react-icons/fa6'
 import { Book, FileText, UserRoundPlus, UserRoundX, X } from 'lucide-react'
 import Swal from 'sweetalert2'
 import BatchUploadBook from "./BatchUploadBook";
+import { validateFileSize } from '@/constants/validationFileSize'
+import { useOutletContext } from 'react-router-dom'
 
 const LayoutDashboard = lazy(() => import('@/components/ui/LayoutDashboard'))
 const DialogCreate = lazy(() => import('./DialogCreate'))
@@ -41,6 +43,8 @@ export default function TemplateControl({
         data: []
     })
 
+    const { settings } = useOutletContext()
+
     useEffect(() => {
         setPage(1)
     }, [searchTerm, setPage])
@@ -56,17 +60,39 @@ export default function TemplateControl({
         });
     };
 
-    const handlePreviewPoster = (file) => {
+    const handlePreviewPoster = (e) => {
+        const file = e.target.files[0]
         if (file) {
-            const previewURL = URL.createObjectURL(file)
-            setPoster(previewURL)
+            const validation = validateFileSize(file, settings?.max_upload_size)
+            if (validation.isValid) {
+                const previewURL = URL.createObjectURL(file)
+                setPoster(previewURL)
+            } else {
+                setPoster("")
+                Swal.fire({
+                    icon: 'error',
+                    text: validation.error
+                }) 
+                e.target.value = ''; 
+            }
         }
     }
 
-    const handlePreviewFile = (file) => {
+    const handlePreviewFile = (e) => {
+        const file = e.target.files[0]
         if (file) {
-            const previewURL = URL.createObjectURL(file)
-            setFile(previewURL)
+            const validation = validateFileSize(file, settings?.max_upload_size)
+            if (validation.isValid) {
+                const previewURL = URL.createObjectURL(file)
+                setFile(previewURL)
+            } else {
+                setFile("")
+                Swal.fire({
+                    icon: 'error',
+                    text: validation.error
+                }) 
+                e.target.value = ''; 
+            }
         }
     }
 
@@ -161,11 +187,11 @@ export default function TemplateControl({
             handleCheckboxChange={handleCheckboxChange} 
             openToggle={openToggle} 
             setOpenToggle={handleToggleClose} 
-            handlePreviewPoster={(e) => handlePreviewPoster(e.target.files[0])} 
             poster={poster} 
             setPoster={setPoster}
-            handlePreviewFile={(e) => handlePreviewFile(e.target.files[0])} 
             file={file} 
+            handlePreviewPoster={handlePreviewPoster} 
+            handlePreviewFile={handlePreviewFile} 
             setFile={setFile}
             />
 
@@ -178,11 +204,11 @@ export default function TemplateControl({
             handleCheckboxChange={handleCheckboxChange} 
             openToggle={openDialogUpdate} 
             setOpenToggle={() => setOpenDialogUpdate(() => ({ status:false, data: [] }))} 
-            handlePreviewPoster={(e) => handlePreviewPoster(e.target.files[0])} 
             poster={poster} 
             setPoster={setPoster}
-            handlePreviewFile={(e) => handlePreviewFile(e.target.files[0])} 
             file={file} 
+            handlePreviewPoster={handlePreviewPoster} 
+            handlePreviewFile={handlePreviewFile} 
             setOpenDialogUpdate={setOpenDialogUpdate}
             setOpenDetail={setOpenDetail}
             />

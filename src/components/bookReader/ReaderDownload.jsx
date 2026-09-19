@@ -11,6 +11,9 @@ import { getOfflineBookById } from '@/constants/globals'
 const ToolsReader = lazy(() => import('./ToolsReader'))
 const BookReader = lazy(() => import('./BookReader'))
 const LayoutReader = lazy(() => import('./LayoutReader'))
+const Loading = lazy(() => import('@/components/ui/Loading'))
+const Error = lazy(() => import('@/components/ui/Error'))
+const NotFound = lazy(() => import('@/components/ui/NotFound'))
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -39,15 +42,19 @@ export default function ReaderDownload() {
 
     const { id } = useParams()
 
-    const { data: getBook } = useQuery({
-            queryKey: ['offlineBook', id, userId],
-            queryFn: async () => {
-                const res = await getOfflineBookById(id, userId)
-                return {
-                    ...res,
-                    pdfUrl: res?.pdfUrl
-                }
-            },
+    const { data: getBook, isLoading, refetch, error } = useQuery({
+        queryKey: ['offlineBook', id, userId],
+        queryFn: async () => {
+            const res = await getOfflineBookById(id, userId)
+            return {
+                ...res,
+                pdfUrl: res?.pdfUrl
+            }
+        },
+        staleTime: Infinity,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
     })
 
     useEffect(() => {
@@ -198,52 +205,70 @@ export default function ReaderDownload() {
     }, [])
 
     return (
-        <LayoutReader
-        currentPage={currentPage}
-        numPages={numPages}
-        showTools={showTools}
-        setShowTools={setShowTools}>
-            { showTools && (
-                <ToolsReader
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                numPages={numPages}
-                pageRefs={pageRefs}
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                zoom={zoom}
-                setZoom={setZoom}
-                isReady={isReady}
-                scrollContainerRef={scrollContainerRef}
-                pageTexts={pageTexts}
-                isNavigatingRef={isNavigatingRef}
-                setVisibleRange={setVisibleRange}
-                />
-            ) }
-            <ErrorBoundary>
-                <Suspense fallback={
-                    <div className="h-screen w-full flex flex-col justify-center items-center bg-zinc-950">
-                        <p className="text-center font-bold text-2xl text-zinc-400 animate-pulse">Memuat Pembaca...</p>
+        <>
+        { isLoading ? (
+                <div className="max-w-2xl mx-auto flex items-center h-screen">
+                    <Loading />
+                </div>
+            ) : error ? (
+                <div className="max-w-2xl mx-auto flex items-center h-screen">
+                    <Error refetch={refetch} variant='card' />
+                </div>
+            ) : 
+                !getBook ? (
+                    <div className="max-w-2xl mx-auto flex items-center h-screen">
+                        <NotFound />
                     </div>
-                }>
-                    <BookReader
-                    getBook={getBook}
+                ) : (
+                    <LayoutReader
+                    currentPage={currentPage}
                     numPages={numPages}
-                    pageRefs={pageRefs}
-                    pageWidth={pageWidth}
-                    searchQuery={searchQuery}
-                    setIsReady={setIsReady}
-                    setNumPages={setNumPages}
-                    zoom={zoom * bookSizeDefault}
-                    scrollContainerRef={scrollContainerRef}
-                    onPageChange={handlePageChange}
-                    isReady={isReady}
-                    isNavigatingRef={isNavigatingRef}
-                    visibleRange={visibleRange}
-                    setVisibleRange={setVisibleRange}
-                    />
-                </Suspense>
-            </ErrorBoundary>
-        </LayoutReader>
+                    showTools={showTools}
+                    setShowTools={setShowTools}>
+                        { showTools && (
+                            <ToolsReader
+                            currentPage={currentPage}
+                            setCurrentPage={setCurrentPage}
+                            numPages={numPages}
+                            pageRefs={pageRefs}
+                            searchQuery={searchQuery}
+                            setSearchQuery={setSearchQuery}
+                            zoom={zoom}
+                            setZoom={setZoom}
+                            isReady={isReady}
+                            scrollContainerRef={scrollContainerRef}
+                            pageTexts={pageTexts}
+                            isNavigatingRef={isNavigatingRef}
+                            setVisibleRange={setVisibleRange}
+                            />
+                        ) }
+                        <ErrorBoundary>
+                            <Suspense fallback={
+                                <div className="h-screen w-full flex flex-col justify-center items-center bg-zinc-950">
+                                    <p className="text-center font-bold text-2xl text-zinc-400 animate-pulse">Memuat Pembaca...</p>
+                                </div>
+                            }>
+                                <BookReader
+                                getBook={getBook}
+                                numPages={numPages}
+                                pageRefs={pageRefs}
+                                pageWidth={pageWidth}
+                                searchQuery={searchQuery}
+                                setIsReady={setIsReady}
+                                setNumPages={setNumPages}
+                                zoom={zoom * bookSizeDefault}
+                                scrollContainerRef={scrollContainerRef}
+                                onPageChange={handlePageChange}
+                                isReady={isReady}
+                                isNavigatingRef={isNavigatingRef}
+                                visibleRange={visibleRange}
+                                setVisibleRange={setVisibleRange}
+                                />
+                            </Suspense>
+                        </ErrorBoundary>
+                    </LayoutReader>
+                )
+        }
+        </>
     )
 }

@@ -101,8 +101,8 @@ export default function AdmSettings() {
             <div role="tablist" className="tabs tabs-boxed mb-6 bg-base-200">
                 <button type="button" onClick={() => setActiveTab('umum')} className={`tab ${activeTab === 'umum' ? 'tab-active' : ''}`}>Umum & Profil</button>
                 <button type="button" onClick={() => setActiveTab('sirkulasi')} className={`tab ${activeTab === 'sirkulasi' ? 'tab-active' : ''}`}>Aturan Sirkulasi</button>
-                <button type="button" onClick={() => setActiveTab('hak_akses')} className={`tab ${activeTab === 'hak_akses' ? 'tab-active' : ''}`}>Hak Akses & Pengguna</button>
-                <button type="button" onClick={() => setActiveTab('sistem')} className={`tab ${activeTab === 'sistem' ? 'tab-active' : ''}`}>Sistem</button>
+                {/* <button type="button" onClick={() => setActiveTab('hak_akses')} className={`tab ${activeTab === 'hak_akses' ? 'tab-active' : ''}`}>Hak Akses & Pengguna</button>
+                <button type="button" onClick={() => setActiveTab('sistem')} className={`tab ${activeTab === 'sistem' ? 'tab-active' : ''}`}>Sistem</button> */}
             </div>
 
             <form onSubmit={handleSave}>
@@ -127,12 +127,12 @@ export default function AdmSettings() {
                 {activeTab === 'hak_akses' && (
                     <AccessSettings formData={formData} onChange={handleInputChange} />
                 )}
-                {activeTab === 'sistem' && (
+                {/* {activeTab === 'sistem' && (
                     <div className="grid grid-cols-2 gap-6">
                         <CloudStorageInfo value={formData.max_upload_size} onChange={handleInputChange} />
                         <SystemBackupSetting autoBackup={formData.auto_backup} backupSchedule={formData.backup_schedule} onChange={handleInputChange} />
                     </div>
-                )}
+                )} */}
                 
                 {/* Tombol Aksi Simpan Global */}
                 {(activeTab !== 'umum') && (

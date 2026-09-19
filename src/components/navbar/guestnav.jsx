@@ -1,5 +1,6 @@
 import { useLocation } from 'react-router-dom'
 import { HashLink as NavLink } from 'react-router-hash-link'
+const icon = '/icon/apple-touch-icon.png'
 
 export default function GuestNav({ navlink }) {
     const location = useLocation()
@@ -11,7 +12,10 @@ export default function GuestNav({ navlink }) {
         <div className="relative">
             <nav className="fixed top-0 left-0 right-0 w-full z-10 backdrop-blur-md bg-white/80 dark:bg-gray-900/80 border-b border-slate-200 dark:border-gray-800 px-6 py-4 flex justify-between items-center max-w-7xl mx-auto rounded-b-xl shadow-sm">
                 <div className="flex items-center gap-2">
-                <span className="text-xl font-extrabold tracking-tight">📚 RuangBaca</span>
+                <span className="text-xl font-black tracking-tight flex items-center gap-3">
+                    <img src={icon} alt="icon" className='w-12' />
+                    Elib-Four
+                </span>
                 </div>
                 <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600 dark:text-gray-300">
                 { navlink.map((items, i) => (

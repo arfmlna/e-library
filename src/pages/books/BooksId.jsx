@@ -4,6 +4,9 @@ import { pb } from '../../utils/pocketbase'
 import { useQuery } from '@tanstack/react-query';
 
 const BookFlip = lazy(() => import('../../components/bookFlip/BookFlip')) 
+const Loading = lazy(() => import('@/components/ui/Loading'))
+const Error = lazy(() => import('@/components/ui/Error'))
+const NotFound = lazy(() => import('@/components/ui/NotFound'))
 
 export default function BooksId() {
     const { bookId } = useParams()
@@ -33,7 +36,7 @@ export default function BooksId() {
         renderOnlyPageLengthChange: true
     }
 
-    const { data: getBook } = useQuery({
+    const { data: getBook, isLoading, error, refetch: refreshData } = useQuery({
         queryKey: ['book', bookId],
         queryFn: async () => {
             const data = pb.collection('books').getOne(`${bookId}`)
@@ -44,7 +47,9 @@ export default function BooksId() {
             }
         },
         staleTime: Infinity,
-        refetchOnWindowFocus: false, 
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
     });
 
     const book = bookState ? bookState : getBook?.pdfUrl
@@ -57,7 +62,22 @@ export default function BooksId() {
                 </div>
             }>
                 <div className="min-h-screen">
-                    <BookFlip path={book} options={config} />
+                    { isLoading ? (
+                        <div className="max-w-2xl mx-auto flex items-center h-screen">
+                            <Loading />
+                        </div>
+                    ) : error ? (
+                    <div className="max-w-2xl mx-auto flex items-center h-screen">
+                        <Error refetch={refreshData} variant='card' />
+                    </div>
+                ) : 
+                    !book ? (
+                        <div className="max-w-2xl mx-auto flex items-center h-screen">
+                            <NotFound />
+                        </div>
+                    ) : (
+                        <BookFlip path={book} options={config} />
+                    ) }
                 </div>
             </Suspense>
         </div>

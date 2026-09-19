@@ -12,7 +12,7 @@ export default function NonAcademicBooks() {
 
     const [searchTerm] = useDebounce(searchItem, 500)
     
-    const { data: books, refetch: refreshData } = useQuery({
+    const { data: books, refetch: refreshData, isLoading, error } = useQuery({
         queryKey: ['books', searchTerm, page, category],
         queryFn: async () => {
             const conditions = [`bookType = "nonAcademic"`];
@@ -52,6 +52,8 @@ export default function NonAcademicBooks() {
             setSearchItem={setSearchItem} 
             page={page} setPage={setPage} 
             setCategory={setCategory} 
+            isLoading={isLoading}
+            error={error}
             />
         </>
     )

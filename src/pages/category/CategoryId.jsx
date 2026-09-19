@@ -23,7 +23,7 @@ export default function CategoryId() {
     }
 
 
-    const { data: category, refetch: refreshData } = useQuery({
+    const { data: category, refetch: refreshData, isLoading, error } = useQuery({
         queryKey: ['category', categoryName, searchTerm, page],
         queryFn: () => pb.collection('books').getList(page, 10, {
             filter: filterConditions.length > 0 ? filterConditions.join(" && ") : "",
@@ -43,6 +43,8 @@ export default function CategoryId() {
             setSearchItem={setSearchItem} 
             page={page} 
             setPage={setPage} 
+            isLoading={isLoading}
+            error={error}
             />
         </div>
     )

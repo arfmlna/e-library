@@ -1,6 +1,7 @@
-import LatestBook from '@/components/book/LatestBook'
-import BookRecommendations from '@/components/book/RecomendationBook'
-import React from 'react'
+import React, { lazy } from 'react'
+
+const LatestBook = lazy(() => import('@/components/book/LatestBook'))
+const BookRecommendations = lazy(() => import('@/components/book/RecomendationBook'))
 
 export default function Discovery() {
   return (

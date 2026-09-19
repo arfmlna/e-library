@@ -4,6 +4,7 @@ import { NavLink } from 'react-router-dom';
 import anonim from '/anonim.jpg'
 import { LogOut } from 'lucide-react';
 import { pb } from '@/utils/pocketbase';
+const icon = '/icon/apple-touch-icon.png'
 
 export default function UserNav({
     isOnline,
@@ -28,8 +29,9 @@ export default function UserNav({
                     onMouseLeave={() => setHoverNav(false)}>
                     <div className="max-w-7xl mx-auto flex flex-row items-center justify-between">
                         <div className="flex-none">
-                            <span className="text-xl font-black tracking-tight">
-                                📚 RuangBaca
+                            <span className="text-xl font-black tracking-tight flex items-center gap-3">
+                                <img src={icon} alt="icon" className='w-12' />
+                                Elib-Four
                             </span>
                         </div>
                         <div className="flex flex-row items-center gap-2">

@@ -1,9 +1,13 @@
 import { pb } from '@/utils/pocketbase'
 import { useQuery } from '@tanstack/react-query'
-import React, { useMemo } from 'react'
+import React, { lazy, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import Layout from '@/components/ui/layout'
-import PdfToPoster from '@/components/poster/PdftoPoster'
+
+const Layout = lazy(() => import('@/components/ui/layout'))
+const PdfToPoster = lazy(() => import('@/components/poster/PdftoPoster'))
+const Loading = lazy(() => import('@/components/ui/Loading'))
+const Error = lazy(() => import('@/components/ui/Error'))
+const NotFound = lazy(() => import('@/components/ui/NotFound'))
 
 const CategoryItem = ({ data }) => {
     const posterUrl = useMemo(() => {
@@ -12,19 +16,21 @@ const CategoryItem = ({ data }) => {
             collectionId: data.latest_book_collection_id,
             collectionName: 'books',
         };
-        return data?.latest_poster ? pb.files.getURL(mockBookRecord, data?.latest_poster) : null;
+        return data?.latest_poster ? pb.files.getURL(mockBookRecord, data?.latest_poster) : data?.latest_pdf_file ? pb.files.getURL(mockBookRecord, data?.latest_pdf_file) : null;
     }, [data]);
+
+    console.log(posterUrl)
 
     return (
         <Link to={'/category/'+data?.name} key={data.id}>
             <div className="group rounded-md relative overflow-hidden aspect-video bg-gray-100 shadow-md shadow-blue-600">
-                { data?.latest_poster ? (
+                { data?.latest_poster && posterUrl ? (
                     <img
                         className="w-full h-full object-cover transition-transform duration-300 grayscale group-hover:scale-105 group-hover:grayscale-0"
                         src={posterUrl}
                         alt={data?.name} 
                     />
-                ) : data?.latest_pdf_file ? (
+                ) : data?.latest_pdf_file && posterUrl ? (
                     <div className="w-full h-full object-cover transition-transform duration-300 grayscale group-hover:scale-105 group-hover:grayscale-0">
                         <div className="w-full h-full overflow-hidden">
                             <PdfToPoster pdfFile={posterUrl} height={400}/>
@@ -78,7 +84,7 @@ const CategoryItem = ({ data }) => {
 };
 
 export default function Categories() {
-    const { data: category } = useQuery({
+    const { data: category, isLoading, refetch, error } = useQuery({
         queryKey: ['category'],
         queryFn: async () => {
             const res = pb.collection('categories').getList(1, 15, {
@@ -93,14 +99,24 @@ export default function Categories() {
         title={"Categories"} 
         subtitle={"cari buku berdasarkan kategori"}
         searchItem={false} >
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-20">
-            {category?.items?.map((data) => {
-                
-                return (
-                    <CategoryItem data={data} key={data?.id} />
-                );
-            })}
-            </div>
+            { isLoading ? <Loading variant='card' count={4} /> : error ? <Error refetch={refetch} variant='card' /> : 
+                category.length === 0 ? (
+                    <div className="text-center py-8 text-sm opacity-60">Category buku tidak tersedia!.</div>
+                ) : 
+                    category.totalItems === 0 ? (
+                        <NotFound
+                        title='Data Tidak Tersedia'
+                        />
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-20">
+                        {category?.items?.map((data) => {
+                            return (
+                                <CategoryItem data={data} key={data?.id} />
+                            );
+                        })}
+                        </div>
+                    )
+            }
         </Layout>
     )
 }

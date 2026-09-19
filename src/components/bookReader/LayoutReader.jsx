@@ -20,7 +20,7 @@ export default function LayoutReader({
             <div className="fixed top-3 left-3 z-10">
                 <button 
                     className="p-2.5 bg-black/70 backdrop-blur-sm text-zinc-400 text-xs shadow-lg rounded-md border-none transition-all"
-                    onClick={() => navigate('/books')}
+                    onClick={() => navigate(-1)}
                 >
                     <ArrowBigLeftDash size={20} />
                 </button>

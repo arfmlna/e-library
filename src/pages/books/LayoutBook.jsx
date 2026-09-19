@@ -10,6 +10,8 @@ const ListBook = lazy(() => import('@/components/ui/CardBook/ListBook'))
 const PaginationBook = lazy(() => import('@/components/ui/CardBook/PaginationBook'))
 const NotFoundBooks = lazy(() => import('@/components/ui/CardBook/NotFoundBooks'))
 const Layout = lazy(() => import('@/components/ui/layout'))
+const Loading = lazy(() => import('@/components/ui/Loading'))
+const Error = lazy(() => import('@/components/ui/Error'))
 
 export default function LayoutBook({
     title, 
@@ -22,7 +24,9 @@ export default function LayoutBook({
     setPage, 
     setCategory, 
     selectedType, 
-    setSelectedType
+    setSelectedType,
+    isLoading,
+    error
 }) {
     const [hoverId, setHoverId] = useState(null)
     const [viewMode, setViewMode] = useState("grid")
@@ -66,70 +70,71 @@ export default function LayoutBook({
         books={books}
         handleBookType={handleBookType}
         >
-            
-            {books?.items?.length === 0 ? (
-                <NotFoundBooks searchItem={searchItem} />
-            ) : (
-                <div className=''>
-                    { viewMode === 'grid' ? (
-                        <div className="w-full grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5 justify-center">
-                        { books?.items?.map((data) => (
-                            <GridBook
-                            key={data?.id}
-                            data={data}
-                            setClickId={setClickId}
-                            hoverId={hoverId}
-                            setHoverId={setHoverId}
-                            popupInformation={
-                                <PopupInformation
+            { isLoading ? <Loading variant='card' count={5} /> : error ? <Error refetch={refreshData} variant='full' /> : 
+                books?.items?.length === 0 ? (
+                    <NotFoundBooks searchItem={searchItem} />
+                ) : (
+                    <div className=''>
+                        { viewMode === 'grid' ? (
+                            <div className="w-full grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5 justify-center">
+                            { books?.items?.map((data) => (
+                                <GridBook
+                                key={data?.id}
                                 data={data}
-                                clickId={clickId}
                                 setClickId={setClickId}
+                                hoverId={hoverId}
+                                setHoverId={setHoverId}
+                                popupInformation={
+                                    <PopupInformation
+                                    data={data}
+                                    clickId={clickId}
+                                    setClickId={setClickId}
+                                    />
+                                }
+                                poster={
+                                    <Poster
+                                    data={data}
+                                    height={240}
+                                    width={240}
+                                    />
+                                }
                                 />
-                            }
-                            poster={
-                                <Poster
+                            ))}
+                            </div>
+                        ) : (
+                            <div className="flex flex-col gap-3">
+                            {books?.items?.map((data) => (
+                                <ListBook
+                                key={data?.id}
                                 data={data}
-                                height={240}
-                                width={324}
-                                />
-                            }
-                            />
-                        ))}
-                        </div>
-                    ) : (
-                        <div className="flex flex-col gap-3">
-                        {books?.items?.map((data) => (
-                            <ListBook
-                            key={data?.id}
-                            data={data}
-                            setClickId={setClickId}
-                            popupInformation={
-                                <PopupInformation
-                                data={data}
-                                clickId={clickId}
                                 setClickId={setClickId}
+                                popupInformation={
+                                    <PopupInformation
+                                    data={data}
+                                    clickId={clickId}
+                                    setClickId={setClickId}
+                                    />
+                                }
+                                poster={
+                                    <Poster
+                                    data={data}
+                                    height={100}
+                                    />
+                                }
                                 />
-                            }
-                            poster={
-                                <Poster
-                                data={data}
-                                height={100}
-                                />
-                            }
+                            ))}
+                            </div>
+                        ) }
+                        { page !== false && (
+                            <PaginationBook 
+                            books={books} 
+                            setPage={setPage} 
+                            refreshData={refreshData} 
                             />
-                        ))}
-                        </div>
-                    ) }
-                    { page !== false && (
-                        <PaginationBook 
-                        books={books} 
-                        setPage={setPage} 
-                        refreshData={refreshData} 
-                        />
-                    ) }
-                </div>
-            )}
+                        ) }
+                    </div>
+                )
+            }
         </Layout>
     )
 }

@@ -213,7 +213,7 @@ export default function MusicPlayer({
                     title: playlist[currentIndex].name,
                     artist: "Lokal Musik Player",
                     album: "Daftar Putar Lokal",
-                    artwork: [{ src: "/sketch.png", sizes: "192x192", type: "image/png" }]
+                    artwork: [{ src: "/icon/android-chrome-192x192.png", sizes: "192x192", type: "image/png" }]
                 });
 
                 navigator.mediaSession.setActionHandler('play', () => togglePlay());

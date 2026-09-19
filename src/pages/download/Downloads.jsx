@@ -13,7 +13,7 @@ const Downloads = () => {
   const [searchTerm] = useDebounce(searchItem, 500)
   const myId = pb?.authStore?.record?.id
 
-  const { data: books, refetch: refreshData } = useQuery({
+  const { data: books, refetch: refreshData, isLoading, error } = useQuery({
     queryKey: ['books', searchTerm, page],
     queryFn: () => getOfflineBooksList(page, 10, searchTerm, myId),
     enabled: !!myId,
@@ -33,6 +33,8 @@ const Downloads = () => {
     setSearchItem={setSearchItem} 
     page={page} 
     setPage={setPage} 
+    isLoading={isLoading}
+    error={error}
     />
   );
 };

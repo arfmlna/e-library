@@ -12,7 +12,7 @@ export default function Books() {
 
     const [searchTerm] = useDebounce(searchItem, 500)
     
-    const { data: books, refetch: refreshData } = useQuery({
+    const { data: books, refetch: refreshData, isLoading, error } = useQuery({
         queryKey: ['books', searchTerm, page, category],
         queryFn: async () => {
             const conditions = [`bookType = "digital"`];
@@ -52,7 +52,10 @@ export default function Books() {
             setSearchItem={setSearchItem} 
             page={page} 
             setPage={setPage} 
-            setCategory={setCategory} />
+            setCategory={setCategory}
+            isLoading={isLoading}
+            error={error}
+            />
         </>
     )
 }

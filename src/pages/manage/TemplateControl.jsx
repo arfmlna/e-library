@@ -49,7 +49,8 @@ export default function TemplateControl({
         setPage(1)
     }, [searchTerm, setPage])
 
-    const handlePreviewAvatar = (file) => {
+    const handlePreviewAvatar = (e) => {
+        const file = e.target.files[0]
         if (file) {
             const validation = validateFileSize(file, settings?.max_upload_size); 
             if (validation.isValid) {
@@ -60,7 +61,8 @@ export default function TemplateControl({
                 Swal.fire({
                     icon: 'error',
                     text: validation.error
-                })
+                }) 
+                e.target.value = ''; 
             }
         }
     }
@@ -148,7 +150,7 @@ export default function TemplateControl({
             role={role} 
             refreshData={refreshData}
             setOpenToggle={handleToggleClose} 
-            handlePreviewAvatar={(e) => handlePreviewAvatar(e.target.files[0])} 
+            handlePreviewAvatar={handlePreviewAvatar} 
             avatar={avatar} 
             />
 
@@ -160,7 +162,7 @@ export default function TemplateControl({
             openToggle={openDialogUpdate} 
             setOpenToggle={setOpenDialogUpdate} 
             setOpenDetail={setOpenDetail}
-            handlePreviewAvatar={(e) => handlePreviewAvatar(e.target.files[0])} 
+            handlePreviewAvatar={handlePreviewAvatar} 
             avatar={avatar} 
             setAvatar={setAvatar}
             />
@@ -232,8 +234,8 @@ export default function TemplateControl({
                         </thead>
                         <tbody>
                             { fullData?.items?.map((data) => {
-                            const avatarUrl = pb.files.getURL(data, data.avatar)
-                            const verifData = data.expand.verification_via_users
+                            const avatarUrl = pb.files.getURL(data, data?.avatar)
+                            const verifData = data?.expand?.verification_via_users
                             return (
                                 <tr key={data.id}>
                                     { role === 'edmin' && (

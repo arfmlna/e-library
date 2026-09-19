@@ -165,7 +165,6 @@ export default function DialogUpdate({
         }
 
         // 4. SANITASI PAYLOAD UNTUK POCKETBASE
-        delete data.bookType;
         // 5. PROSES UPDATE KE SERVER
         Swal.fire({
             title: 'Mohon Tunggu',

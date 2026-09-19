@@ -38,13 +38,11 @@ export default function DialogCreate({
         const allInputData = new FormData(e.target);
         const data = Object.fromEntries(allInputData.entries());
 
-        // 1. Ambil ID Supplier langsung dari form
         const supplierId = allInputData.get('supplier');
         if (!supplierId || supplierId === "choose supplier" || supplierId === "") {
             return Swal.fire('Error', 'Silakan pilih supplier!', 'error');
         }
 
-        // Cari kode supplier dari state 'suppliers' lokal berdasarkan ID-nya
         const targetSupplier = supplier?.find(sup => sup.id === supplierId);
         const supplierKode = targetSupplier?.kode || "";
 
@@ -52,36 +50,28 @@ export default function DialogCreate({
         data.publishDate = new Date();
         data.uploader = pb?.authStore?.record?.id;
 
-        // 2. Logika Pemrosesan Kategori & Generate Kode Buku
         if (data?.bookType === 'digital') {
             if (selectedCategories.length === 0) {
                 return Swal.fire('Error', 'Pilih minimal satu kategori untuk buku digital!', 'error');
             }
             
-            // Ambil kode dari kategori utama (pilihan pertama)
             const kategoriUtamaKode = selectedCategories[0].kode;
             
             data.kode_buku = await generateKodeBuku(kategoriUtamaKode, supplierKode);
             data.category = selectedCategories.map(item => item.id);
         } else {
-            // Logika untuk Buku Fisik
             const categoryId = allInputData.get('category');
             if (!categoryId || categoryId === "choose category" || categoryId === "") {
                 return Swal.fire('Error', 'Silakan pilih kategori buku fisik!', 'error');
             }
 
-            // Cari kode kategori dari state 'categories' lokal berdasarkan ID-nya
             const targetCategory = categories?.find(cat => cat.id === categoryId);
             const categoryKode = targetCategory?.kode || "";
 
             data.kode_buku = await generateKodeBuku(categoryKode, supplierKode);
-            data.category = [categoryId]; // Tetap dikirim sebagai array tunggal
+            data.category = [categoryId];
         }
-        
-        // 3. Sanitasi Data (Hapus field UI agar tidak ditolak PocketBase)
-        delete data.bookType;
 
-        // 4. Proses Eksekusi Simpan Data ke Server
         Swal.fire({
             title: 'Mohon Tunggu',
             text: 'Sedang menyimpan data...',

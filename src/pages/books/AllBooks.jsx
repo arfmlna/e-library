@@ -13,7 +13,7 @@ export default function AllBooks() {
 
     const [searchTerm] = useDebounce(searchItem, 500)
     
-    const { data: books, refetch: refreshData } = useQuery({
+    const { data: books, refetch: refreshData, isLoading, error } = useQuery({
         queryKey: ['books', searchTerm, page, category, selectedType],
         queryFn: async () => {
             const conditions = selectedType !== "all" ? [`bookType = "${selectedType}"`] : selectedType === "all" && [];
@@ -56,6 +56,8 @@ export default function AllBooks() {
             setCategory={setCategory} 
             selectedType={selectedType}
             setSelectedType={setSelectedType}
+            isLoading={isLoading}
+            error={error}
             />
         </>
     )

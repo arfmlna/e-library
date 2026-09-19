@@ -47,9 +47,9 @@ export default function LandingPage() {
       {/* 3. STATISTIK SECTION */}
       <section id="about" className="h-full md:h-screen flex items-center bg-slate-100 dark:bg-gray-800/50 py-16 border-y border-slate-200 dark:border-gray-800">
         <div className="max-w-4xl mx-auto px-6 text-center space-y-4">
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Tentang RuangBaca</h2>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Tentang Elib-Four</h2>
           <p className="text-sm md:text-base text-slate-600 dark:text-gray-300 leading-relaxed max-w-2xl mx-auto">
-            RuangBaca adalah ruang pustaka digital yang dirancang untuk mendukung ekosistem literasi. Kami mengintegrasikan teknologi pencarian pintar guna mempermudah pengelolaan data katalog pustaka serta memperluas akses informasi bagi seluruh civitas dan pengguna.
+            Elib-Four adalah ruang pustaka digital yang dirancang untuk mendukung ekosistem literasi. Kami mengintegrasikan teknologi pencarian pintar guna mempermudah pengelolaan data katalog pustaka serta memperluas akses informasi bagi seluruh civitas dan pengguna.
           </p>
           <div className="pt-4 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-xl mx-auto text-xs font-semibold text-slate-500 dark:text-gray-400">
             <div className="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-slate-200/60 dark:border-gray-700/60">
@@ -112,7 +112,7 @@ export default function LandingPage() {
               Gunakan Layanan
             </NavLink>
           </button>
-          <p className="text-xs text-slate-400 dark:text-gray-500 pt-8">&copy; {new Date().getFullYear()} RuangBaca E-Library. All rights reserved.</p>
+          <p className="text-xs text-slate-400 dark:text-gray-500 pt-8">&copy; {new Date().getFullYear()} Elib-Four E-Library. All rights reserved.</p>
         </div>
       </footer>
 

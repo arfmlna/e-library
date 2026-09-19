@@ -63,8 +63,9 @@ export default defineConfig({
       injectRegister: 'auto',
 
       pwaAssets: {
-        disabled: false,
+        disabled: true,
         config: true,
+        image: '/icon/favicon.ico'
       },
 
       manifest: {
@@ -78,12 +79,12 @@ export default defineConfig({
         scope: '/',
         background_color: '#ffffff',
         icons: [
-          { src: '/sketch192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/sketch512.png', sizes: '512x512', type: 'image/png' }
+          { src: '/icon/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icon/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' }
         ],
         screenshots: [
-          { src: '/sketchMobile.png', sizes: '540x720', type: 'image/png', form_factor: 'narrow' },
-          { src: '/sketchDesktop.png', sizes: '1280x800', type: 'image/png', form_factor: 'wide' }
+          { src: '/icon/android-chrome-192x192.png', sizes: '540x720', type: 'image/png', form_factor: 'narrow' },
+          { src: '/icon/android-chrome-512x512.png', sizes: '1280x800', type: 'image/png', form_factor: 'wide' }
         ]
       },
 

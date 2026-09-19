@@ -1,7 +1,9 @@
+import { validateFileSize } from '@/constants/validationFileSize';
 import { pb } from '@/utils/pocketbase';
 import React, { useState, useEffect } from 'react';
 import ReactQuill from 'react-quill-new'; // 👈 Pustaka Editor
 import 'react-quill-new/dist/quill.snow.css'; // Gaya Editor
+import { useOutletContext } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 export default function ArticleModal({ articleItem, onSuccess, onClose }) {
@@ -12,6 +14,8 @@ export default function ArticleModal({ articleItem, onSuccess, onClose }) {
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState('');
     const [loading, setLoading] = useState(false);
+
+    const { settings } = useOutletContext()
 
     useEffect(() => {
         if (articleItem) {
@@ -55,9 +59,24 @@ export default function ArticleModal({ articleItem, onSuccess, onClose }) {
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
-        if (file) {
+        const validation = validateFileSize(file, settings?.max_upload_size); 
+        if (file && validation.isValid) {
             setImageFile(file);
             setImagePreview(URL.createObjectURL(file)); // Preview lokal sementara
+        } else {
+            setImageFile(null);
+            setImagePreview(null);
+            const modalContainer = e.target.closest('.modal') || document.body;
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal Mengunggah',
+                text: validation.error || 'Ukuran file terlalu besar.',
+                target: modalContainer, // Menghindari penumpukan container internal
+                didOpen: () => {
+                    Swal.getContainer().style.zIndex = '999999'; // Memaksa tampil di paling depan
+                }
+            });
+            e.target.value = ''; 
         }
     };
 

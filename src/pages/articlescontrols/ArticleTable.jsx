@@ -38,8 +38,16 @@ export default function ArticleTable({ data, loading, onEdit, onDelete }) {
                         <td className="px-6 py-4 capitalize"><span className="badge badge-ghost font-semibold">{article.category}</span></td>
                         <td className="px-6 py-4 opacity-80">{article.author}</td>
                         <td className="px-6 py-4 text-center space-x-2 whitespace-nowrap">
-                            <button onClick={() => onEdit(article)} className="btn btn-warning btn-xs text-white">Edit</button>
-                            <button onClick={() => onDelete(article.id)} className="btn btn-error btn-xs text-white">Hapus</button>
+                            <button onClick={(e) => {
+                                e.stopPropagation()
+                                onEdit(article)
+                            }} 
+                            className="btn btn-warning btn-xs text-white">Edit</button>
+                            <button onClick={(e) => {
+                                e.stopPropagation()
+                                onDelete(article.id)
+                            }} 
+                            className="btn btn-error btn-xs text-white">Hapus</button>
                         </td>
                     </tr>
                 );

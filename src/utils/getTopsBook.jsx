@@ -47,7 +47,8 @@ export const fetchTopBorrowedBooks = async (limit = 5) => {
                     id: book.id,
                     collectionId: book.collectionId,
                     title: book.title,
-                    cover: book.poster, // Ditambahkan agar bisa merender gambar seperti e-book
+                    poster: book.poster,
+                    pdfFile: book.pdfFile,
                     type: book.bookType === 'academic' ? 'Akademik' : 'Non-Akademik',
                     readersCount: 0 // Diubah dari borrowCount menjadi readersCount agar propertinya sama dengan top book digital
                 };
