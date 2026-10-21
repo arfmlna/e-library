@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react'
+import React, { Suspense, useEffect } from 'react'
 import DarkMode from '../switch/DarkMode';
 import { NavLink } from 'react-router-dom';
 import anonim from '/anonim.jpg'
@@ -16,15 +16,21 @@ export default function UserNav({
 }) {
     const info = pb.authStore.record
     const avatar = pb.files.getURL(info, info.avatar)
-    const navCondition = (data) => data?.name === 'Profile' || data?.name === 'Auth Logs Activity' || data?.name === 'Downloads' || data?.name === 'Settings' || data?.name === 'Request & History Borrow Book'
+    const navCondition = (data) => data?.name === 'Profile' || data?.name === 'Auth Logs Activity' || data?.name === 'Offline Mode' || data?.name === 'Settings' || data?.name === 'Request & History Borrow Book'
     const toggleSubMenu = () => {
         setHoverNav(true);
     };
+    useEffect(() => {
+        const timer = setTimeout(() => setHoverNav(false), 60000);
+        return () => clearTimeout(timer);
+    }, []);
     return (
+        // ${hoverNav ? 'translate-y-0 opacity-100' : '-translate-y-24 opacity-0'}
         <>
             <div className="hidden md:block select-none">
                 <nav className={`backdrop-blur-xl bg-white/80 dark:bg-gray-800 border-b border-slate-200/50 dark:border-slate-800/50 px-8 py-4 fixed top-0 w-full shadow-sm z-50 transition-all duration-300 ease-in-out
-                    ${hoverNav ? 'translate-y-0 opacity-100' : '-translate-y-24 opacity-0'}`}
+                    ${hoverNav ? 'translate-y-0 opacity-100' : 'translate-y-0 opacity-100'}
+                    `}
                     onMouseEnter={() => setHoverNav(true)}
                     onMouseLeave={() => setHoverNav(false)}>
                     <div className="max-w-7xl mx-auto flex flex-row items-center justify-between">
@@ -136,6 +142,10 @@ export default function UserNav({
                     onMouseLeave={() => setHoverNav(false)}
                 >
                 </div>
+                <div
+                    className="fixed top-0 left-0 right-0 h-4 z-40"
+                    onMouseEnter={() => setHoverNav(true)}
+                />
             </div>
         </>
     )

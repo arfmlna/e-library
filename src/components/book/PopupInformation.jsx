@@ -80,7 +80,7 @@ const PopupInformation = ({ data, clickId, setClickId }) => {
             }
             download={
                 isOnline && (
-                    <button className="btn btn-sm"
+                    <button className="btn btn-neutral btn-sm flex-1 sm:flex-none px-4 py-2"
                         onClick={() => saveBookToOffline(data, myId)}
                     >
                         <Download size={15} />

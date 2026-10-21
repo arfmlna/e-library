@@ -5,7 +5,7 @@ import { Book, FileText, UserRoundPlus, UserRoundX, X } from 'lucide-react'
 import Swal from 'sweetalert2'
 import BatchUploadBook from "./BatchUploadBook";
 import { validateFileSize } from '@/constants/validationFileSize'
-import { useOutletContext } from 'react-router-dom'
+import { getSettings } from '@/utils/settings'
 
 const LayoutDashboard = lazy(() => import('@/components/ui/LayoutDashboard'))
 const DialogCreate = lazy(() => import('./DialogCreate'))
@@ -31,19 +31,21 @@ export default function TemplateControl({
     const [file, setFile] = useState("")
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [show, setShow] = useState(false)
-    
     const [openDialogUpdate, setOpenDialogUpdate] = useState({
         status: false,
         role: '',
         data: []
     })
-    
     const [openDetail, setOpenDetail] = useState({
         status: false,
         data: []
     })
+    const [settings, setSettings] = useState(null);
 
-    const { settings } = useOutletContext()
+    
+    useEffect(() => {
+        getSettings().then(setSettings);
+    }, []);
 
     useEffect(() => {
         setPage(1)
@@ -157,7 +159,9 @@ export default function TemplateControl({
                     refreshData()
                 });
             } catch (err) {
-                console.error("Detail Error:", err.originalError); 
+                if (import.meta.env.DEV) {
+                    console.error("Detail Error:", err.originalError); 
+                }
                 Swal.fire(
                     'Gagal!',
                     'Terjadi kesalahan saat menghapus data: ' + err.message,

@@ -80,7 +80,9 @@ export default function TemplateEBook({
             refreshData()
             setOpenToggle(false)
         } catch (error) {
-            console.error("Error Detail:", error.data);
+            if (import.meta.env.DEV) {
+                console.error("Error Detail:", error.data);
+            }
             Swal.fire({
                 icon: 'error',
                 title: 'Gagal Menyimpan',
@@ -119,7 +121,9 @@ export default function TemplateEBook({
             setOpenDialogUpdate((prev) => ({...prev, status: false}))
             setOpenDetail((prev) => ({ ...prev, status: false }))
         } catch (error) {
-            console.error("Error Detail:", error.data);
+            if (import.meta.env.DEV) {
+                console.error("Error Detail:", error.data);
+            }
             Swal.fire({
                 icon: 'error',
                 title: 'Gagal Memperbaharui',
@@ -170,7 +174,9 @@ export default function TemplateEBook({
                     refreshData()
                 });
             } catch (err) {
-                console.log(err)
+                if (import.meta.env.DEV) {
+                    console.log(err)
+                }
                 Swal.fire(
                     'Gagal!',
                     'Terjadi kesalahan saat menghapus data: ' + err.message,

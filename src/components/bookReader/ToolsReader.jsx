@@ -1,5 +1,6 @@
 import { Search, X } from 'lucide-react'
-import React, { lazy, useCallback, useEffect, useState } from 'react'
+import React, { lazy, useCallback, useEffect, useRef, useState } from 'react'
+import Swal from 'sweetalert2'
 
 const DirectPageReader = lazy(() => import('./DirectPageReader'))
 const ZoomReader = lazy(() => import('./ZoomReader'))
@@ -22,132 +23,111 @@ export default function ToolsReader({
     const [searchResults, setSearchResults] = useState([])
     const [activeSearchIndex, setActiveSearchIndex] = useState(-1)
     const [showSearchWord, setShowSearchWord] = useState(false)
+    const searchInputRef = useRef(null);
 
     const goToPage = useCallback((targetPageNum) => {
-        const container = scrollContainerRef?.current
-        const targetElement = pageRefs.current[targetPageNum - 1]
+        const container = scrollContainerRef?.current;
+        if (!container || targetPageNum < 1 || targetPageNum > numPages) return;
 
-        if (!container || !targetElement || targetPageNum < 1 || targetPageNum > numPages) {
-            return
-        }
+        isNavigatingRef.current = true;
+        setCurrentPage(targetPageNum);
 
-        isNavigatingRef.current = true
-
-        setCurrentPage(targetPageNum)
-
-        const buffer = 3
-
+        const buffer = 2;
         setVisibleRange({
             start: Math.max(1, targetPageNum - buffer),
             end: Math.min(numPages, targetPageNum + buffer)
-        })
+        });
 
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                const containerRect = container.getBoundingClientRect()
-                const targetRect = targetElement.getBoundingClientRect()
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            const targetElement = pageRefs.current[targetPageNum - 1];
 
-                const targetScrollTop =
-                    targetRect.top -
-                    containerRect.top +
-                    container.scrollTop
+            if (targetElement) {
+                const top = targetElement.getBoundingClientRect().top
+                    - container.getBoundingClientRect().top
+                    + container.scrollTop;
 
-                container.scrollTo({
-                    top: targetScrollTop,
-                    behavior: 'auto'
-                })
+                container.scrollTo({ top, behavior: 'smooth' });
+            }
 
-                requestAnimationFrame(() => {
-                    isNavigatingRef.current = false
-                })
-            })
-        })
+            setTimeout(() => {
+                isNavigatingRef.current = false;
+            }, 450);
+        }));
     }, [
-        numPages,
-        pageRefs,
-        scrollContainerRef,
-        isNavigatingRef,
-        setCurrentPage,
-        setVisibleRange
-    ])
+        numPages, pageRefs, scrollContainerRef, isNavigatingRef,
+        setCurrentPage, setVisibleRange
+    ]);
 
-    const handleSearch = (e) => {
-        e.preventDefault()
+    const handleSearch = useCallback((e) => {
+        e.preventDefault();
 
-        if (!searchQuery.trim() || !isReady || !pageTexts.length) {
-            return
-        }
+        const query = searchQuery.trim().toLowerCase();
+        if (!query || !isReady || !pageTexts?.length) return;
 
-        const query = searchQuery.toLowerCase().trim()
-        const results = []
+        const results = [];
 
         pageTexts.forEach((pageText, index) => {
-            if (!pageText) return
+            if (typeof pageText !== 'string' || !pageText.trim()) return;
 
-            const normalizedText = pageText.toLowerCase()
-            const matchedIndex = normalizedText.indexOf(query)
+            const text = pageText.toLowerCase();
+            const matchedIndex = text.indexOf(query);
+            if (matchedIndex === -1) return;
 
-            if (matchedIndex !== -1) {
-                const startIndex = Math.max(0, matchedIndex - 25)
-                const snippet = pageText.substring(
-                    startIndex,
-                    startIndex + 80
-                )
+            const start = Math.max(0, matchedIndex - 25);
+            const snippet = pageText.substring(start, start + 80);
 
-                results.push({
-                    page: index + 1,
-                    snippet: `${snippet}${pageText.length > startIndex + 80 ? '...' : ''}`
-                })
-            }
-        })
+            results.push({
+                page: index + 1,
+                snippet: `${start > 0 ? '...' : ''}${snippet}${pageText.length > start + 80 ? '...' : ''}`
+            });
+        });
 
-        setSearchResults(results)
+        setSearchResults(results);
+        setActiveSearchIndex(results.length ? 0 : -1);
 
-        if (results.length > 0) {
-            setActiveSearchIndex(0)
-            goToPage(results[0].page)
+        if (results.length) {
+            goToPage(results[0].page);
         } else {
-            setActiveSearchIndex(-1)
-            alert(`Kata "${searchQuery}" tidak ditemukan di dalam PDF ini.`)
+            Swal.fire({
+                icon: 'error',
+                text: `Kata "${searchQuery.trim()}" tidak ditemukan di dalam PDF ini.`
+            });
         }
-    }
+    }, [searchQuery, isReady, pageTexts, goToPage]);
 
-    const handleSelectResult = (index) => {
-        if (!searchResults[index]) return
+    const handleSelectResult = useCallback((index) => {
+        const result = searchResults[index];
+        if (!result) return;
 
-        setActiveSearchIndex(index)
-        goToPage(searchResults[index].page)
-    }
+        setActiveSearchIndex(index);
+        goToPage(result.page);
+        setShowSearchWord(false);
+    }, [searchResults, goToPage]);
 
     useEffect(() => {
         const handleKeyDown = (evt) => {
-            if (
-                (evt.ctrlKey || evt.metaKey) &&
-                evt.key.toLowerCase() === 'k'
-            ) {
-                evt.preventDefault()
-                setShowSearchWord(true)
+            if ((evt.ctrlKey || evt.metaKey) && evt.key.toLowerCase() === 'k') {
+                evt.preventDefault();
+                setShowSearchWord(true);
+                requestAnimationFrame(() => {
+                    searchInputRef.current?.focus();
+                    searchInputRef.current?.select();
+                });
             }
 
-            if (evt.key === 'Escape') {
-                setShowSearchWord(false)
-            }
-        }
+            if (evt.key === 'Escape') setShowSearchWord(false);
+        };
 
-        window.addEventListener('keydown', handleKeyDown)
-
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown)
-        }
-    }, [])
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
 
     useEffect(() => {
-        if (!searchQuery) {
-            setSearchResults([])
-            setActiveSearchIndex(-1)
+        if (!searchQuery.trim()) {
+            setSearchResults([]);
+            setActiveSearchIndex(-1);
         }
-    }, [searchQuery])
-
+    }, [searchQuery]);
     return (
         <div className="flex justify-center w-full">
             <ZoomReader
@@ -175,7 +155,7 @@ export default function ToolsReader({
             </div>
 
             {showSearchWord && (
-                <div className="fixed top-1/3 z-20 flex flex-col justify-center gap-2 w-fit md:w-md">
+                <div className="fixed top-1/3 z-20 flex flex-col justify-center gap-2 w-xs md:w-md">
                     <div className="relative w-full flex justify-end">
                         <button
                             className="absolute z-30 -right-3 btn btn-circle btn-xs btn-neutral"
@@ -193,6 +173,7 @@ export default function ToolsReader({
                             type="text"
                             placeholder="Cari kata..."
                             value={searchQuery}
+                            ref={searchInputRef} 
                             onChange={e => {
                                 setSearchQuery(e.target.value)
 
@@ -233,7 +214,8 @@ export default function ToolsReader({
                                         Halaman {result.page}
                                     </span>
 
-                                    <span className="truncate w-full italic text-zinc-400 text-[11px]">
+                                    <span className="truncate w-full italic text-zinc-400 text-[11px]"
+                                    onClick={() => setShowSearchWord(false)}>
                                         "{result.snippet}"
                                     </span>
                                 </button>

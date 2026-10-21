@@ -136,7 +136,7 @@ export default function SideBarControls({
                 </span>
                 <button
                     onClick={() => setIsSidebarOpen(false)}
-                    className="p-1 bg-slate-200 dark:bg-slate-800 rounded-full"
+                    className="p-1"
                 >
                     <X size={18} />
                 </button>
@@ -156,7 +156,7 @@ export default function SideBarControls({
                     <div className="text-sm inline items-center">
                         <label htmlFor="showArrow" className='text-md mr-1'> Show Arrow </label>
                         <input type="checkbox" name="showArrow" id="showArrow" 
-                        className='checkbox checkbox-md'
+                        className='checkbox checkbox-sm'
                         onChange={(e) => setShowArrow(e.target.checked)} 
                         defaultChecked={showArrow}/>
                     </div>

@@ -184,7 +184,9 @@ export default function DialogUpdate({
             setOpenDialogUpdate((prev) => ({...prev, status: false}))
             setOpenDetail((prev) => ({ ...prev, status: false }))
         } catch (error) {
-            // console.error("Error Detail PocketBase:", error?.data);
+            if (import.meta.env.DEV) {
+                console.error("Error Detail PocketBase:", error?.data);
+            }
             Swal.fire({ icon: 'error', title: 'Gagal Memperbaharui', text: error.message || 'Terjadi kesalahan' });
         }
     };

@@ -22,221 +22,178 @@ export default function BookReader({
     visibleRange,
     setVisibleRange
 }) {
-    const [pageHeight, setPageHeight] = useState(pageWidth * 1.414)
+    const [pageRatio, setPageRatio] = useState(1.414);
+    const [isMobile, setIsMobile] = useState(false);
 
-    const textRenderer = useCallback((textItem) => {
-        if (!searchQuery) return textItem.str
+    const dynamicScale = Math.max(0.5, isMobile ? zoom - 0.4 : zoom);
+    const pageHeight = pageWidth * pageRatio;
+    const pageStep = pageHeight * dynamicScale;
 
-        const escapedQuery = searchQuery.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')
+    const memoizedRegex = useMemo(() => {
+        if (!searchQuery?.trim()) return null;
+        const escaped = searchQuery.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return new RegExp(`(${escaped})`, 'gi');
+    }, [searchQuery]);
 
-        const regex = new RegExp(`(${escapedQuery})`, 'gi')
+    const textRenderer = useCallback((item) => {
+        if (!memoizedRegex || !item?.str) return item?.str || '';
+        return item.str.replace(
+            memoizedRegex,
+            match => `<mark class="bg-yellow-400 text-black m-0 p-0">${match}</mark>`
+        );
+    }, [memoizedRegex]);
 
-        return textItem.str.replace(regex, match => `<mark class="bg-yellow-400 text-black px-0.5 rounded-sm">${match}</mark>`)
-    }, [searchQuery])
+    const onDocumentLoadSuccess = useCallback(async (pdf) => {
+        setNumPages(pdf.numPages);
+        setIsReady(false);
+        pageRefs.current = Array(pdf.numPages).fill(null);
+        setVisibleRange({ start: 1, end: Math.min(4, pdf.numPages) });
 
-    const onDocumentLoadSuccess = useCallback(({ numPages }) => {
-        setNumPages(numPages)
-        pageRefs.current = pageRefs.current.slice(0, numPages)
-
-        setVisibleRange({
-            start: 1,
-            end: Math.min(6, numPages)
-        })
-
-        setTimeout(() => {
-            setIsReady(true)
-        }, 300)
-    }, [setNumPages, setVisibleRange, setIsReady, pageRefs])
-
-    useEffect(() => {
-        if (!getBook?.pdfUrl) return
-
-        let cancelled = false
-
-        async function getPageSize() {
-            try {
-                const loadingTask = pdfjs.getDocument(getBook.pdfUrl)
-                const pdf = await loadingTask.promise
-
-                if (cancelled) {
-                    await pdf.destroy()
-                    return
-                }
-
-                const page = await pdf.getPage(1)
-                const viewport = page.getViewport({ scale: 1 })
-                const ratio = viewport.height / viewport.width
-
-                if (!cancelled) {
-                    setPageHeight(pageWidth * ratio)
-                }
-
-                page.cleanup()
-                await pdf.destroy()
-            } catch (error) {
-                console.error('Gagal mengambil ukuran halaman PDF:', error)
+        try {
+            const page = await pdf.getPage(1);
+            const viewport = page.getViewport({ scale: 1 });
+            setPageRatio(viewport.height / viewport.width);
+            page.cleanup();
+        } catch (error) {
+            if (import.meta.env.DEV) {
+                console.error('Gagal membaca ukuran halaman PDF:', error);
             }
+        } finally {
+            setIsReady(true);
         }
-
-        getPageSize()
-
-        return () => {
-            cancelled = true
-        }
-    }, [getBook?.pdfUrl, pageWidth])
+    }, [setNumPages, setIsReady, setVisibleRange, pageRefs]);
 
     useEffect(() => {
-        const container = scrollContainerRef?.current
+        const checkScreen = () => setIsMobile(window.innerWidth < 768);
+        checkScreen();
+        window.addEventListener('resize', checkScreen);
+        return () => window.removeEventListener('resize', checkScreen);
+    }, []);
 
-        if (!container || !numPages || !isReady) return
+    useEffect(() => {
+        const container = scrollContainerRef?.current;
+        if (!container || !numPages || !isReady || !pageStep) return;
 
-        let ticking = false
+        let frame = 0;
 
         const updateVisiblePages = () => {
-            if (isNavigatingRef.current || ticking) return
+            cancelAnimationFrame(frame);
+            frame = requestAnimationFrame(() => {
+                if (isNavigatingRef.current) return;
 
-            ticking = true
-
-            requestAnimationFrame(() => {
-                const scrollTop = container.scrollTop
-                const viewportHeight = container.clientHeight
-                const currentHeight = pageHeight || pageWidth * 1.414
-
-                if (!viewportHeight || !currentHeight) {
-                    ticking = false
-                    return
-                }
-
-                const pageStep = currentHeight * zoom
-                let firstVisiblePage = Math.floor(scrollTop / pageStep) + 1
-
-                if (scrollTop < 50) firstVisiblePage = 1
-
-                firstVisiblePage = Math.max(
+                const first = Math.max(
                     1,
-                    Math.min(firstVisiblePage, numPages)
-                )
+                    Math.min(numPages, Math.floor(container.scrollTop / pageStep) + 1)
+                );
+                const count = Math.ceil(container.clientHeight / pageStep);
+                const buffer = 2;
+                const start = Math.max(1, first - buffer);
+                const end = Math.min(numPages, first + count + buffer);
 
-                const visiblePageCount =
-                    Math.ceil(viewportHeight / pageStep)
+                setVisibleRange(prev =>
+                    prev.start === start && prev.end === end
+                        ? prev
+                        : { start, end }
+                );
+            });
+        };
 
-                const buffer = 3
-
-                const start = Math.max(
-                    1,
-                    firstVisiblePage - buffer
-                )
-
-                const end = Math.min(
-                    numPages,
-                    firstVisiblePage + visiblePageCount + buffer
-                )
-
-                setVisibleRange(prev => {
-                    if (prev.start === start && prev.end === end) {
-                        return prev
-                    }
-
-                    return { start, end }
-                })
-
-                ticking = false
-            })
-        }
-
-        container.addEventListener(
-            'scroll',
-            updateVisiblePages,
-            { passive: true }
-        )
-
-        const timeout = setTimeout(updateVisiblePages, 100)
+        container.addEventListener('scroll', updateVisiblePages, { passive: true });
+        updateVisiblePages();
 
         return () => {
-            container.removeEventListener(
-                'scroll',
-                updateVisiblePages
-            )
-            clearTimeout(timeout)
-        }
-    }, [numPages, isReady, pageHeight, zoom, pageWidth, scrollContainerRef, isNavigatingRef, setVisibleRange])
+            container.removeEventListener('scroll', updateVisiblePages);
+            cancelAnimationFrame(frame);
+        };
+    }, [
+        numPages, isReady, pageStep, scrollContainerRef,
+        isNavigatingRef, setVisibleRange
+    ]);
 
-    const memoizedDocumentOptions = useMemo(
-        () => documentOptions,
-        []
-    )
+    const noDataElement = (
+        <div className="flex h-screen w-full flex-col items-center justify-center gap-2 text-base-content/50">
+            <p className="text-sm font-medium">Dokumen PDF belum tersedia.</p>
+        </div>
+    );
+
+    const loadingElement = (
+        <div className="flex h-screen w-full flex-col items-center justify-center gap-3 bg-base-300">
+            <span className="loading loading-spinner loading-lg text-primary" />
+            <p className="text-sm font-semibold text-base-content/70">
+                Sedang memuat dokumen PDF...
+            </p>
+        </div>
+    );
+
+    const errorElement = (
+        <div className="flex h-screen w-full items-center justify-center text-sm text-error">
+            Gagal memuat dokumen PDF.
+        </div>
+    );
+
+    const start = Math.max(1, visibleRange.start);
+    const end = Math.min(numPages || 0, visibleRange.end);
+    const topSpace = (start - 1) * pageStep;
+    const bottomSpace = Math.max(0, numPages - end) * pageStep;
 
     return (
         <div
-            className="relative h-screen overflow-y-auto"
             ref={scrollContainerRef}
+            className="relative h-screen w-full overflow-y-auto bg-base-300"
         >
-            <div className="inline-block min-w-full text-center">
-                <div className="flex justify-center w-full">
-                    <Document
-                        file={getBook?.pdfUrl}
-                        renderMode="canvas"
-                        onLoadSuccess={onDocumentLoadSuccess}
-                        options={memoizedDocumentOptions}
-                        loading={
-                            <div className="h-screen w-screen flex justify-center items-center">
-                                Sedang memuat file...
-                            </div>
-                        }
-                        error={
-                            <div className="h-screen w-screen flex justify-center items-center text-red-500 font-semibold">
-                                Gagal memuat file!
-                            </div>
-                        }
-                        className="shadow-xl"
-                    >
-                        {numPages &&
-                            Array.from(
-                                { length: numPages },
-                                (_, i) => {
-                                    const pageNum = i + 1
-                                    const shouldRender =
-                                        pageNum >= visibleRange.start &&
-                                        pageNum <= visibleRange.end
+            <Document
+                file={getBook?.pdfUrl}
+                onLoadSuccess={onDocumentLoadSuccess}
+                options={documentOptions}
+                className="flex min-h-full w-full flex-col items-center"
+                loading={loadingElement}
+                noData={noDataElement}
+                error={errorElement}
+            >
+                <div style={{ height: topSpace, flexShrink: 0 }} />
 
-                                    return (
+                {Array.from(
+                    { length: Math.max(0, end - start + 1) },
+                    (_, index) => {
+                        const pageNum = start + index;
+
+                        return (
+                            <div
+                                key={pageNum}
+                                ref={el => { pageRefs.current[pageNum - 1] = el; }}
+                                data-page-number={pageNum}
+                                style={{
+                                    minHeight: pageStep,
+                                    width: '100%',
+                                    flexShrink: 0
+                                }}
+                                className="relative flex justify-center overflow-hidden"
+                            >
+                                <Page
+                                    renderMode="canvas"
+                                    pageNumber={pageNum}
+                                    scale={dynamicScale}
+                                    _className="m-0 p-0"
+                                    renderAnnotationLayer={false}
+                                    renderTextLayer={Boolean(searchQuery)}
+                                    customTextRenderer={textRenderer}
+                                    loading={
                                         <div
-                                            key={pageNum}
-                                            ref={el => {
-                                                pageRefs.current[i] = el
-                                            }}
-                                            data-page-number={pageNum}
-                                            className="w-full flex justify-center shadow-2xl"
                                             style={{
-                                                minHeight: shouldRender
-                                                    ? 'auto'
-                                                    : `${pageHeight * zoom}px`
+                                                width: pageWidth,
+                                                height: pageStep
                                             }}
-                                        >
-                                            {shouldRender ? (
-                                                <Page
-                                                    pageNumber={pageNum}
-                                                    scale={zoom}
-                                                    _className="m-0 p-0"
-                                                    renderAnnotationLayer={false}
-                                                    renderTextLayer={true}
-                                                    customTextRenderer={textRenderer}
-                                                />
-                                            ) : (
-                                                <div
-                                                    className="w-full"
-                                                    style={{
-                                                        height: pageHeight * zoom
-                                                    }}
-                                                />
-                                            )}
-                                        </div>
-                                    )
-                                }
-                            )}
-                    </Document>
-                </div>
-            </div>
+                                            className="bg-base-200"
+                                        />
+                                    }
+                                />
+                            </div>
+                        );
+                    }
+                )}
+
+                <div style={{ height: bottomSpace, flexShrink: 0 }} />
+            </Document>
         </div>
-    )
+    );
 }

@@ -39,10 +39,10 @@ export default function DownloadsId() {
             const res = await getOfflineBookById(downloadId, userId)
             return res
         },
-        staleTime: Infinity,
-        refetchOnWindowFocus: false,
-        refetchOnMount: false,
-        refetchOnReconnect: false,
+        // staleTime: Infinity,
+        // refetchOnWindowFocus: false,
+        // refetchOnMount: false,
+        // refetchOnReconnect: false,
     })
 
     const pdfUrl = offlineBook?.pdfUrl

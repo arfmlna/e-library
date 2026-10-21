@@ -53,13 +53,13 @@ export default function TopDigitalBooks() {
                             />
                         ) : (
                             /* Tabel Daftar Top 5 */
-                            <div className="overflow-x-auto w-full shadow-xl">
+                            <div className="overflow-x-auto w-full shadow-xl rounded-md">
                                 <table className="table table-zebra w-full align-middle">
                                     <thead>
                                         <tr>
                                             <th className="w-16 text-center">Rank</th>
                                             <th>Buku</th>
-                                            <th className="text-center w-28">Total Pembaca</th>
+                                            <th className="text-center w-28 hidden md:block">Total Pembaca</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -81,19 +81,20 @@ export default function TopDigitalBooks() {
                                                                 />
                                                             </div>
                                                         </div>
-                                                        <div>
-                                                            <div className="font-bold text-sm max-w-[200px] sm:max-w-xs truncate">
+                                                        <div className='flex flex-col gap-0.5'>
+                                                            <div className="font-bold text-sm max-w-[150px] sm:max-w-xs truncate md:overflow-visible">
                                                                 {book.title}
                                                             </div>
                                                             <div className="text-[11px] opacity-50 flex items-center gap-1 mt-0.5">
                                                                 <BookOpen size={10} /> E-Book Digital
                                                             </div>
+                                                            <span className="block md:hidden w-fit text-[9px] px-1.5 py-1 mt-0.5 rounded-md bg-gray-800 text-white dark:bg-gray-300 dark:text-black">
+                                                                {book.readersCount} Orang
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 </td>
-
-                                                {/* Kolom Total Pembaca */}
-                                                <td className="text-center font-mono font-bold text-sm">
+                                                <td className="text-center font-mono font-bold text-sm hidden md:block">
                                                     <span className="px-2.5 py-1 rounded-md bg-gray-800 text-white dark:bg-gray-300 dark:text-black">
                                                         {book.readersCount} Orang
                                                     </span>

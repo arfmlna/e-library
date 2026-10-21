@@ -51,10 +51,10 @@ export default function ReaderDownload() {
                 pdfUrl: res?.pdfUrl
             }
         },
-        staleTime: Infinity,
-        refetchOnWindowFocus: false,
-        refetchOnMount: false,
-        refetchOnReconnect: false,
+        // staleTime: Infinity,
+        // refetchOnWindowFocus: false,
+        // refetchOnMount: false,
+        // refetchOnReconnect: false,
     })
 
     useEffect(() => {
@@ -115,11 +115,8 @@ export default function ReaderDownload() {
 
                 await pdf.destroy()
             } catch (error) {
-                if (!cancelled) {
-                    console.error(
-                        'Gagal membaca teks PDF:',
-                        error
-                    )
+                if (!cancelled && import.meta.env.DEV) {
+                    console.error('Gagal membaca teks PDF:', error)
                 }
             }
         }

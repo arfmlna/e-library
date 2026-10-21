@@ -74,7 +74,9 @@ export default function AdminVerificationPage() {
             queryClient.invalidateQueries(['adminPendingUsers']);
         },
         onError: (err) => {
-            console.error(err.originalError);
+            if (import.meta.env.DEV) {       
+                console.error(err.originalError);
+            }
             Swal.fire({ 
                 icon: 'error', 
                 title: 'Gagal Memproses', 

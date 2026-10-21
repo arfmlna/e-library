@@ -20,13 +20,12 @@ export default function BookPoster({data, posterUrl, height, widht}) {
                 }}>
                 </div>
             ) : data?.pdfFile || data?.pdfBlob ? (
-                <div className="card rounded-none w-full group-hover/tapGallery:scale-105 hover:transition hover:duration-300 hover:ease-in-out will-change-transform bg-cover relative overflow-hidden bg-base-200"
+                <div className="card rounded-none w-full h-full group-hover/tapGallery:scale-105 hover:transition hover:duration-300 hover:ease-in-out will-change-transform bg-cover relative overflow-hidden bg-base-200 aspect-[3/4]"
                 style={{
                     height: `${height}px`,
-                    width: `${widht}px`
-                }}>
-                    <div className="w-full h-full overflow-hidden">
-                        <PdfToPoster pdfFile={posterUrl} height={height} width={widht} />
+                }}> 
+                    <div className="w-full h-full overflow-hidden absolute inset-0">
+                        <PdfToPoster pdfFile={posterUrl} />
                     </div>
                 </div>
             ) : (

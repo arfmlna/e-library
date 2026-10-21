@@ -11,7 +11,9 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('Error di <Page>:', error, errorInfo);  // Log detail ke console
+    if (import.meta.env.DEV) {
+      console.error('Error di <Page>:', error, errorInfo);
+    }
   }
 
   render() {

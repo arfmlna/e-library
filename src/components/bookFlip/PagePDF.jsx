@@ -3,68 +3,81 @@ import { Page } from 'react-pdf'; // Sesuaikan jika nama import Page berbeda
 
 const PagePDF = React?.memo(
     React?.forwardRef((props, ref) => {
-        // 🛠️ Pindahkan Hook ke paling atas (sebelum early return)
         const searchRegex = useMemo(() => {
-            if (!props?.searchQuery?.trim()) {
-                return null;
-            }
-            const query = props.searchQuery.trim();
-            // 🛠️ Perbaikan no-useless-escape: hilangkan backslash di dekat /
-            const escapedQuery = query.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
-            return new RegExp(`(${escapedQuery})`, 'gi');
-        }, [props?.searchQuery]);
+            const query = props.searchQuery?.trim();
+            return query
+                ? new RegExp(
+                    `(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,
+                    'gi'
+                )
+                : null;
+        }, [props.searchQuery]);
         
         const textRenderer = useMemo(() => {
-            if (!searchRegex) {
-                return undefined;
-            }
-            return (textItem) => {
-                if (!textItem?.str) {
-                    return '';
-                }
-                return textItem.str.replace(searchRegex, (match) => {
-                        return `<mark class="text-yellow-400">${match}</mark>`;
-                    }
+            if (!searchRegex) return undefined;
+
+            return ({ str }) => {
+                if (!str) return '';
+                searchRegex.lastIndex = 0;
+                return str.replace(
+                    searchRegex,
+                    '<mark class="text-yellow-400">$&</mark>'
                 );
             };
         }, [searchRegex]);
 
-        // 🛠️ Early return dipindahkan ke bawah setelah semua Hook dideklarasikan
-        if (!props?.number) {
-            return null;
-        }
+        if (!props.number) return null;
 
-        if (props?.isVisible === false) {
+        if (!props.isVisible) {
             return (
                 <div
-                ref={ref}
-                style={{
-                    width: props?.width,
-                    height: props?.width * 1.414
-                }}
-                className="bg-white"
+                    ref={ref}
+                    className="bg-white"
+                    style={{ width: props.width, height: props.height }}
+                />
+            );
+        }
+
+        if (!props.isVisible) {
+            return (
+                <div
+                    ref={ref}
+                    className="bg-white"
+                    style={{ width: props.width, height: props.height }}
                 />
             );
         }
 
         return (
-            <div ref={ref} className="relative m-0 p-0 overflow-hidden"
+            <div ref={ref} className="relative m-0 p-0 overflow-hidden bg-white"
             style={{
-                width: props?.width,
-                opacity: props?.hasSearchQuery ? props?.isTargetPage ? 1 : 0.3 : 1
+                width: props.width,
+                height: props.height,
+                opacity: props.hasSearchQuery && !props.isTargetPage
+                    ? 0.3 : 1
             }}
             >
                 <Page
                 pageNumber={props?.number}
                 width={props?.width}
-                _className="block m-0 p-0"
+                renderMode="canvas"
                 renderAnnotationLayer={false}
-                renderTextLayer={Boolean(props?.searchQuery)}
+                renderTextLayer={!!props.searchQuery}
                 customTextRenderer={textRenderer}
+                devicePixelRatio={1.5}
+                _className="block m-0 p-0"
                 />
             </div>
         );
-    })
+    }),
+    (prev, next) =>
+        prev.number === next.number &&
+        prev.width === next.width &&
+        prev.height === next.height &&
+        prev.isVisible === next.isVisible &&
+        prev.searchQuery === next.searchQuery &&
+        prev.hasSearchQuery === next.hasSearchQuery &&
+        prev.isTargetPage === next.isTargetPage
 );
 
 export default PagePDF;

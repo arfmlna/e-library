@@ -87,7 +87,9 @@ export default function ForgotPassword() {
             setStep(2);
 
         } catch (err) {
-            console.error(err.originalError);
+            if (import.meta.env.DEV) {       
+                console.error(err.originalError);
+            }
             const currentFailCount = incrementAttempts();
             Swal.fire({
                 icon: 'error',

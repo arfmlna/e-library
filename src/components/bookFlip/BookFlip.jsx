@@ -5,7 +5,7 @@ import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 import { ChevronLeft, ChevronRight, Menu } from 'lucide-react'; 
 import SideBarControls from './SideBarControls';
-import { documentOptions, handleResizeBook } from './UtilsBook';
+import { documentOptions, flipBookSettings, handleResizeBook } from './UtilsBook';
 import PageNavigationHint from './PageClickNavigation';
 
 const PagePDF = lazy(() => import('./PagePDF'))
@@ -31,46 +31,9 @@ export default function BookFlip({ path }) {
     const [zoom, setZoom] = useState(1);
     const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
     const [showArrow, setShowArrow] = useState(true)
-
-    const [dimensions, setDimensions] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const widthWin = window.innerWidth;
-            const heightWin = window.innerHeight;
-
-            if (widthWin < 768) {
-                const targetHeight = heightWin * 0.85;
-                return {
-                    width: Math.min(
-                        targetHeight / 1.414,
-                        widthWin - 32
-                    ),
-                    height: targetHeight
-                };
-            }
-
-            const maxAvailableHeight = heightWin - 120;
-            const availableWidth = widthWin - 320 - 64;
-            const maxAvailableWidth = availableWidth / 2;
-
-            let finalHeight = maxAvailableHeight;
-            let finalWidth = finalHeight / 1.414;
-
-            if (finalWidth > maxAvailableWidth) {
-                finalWidth = maxAvailableWidth;
-                finalHeight = finalWidth * 1.414;
-            }
-
-            return {
-                width: finalWidth,
-                height: finalHeight
-            };
-        }
-
-        return {
-            width: 450,
-            height: 636
-        };
-    });
+    const [pageRatio, setPageRatio] = useState(1.414);
+    const [dimensions, setDimensions] = useState({ width: 450, height: 636 });
+    const readerAreaRef = useRef(null);
 
     const onFlip = useCallback((e) => {
         const pageIndex = e?.data;
@@ -82,54 +45,47 @@ export default function BookFlip({ path }) {
         });
     }, []);
 
+    
     useEffect(() => {
-        const handleResize = () => {
-            handleResizeBook(
-                setIsMobile,
-                setDimensions,
-                isSidebarOpen
+        const container = readerAreaRef.current;
+        if (!container) return;
+
+        const resize = () => {
+            const { width, height } = container.getBoundingClientRect();
+            const mobile = window.innerWidth < 768;
+
+            setIsMobile(mobile);
+
+            const availableWidth = Math.max(0, width - (mobile ? 16 : 32));
+            const availableHeight = Math.max(0, height - 32);
+            const pageWidth = Math.min(
+                mobile ? availableWidth : availableWidth / 2,
+                availableHeight / pageRatio
+            );
+
+            const next = {
+                width: Math.floor(pageWidth),
+                height: Math.floor(pageWidth * pageRatio)
+            };
+
+            setDimensions(prev =>
+                prev.width === next.width && prev.height === next.height
+                    ? prev
+                    : next
             );
         };
 
-        handleResize();
+        const observer = new ResizeObserver(resize);
+        observer.observe(container);
+        resize();
 
-        window.addEventListener('resize', handleResize);
+        return () => observer.disconnect();
+    }, [pageRatio, isSidebarOpen]);
 
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
-    }, [isSidebarOpen]);
-
-    const flipBookSettings = useMemo(() => {
-        if (isMobile) {
-            return {
-                size: "fixed",
-                usePortrait: true,
-                width: Math.round(dimensions.width),
-                height: Math.round(dimensions.height),
-                minWidth: Math.round(dimensions.width),
-                maxWidth: Math.round(dimensions.width),
-                minHeight: Math.round(dimensions.height),
-                maxHeight: Math.round(dimensions.height)
-            };
-        }
-
-        return {
-            size: "fixed",
-            usePortrait: false,
-            width: Math.round(dimensions.width),
-            height: Math.round(dimensions.height),
-            minWidth: Math.round(dimensions.width),
-            maxWidth: Math.round(dimensions.width),
-            minHeight: Math.round(dimensions.height),
-            maxHeight: Math.round(dimensions.height)
-        };
-
-    }, [
-        isMobile,
-        dimensions.width,
-        dimensions.height
-    ]);
+    const fbs = useMemo(
+        () => flipBookSettings(dimensions, isMobile),
+        [dimensions.width, dimensions.height, isMobile]
+    );
 
     if (!path) {
         return (
@@ -141,7 +97,7 @@ export default function BookFlip({ path }) {
 
     return (
         <ErrorBoundary>
-            <div className="flex flex-col md:flex-row min-w-screen min-h-screen relative overflow-hidden bg-slate-300 dark:bg-gray-950/10">
+            <div className="relative flex h-dvh w-screen overflow-hidden bg-slate-300 dark:bg-gray-950">
                 <SideBarControls
                 flipBookRef={flipBookRef}
                 pdfDocument={pdfDocument}
@@ -180,17 +136,25 @@ export default function BookFlip({ path }) {
                     </button>
                 )}
 
-                <div className={`flex-1 w-full h-screen overflow-hidden flex justify-center items-center box-border transition-all duration-300`}>
-                    <div className={`flex justify-center items-center duration-300 ${ isMobile ? isSidebarOpen ? 'translate-y-0' : 'translate-y-20' : 'translate-y-0' }`}>
+                <div 
+                ref={readerAreaRef}
+                className="relative flex flex-1 min-w-0 h-dvh items-center justify-center overflow-hidden">
+                    <div className={`flex justify-center items-center duration-300 
+                        ${ isMobile ? isSidebarOpen ? '-translate-y-20' : 'translate-y-0' : 'translate-y-0' }`}>
                         <PageNavigationHint showArrow={showArrow} currentPage={currentPage} numPages={numPages} isMobile={isMobile} />
                         <Document
                         file={path}
                         renderMode="canvas"
-                        onLoadSuccess={(pdf) => {
+                        onLoadSuccess={async (pdf) => {
                             setNumPages(pdf.numPages);
                             setPdfDocument(pdf);
                             setCurrentPage(0);
                             textCacheRef.current.clear();
+
+                            const page = await pdf.getPage(1);
+                            const viewport = page.getViewport({ scale: 1 });
+
+                            setPageRatio(viewport.height / viewport.width);
                         }}
                         options={documentOptions}
                         className="flex justify-center items-center"
@@ -198,49 +162,49 @@ export default function BookFlip({ path }) {
                             {numPages > 0 && (
                                 <div className="flex justify-center items-center transition-transform duration-300">
                                     <div
+                                    className="flex shrink-0 items-start justify-center"
                                     style={{
                                         transform: `scale(${zoom})`,
                                         transformOrigin: 'center center',
-                                        width: isMobile ? dimensions.width : dimensions.width * 2,
+                                        width: dimensions.width * (isMobile ? 1 : 2),
                                         height: dimensions.height
                                     }}
-                                    className="flex justify-center items-center shrink-0"
                                     >
                                         <HTMLFlipBook
                                         ref={flipBookRef}
                                         className="shrink-0"
-                                        size={flipBookSettings.size}
-                                        usePortrait={flipBookSettings.usePortrait}
-                                        width={flipBookSettings.width}
-                                        height={flipBookSettings.height}
-                                        minWidth={flipBookSettings.minWidth}
-                                        maxWidth={flipBookSettings.maxWidth}
-                                        minHeight={flipBookSettings.minHeight}
-                                        maxHeight={flipBookSettings.maxHeight}
+                                        size={fbs.size}
+                                        usePortrait={fbs.usePortrait}
+                                        width={fbs.width}
+                                        height={fbs.height}
+                                        minWidth={fbs.width}
+                                        maxWidth={fbs.width}
+                                        minHeight={fbs.height}
+                                        maxHeight={fbs.height}
                                         onFlip={onFlip}
-                                        disableFlipByClick={false}
-                                        mobileScrollSupport={true}
                                         flippingTime={240}
                                         maxShadowOpacity={0}
                                         showCover={false}
                                         drawShadow={false}
                                         startPage={currentPage}
-                                        autoSize={true}
-                                        swipeDistance={0}
-                                        showPageCorners={true}
+                                        autoSize={false}
+                                        mobileScrollSupport={true}
+                                        disableFlipByClick={false}
+                                        swipeDistance={20}
+                                        showPageCorners={!isMobile}
                                         >
                                             {Array.from({ length: numPages }, (_, i) => {
                                                     const isTargetPage = searchResults[currentResultIndex]?.pageIndex === i;
-                                                    const isVisible = Math.abs(i - currentPage) <= 1 || isTargetPage;
                                                     return (
                                                         <PagePDF
                                                         key={`page-${i + 1}`}
                                                         number={i + 1}
                                                         width={Math.round(dimensions.width)}
+                                                        height={Math.round(dimensions.height)}
                                                         searchQuery={isTargetPage ? searchQuery : ''}
                                                         hasSearchQuery={searchResults.length > 0}
                                                         isTargetPage={isTargetPage}
-                                                        isVisible={isVisible}
+                                                        isVisible={Math.abs(i - currentPage) <= 1 || isTargetPage}
                                                         />
                                                     );
                                                 }

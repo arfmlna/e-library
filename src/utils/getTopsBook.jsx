@@ -63,7 +63,9 @@ export const fetchTopBorrowedBooks = async (limit = 5) => {
             .slice(0, limit);
             
     } catch (error) {
-        console.error("Gagal menghitung statistik buku terpopuler:", error);
+        if (import.meta.env.DEV) {       
+            console.error("Gagal menghitung statistik buku terpopuler:", error);
+        }
         throw error;
     }
 };
@@ -101,7 +103,9 @@ export const fetchTopUsers = async (limit = 5) => {
             .slice(0, limit);
             
     } catch (error) {
-        console.error("Gagal memuat data pengguna teraktif:", error);
+        if (import.meta.env.DEV) {       
+            console.error("Gagal memuat data pengguna teraktif:", error);
+        }
         throw error;
     }
 };

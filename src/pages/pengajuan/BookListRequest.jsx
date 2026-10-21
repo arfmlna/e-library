@@ -20,7 +20,9 @@ export default function BookListRequest() {
             });
             setRequests(records);
         } catch (error) {
-            console.error("Gagal memuat pengajuan:", error);
+            if (import.meta.env.DEV) {
+                console.error("Gagal memuat pengajuan:", error);
+            }
             Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal mengambil data dari server.' });
         } finally {
             setLoading(false);
@@ -101,8 +103,14 @@ export default function BookListRequest() {
                 try {
                     await Promise.all(databasePromises);
                 } catch (parallelError) {
-                    console.warn("Terjadi eror transaksi paralel, melakukan penghapusan log...");
-                    await pb.collection('loans').delete(loanRecord.id).catch(e => console.error("Gagal rollback:", e));
+                    if (import.meta.env.DEV) {
+                        console.warn("Terjadi eror transaksi paralel, melakukan penghapusan log...");
+                    }
+                    await pb.collection('loans').delete(loanRecord.id).catch(e => {
+                        if (import.meta.env.DEV) {
+                            console.error("Gagal rollback:", e)
+                        }
+                    });
                     throw parallelError; // Lempar eror ke penanganan utama
                 }
                 
@@ -118,7 +126,9 @@ export default function BookListRequest() {
                 fetchPendingRequests();
             }
         } catch (error) {
-            console.error("Error Detail (Bad Request 400):", error);
+            if (import.meta.env.DEV) {
+                console.error("Error Detail (Bad Request 400):", error);
+            }
             // Tampilkan pesan eror asli dari PocketBase agar tahu field mana yang bermasalah
             const errorMsg = error?.data?.message || error.message;
             Swal.fire({ icon: 'error', title: 'Gagal Memproses', text: `Terjadi kesalahan: ${errorMsg}` });

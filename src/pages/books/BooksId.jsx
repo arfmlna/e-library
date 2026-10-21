@@ -46,10 +46,10 @@ export default function BooksId() {
                 pdfUrl: pdfUrl
             }
         },
-        staleTime: Infinity,
-        refetchOnWindowFocus: false,
-        refetchOnMount: false,
-        refetchOnReconnect: false,
+        // staleTime: Infinity,
+        // refetchOnWindowFocus: false,
+        // refetchOnMount: false,
+        // refetchOnReconnect: false,
     });
 
     const book = bookState ? bookState : getBook?.pdfUrl

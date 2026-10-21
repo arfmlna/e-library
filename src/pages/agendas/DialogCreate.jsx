@@ -51,6 +51,7 @@ export default function DialogCreate({
                         placeholder="Insert Event Date..." 
                         required
                         className="input input-bordered w-full h-10 px-3 text-sm bg-base-100 shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                        onFocus={(e) => e.target.showPicker()}
                         />
                     </div>
                     <div className="flex flex-col gap-1.5">

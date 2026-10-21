@@ -1,3 +1,4 @@
+
 export const documentOptions = {
     cMapUrl: '/cmaps/',
     cMapPacked: true,
@@ -8,41 +9,6 @@ export const documentOptions = {
     verbosity: 0,
     pdfBug: false 
 }
-
-// export const handleResizeBook = (setIsMobile, setDimensions, isSidebarOpen) => {
-//     const widthWin = window.innerWidth;
-//     const heightWin = window.innerHeight;
-//     const mobileCheck = widthWin < 768;
-//     setIsMobile(mobileCheck);
-
-//     if (mobileCheck) {
-//         const targetHeight = heightWin * 1.0; 
-//         const targetWidth = targetHeight / 1.414;
-        
-//         setDimensions({
-//             width: Math.min(targetWidth, widthWin - 32), 
-//             height: targetHeight
-//         });
-//     } else {
-//         const maxAvailableHeight = heightWin - 120;
-        
-//         const availableWidth = isSidebarOpen ? (widthWin - 320 - 64) : (widthWin - 64);
-//         const maxAvailableWidth = (availableWidth * 1.0) / 2;
-
-//         let finalHeight = maxAvailableHeight;
-//         let finalWidth = finalHeight / 1.414;
-
-//         if (finalWidth > maxAvailableWidth) {
-//             finalWidth = maxAvailableWidth;
-//             finalHeight = finalWidth * 1.414;
-//         }
-
-//         setDimensions({
-//             width: finalWidth,
-//             height: finalHeight
-//         });
-//     }
-// };
 
 export const handleResizeBook = (
     setIsMobile,
@@ -83,3 +49,14 @@ export const handleResizeBook = (
         height: finalHeight
     });
 };
+
+export const flipBookSettings = (dimensions, isMobile) => ({
+    size: "fixed",
+    usePortrait: isMobile,
+    width: Math.round(dimensions.width),
+    height: Math.round(dimensions.height),
+    minWidth: Math.round(dimensions.width),
+    maxWidth: Math.round(dimensions.width),
+    minHeight: Math.round(dimensions.height),
+    maxHeight: Math.round(dimensions.height)
+});

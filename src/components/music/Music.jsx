@@ -10,7 +10,9 @@ export default function Music({ audioRef }) {
         
         if (!play) {
             audioRef.current.play().catch(err => {
-                console.error("Gagal memutar audio:", err);
+                if (import.meta.env.DEV) {
+                    console.error("Gagal memutar audio:", err);
+                }
             });
         } else {
             audioRef.current.pause();

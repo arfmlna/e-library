@@ -108,15 +108,14 @@ export default function AdmSettings() {
             <form onSubmit={handleSave}>
                 {/* Menyembunyikan/menampilkan form secara dinamis berdasarkan tab yang dipilih admin */}
                 {activeTab === 'sirkulasi' && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
                     <div className="col-span-2">
                         <CirculationForm formData={formData} onChange={handleInputChange} />
-                        <div className="my-6"></div>
-                        <AccessSettings formData={formData} onChange={handleInputChange} />
                     </div>
                     <div className="space-y-6">
                         <CloudStorageInfo value={formData.max_upload_size} onChange={handleInputChange} />
-                        <SystemBackupSetting autoBackup={formData.auto_backup} backupSchedule={formData.backup_schedule} onChange={handleInputChange} />
+                        <AccessSettings formData={formData} onChange={handleInputChange} />
+                        {/* <SystemBackupSetting autoBackup={formData.auto_backup} backupSchedule={formData.backup_schedule} onChange={handleInputChange} /> */}
                     </div>
                 </div>
                 )}

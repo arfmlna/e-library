@@ -28,7 +28,9 @@ const DialogInformation = ({
             queryClient.invalidateQueries({ queryKey: ['totalReaders', data.id] });
         },
         onError: (err) => {
-            console.error("Gagal mencatat statistik membaca:", err);
+            if (import.meta.env.DEV) {
+                console.error("Gagal mencatat statistik membaca:", err);
+            }
         }
     });
 
@@ -41,7 +43,7 @@ const DialogInformation = ({
     return (
         <>
             { clickId.id === data.id && (
-                <Dialog open={clickId.status} onClose={() => setClickId({ id: null, status: false })}>
+                <Dialog data-theme={theme} open={clickId.status} onClose={() => setClickId({ id: null, status: false })}>
                     <DialogBackdrop className="fixed inset-0 z-50 bg-white/50 dark:bg-black/50" />
                     <DialogPanel data-theme={theme} className="fixed bg-white dark:bg-gray-800 left-1/2 top-1/2 z-50 w-[92%] sm:w-full sm:max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl border border-base-content/10 p-5 md:p-6 shadow-2xl">
                         <DialogHeader className="space-y-1">
@@ -65,7 +67,7 @@ const DialogInformation = ({
                                         to={`/flipbook/${redirect}/${data.id}`} 
                                         state={{ bookData: data }} 
                                         onClick={handleReadingAction}
-                                        className="btn btn-primary btn-sm flex-1 sm:flex-none px-4 text-primary-content">
+                                        className="btn btn-primary btn-sm flex-1 sm:flex-none px-4 py-2 text-primary-content">
                                         <BookOpen size={15}/>
                                         Flip Book
                                     </NavLink>
@@ -73,18 +75,16 @@ const DialogInformation = ({
                                         to={`/reader/${redirect}/${data.id}`} 
                                         state={{ bookData: data }}
                                         onClick={handleReadingAction}
-                                        className="btn btn-outline btn-primary btn-sm flex-1 sm:flex-none px-4">
+                                        className="btn btn-outline btn-primary btn-sm flex-1 sm:flex-none px-4 py-2">
                                         <NotepadText size={15} />
                                         Reader
                                     </NavLink>
-                                    <div className="flex-1 sm:flex-none [&>a]:btn [&>a]:btn-neutral [&>a]:btn-sm [&>a]:w-full [&>button]:btn [&>button]:btn-neutral [&>button]:btn-sm [&>button]:w-full">
-                                        {download}
-                                    </div>
+                                    {download}
                                     </>
                                 )}
                                 { data?.bookType !== 'digital' && (
                                     <button 
-                                        className="btn btn-primary text-white btn-sm flex-1 sm:flex-none px-4"
+                                        className="btn btn-primary text-white btn-sm flex-1 sm:flex-none px-4 py-2"
                                         onClick={() => setIsModalOpen(true)}
                                     >
                                         <Send size={15} />
@@ -108,7 +108,9 @@ const DialogInformation = ({
                         userId={authId} 
                         onClose={() => setIsModalOpen(false)} 
                         onSuccess={() => {
-                            console.log("Pengajuan sukses diproses!");
+                            if (import.meta.env.DEV) {
+                                console.log("Pengajuan sukses diproses!");
+                            }
                         }}
                     />
                 </Dialog>

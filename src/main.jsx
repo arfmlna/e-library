@@ -54,28 +54,13 @@ const BaseLayout = ({ navlink }) => {
   || /^\/reader\/online\/[^/]+/.test(location.pathname)
   || /^\/reader\/offline\/[^/]+/.test(location.pathname)
 
-  const [settings, setSettings] = useState(null);
-
-  useEffect(() => {
-    async function fetchSettings() {
-      try {
-        const record = await pb.collection("settings").getFirstListItem("");
-        setSettings(record);
-      } catch {
-        console.error("Gagal mengambil settings");
-      }
-    }
-
-    fetchSettings();
-  }, []);
-
   return (
     <div className={`flex ${!role || role === 'users' ? 'flex-col' : 'flex-row'} min-h-screen w-full bg-base-100 text-base-content overflow-x-hidden`}>
       { !isAuthPage && <Navbar role={role} navlink={navlink} /> }
       <div className="flex flex-col flex-1 min-w-0">
-        {!isAuthPage && <div className="h-16 w-full shrink-0" />}
+        {!isAuthPage && <div className="h-16 w-full shrink-0 mt-5" />}
           <main>
-              <Outlet context={{ settings }} /> 
+              <Outlet /> 
           </main>
       </div>
 
@@ -120,14 +105,11 @@ const ProtectedRoute = () => {
     return <Navigate to="/home" replace />;
   }
 
-  if (
-    record?.role === 'users' && 
-    (record?.status !== 'verified')
-  ) {
-    if (window.location.pathname !== '/verification') {
-      return <Navigate to="/verification" replace />;
-    }
-  }
+  // if (record?.role === 'users' && (record?.status !== 'verified')) {
+  //   if (window.location.pathname !== '/verification') {
+  //     return <Navigate to="/verification" replace />;
+  //   }
+  // }
   return <Outlet />;
 };
 
@@ -160,11 +142,12 @@ createRoot(document.getElementById('root')).render(
                   !pb?.authStore?.isValid ? ( 
                     <Navigate to="/home" replace />
                   ) : pb.authStore.record?.role === 'users' ? ( 
-                    (pb.authStore.record?.status !== 'verified') ? (
-                      <Navigate to="/verification" replace />
-                    ) : (
+                    // (pb.authStore.record?.status !== 'verified') ? (
+                    //   <Navigate to="/verification" replace />
+                    // ) : 
+                    // (
                       <Navigate to="/downloads" replace /> 
-                    )
+                    // )
                   ) : pb.authStore.record?.role === 'petugas' || pb.authStore.record?.role === 'edmin' ? ( 
                     <Navigate to="/dashboard" replace /> 
                   ) : ( 

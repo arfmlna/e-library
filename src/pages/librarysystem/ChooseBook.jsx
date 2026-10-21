@@ -95,7 +95,9 @@ export default function ChooseBook({ memberId, bookId, setBookId, handleAddBook,
       setSearchKeyword("");
       setInputVal("");
     } catch (error) {
-      console.error("Original Error:", error.originalError || error);
+      if (import.meta.env.DEV) {
+        console.error("Original Error:", error.originalError || error);
+      }
       Swal.fire({
           title: "Gagal Memproses Data!",
           text: "Terjadi kesalahan saat memverifikasi status peminjaman Anda ke server.",

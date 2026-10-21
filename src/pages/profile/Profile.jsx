@@ -4,17 +4,23 @@ import avatarNA from '/anonim.jpg'
 import { useMutation, useQuery } from '@tanstack/react-query';
 import Swal from 'sweetalert2';
 import { ArrowBigLeftDash, ArrowLeft } from 'lucide-react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { NavLink } from 'react-router-dom';
 import { dateOnlyFormatted } from '@/constants/dateFormat';
 import { validateFileSize } from '@/constants/validationFileSize';
+import { getSettings } from '@/utils/settings';
 
 export default function Profile() {
+    const [image, setImage] = useState(null)
+    const [settings, setSettings] = useState(null);
+    
     const myData = pb.authStore.record
     const avatar = pb.files.getURL(myData, myData.avatar)
-    const [image, setImage] = useState(null)
     const navigate = useNavigate()
-    const { settings } = useOutletContext()
+    
+    useEffect(() => {
+        getSettings().then(setSettings);
+    }, []);
 
     const { data: profile } = useQuery({
         queryKey: ['profile'],

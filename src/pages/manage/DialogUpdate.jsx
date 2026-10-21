@@ -69,7 +69,9 @@ export default function DialogUpdate({
             setOpenToggle((prev) => ({...prev, status: false}))
             setOpenDetail((prev) => ({ ...prev, status: false }))
         } catch (error) {
-            console.error(error.originalError);
+            if (import.meta.env.DEV) {
+                console.error(error.originalError);
+            }
             const errorMessage = error?.data?.message || error?.message || 'Terjadi kesalahan pada server';
             Swal.fire({
                 icon: 'error',

@@ -56,7 +56,9 @@ export const decryptBookData = async (encryptedArrayBuffer, userId, mimeType = "
 
         return new Blob([decryptedBuffer], { type: mimeType });
     } catch (error) {
-        console.error("Gagal mendekripsi berkas biner:", error);
+        if (import.meta.env.DEV) {
+            console.error("Gagal mendekripsi berkas biner:", error);
+        }
         return null; // Mengembalikan null jika gagal agar aplikasi tidak crash
     }
 };

@@ -51,7 +51,6 @@ export default function RecommendedDigitalBooks() {
 
     return (
         <div className="w-full max-w-6xl mx-auto px-4 my-8">
-            {/* Section Header */}
             <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-2">
                     <div className="p-2 bg-primary/10 dark:bg-slate-600 text-primary dark:text-slate-800 rounded-lg">

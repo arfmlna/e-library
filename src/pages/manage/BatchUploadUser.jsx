@@ -41,7 +41,9 @@ export default function BatchUploadUser({ show, setShow }) {
             queryClient.invalidateQueries(["users"]);
         },
         onError: (error) => {
-            console.error("Gagal mengupload user:", error);
+            if (import.meta.env.DEV) {
+                console.error("Gagal mengupload user:", error);
+            }
             Swal.fire({
                 icon: 'error',
                 text: `Terjadi kesalahan: ${error.message}`

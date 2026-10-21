@@ -6,7 +6,9 @@ export function useLocalStorage(key, initialValue) {
             const saved = localStorage.getItem(key);
             return saved !== null ? JSON.parse(saved) : initialValue;
         } catch (error) {
-            console.warn(`Error membaca localStorage key "${key}":`, error);
+            if (import.meta.env.DEV) {
+                console.warn(`Error membaca localStorage key "${key}":`, error);
+            }
             return initialValue;
         }
     };
@@ -36,7 +38,9 @@ export function useLocalStorage(key, initialValue) {
             setValue(valueToStore);
             window.dispatchEvent(new Event('local-storage-update')); 
         } catch (error) {
-            console.warn(`Error menyimpan localStorage key "${key}":`, error);
+            if (import.meta.env.DEV) {
+                console.warn(`Error menyimpan localStorage key "${key}":`, error);
+            }
         }
     };
 

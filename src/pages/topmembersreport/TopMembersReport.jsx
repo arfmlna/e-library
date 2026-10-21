@@ -14,46 +14,48 @@ export default function TopMembersReport() {
     const fetchActiveMembers = async () => {
         setLoading(true);
         try {
-        // 1. Tentukan batas awal dan akhir bulan yang dipilih untuk filter database
-        const startFilter = `${selectedMonth}-01 00:00:00`;
-        const endFilter = `${selectedMonth}-31 23:59:59`;
+            // 1. Tentukan batas awal dan akhir bulan yang dipilih untuk filter database
+            const startFilter = `${selectedMonth}-01 00:00:00`;
+            const endFilter = `${selectedMonth}-31 23:59:59`;
 
-        // 2. Tarik data dari loan_details yang terjadi pada bulan tersebut
-        const records = await pb.collection('loan_details').getFullList({
-            filter: `loan_id.loan_date >= "${startFilter}" && loan_id.loan_date <= "${endFilter}"`,
-            expand: 'loan_id.borrower'
-        });
+            // 2. Tarik data dari loan_details yang terjadi pada bulan tersebut
+            const records = await pb.collection('loan_details').getFullList({
+                filter: `loan_id.loan_date >= "${startFilter}" && loan_id.loan_date <= "${endFilter}"`,
+                expand: 'loan_id.borrower'
+            });
 
-        // 3. Hitung skor akumulasi peminjaman tiap anggota menggunakan Reduce
-        const memberCountMap = records.reduce((acc, current) => {
-            const loan = current.expand?.loan_id;
-            const borrower = loan?.expand?.borrower;
-            
-            if (!borrower) return acc; // Lewati jika data siswa sudah dihapus/kosong
+            // 3. Hitung skor akumulasi peminjaman tiap anggota menggunakan Reduce
+            const memberCountMap = records.reduce((acc, current) => {
+                const loan = current.expand?.loan_id;
+                const borrower = loan?.expand?.borrower;
+                
+                if (!borrower) return acc; // Lewati jika data siswa sudah dihapus/kosong
 
-            if (!acc[borrower.id]) {
-            acc[borrower.id] = {
-                id: borrower.id,
-                name: borrower.name,
-                identityNumber: borrower.identity_number || borrower.nis || '-', // Menyesuaikan kolom nomor induk/NIS
-                email: borrower.email || '-',
-                totalBorrow: 0
-            };
-            }
-            acc[borrower.id].totalBorrow += 1;
-            return acc;
-        }, {});
+                if (!acc[borrower.id]) {
+                acc[borrower.id] = {
+                    id: borrower.id,
+                    name: borrower.name,
+                    identityNumber: borrower.identity_number || borrower.nis || '-', // Menyesuaikan kolom nomor induk/NIS
+                    email: borrower.email || '-',
+                    totalBorrow: 0
+                };
+                }
+                acc[borrower.id].totalBorrow += 1;
+                return acc;
+            }, {});
 
-        // 4. Ubah objek map menjadi Array, lalu urutkan dari skor tertinggi
-        const sortedMembers = Object.values(memberCountMap)
-            .sort((a, b) => b.totalBorrow - a.totalBorrow)
-            .slice(0, 10); // Ambil peringkat Top 10 Besar siswa teraktif
+            // 4. Ubah objek map menjadi Array, lalu urutkan dari skor tertinggi
+            const sortedMembers = Object.values(memberCountMap)
+                .sort((a, b) => b.totalBorrow - a.totalBorrow)
+                .slice(0, 10); // Ambil peringkat Top 10 Besar siswa teraktif
 
-        setTopMembers(sortedMembers);
+            setTopMembers(sortedMembers);
         } catch (error) {
-        console.error("Gagal menghitung statistik siswa teraktif:", error);
+            if (import.meta.env.DEV) {       
+                console.error("Gagal menghitung statistik siswa teraktif:", error);
+            }
         } finally {
-        setLoading(false);
+            setLoading(false);
         }
     };
 

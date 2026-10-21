@@ -1,9 +1,9 @@
 import { validateFileSize } from '@/constants/validationFileSize';
 import { pb } from '@/utils/pocketbase';
+import { getSettings } from '@/utils/settings';
 import React, { useState, useEffect } from 'react';
 import ReactQuill from 'react-quill-new'; // 👈 Pustaka Editor
 import 'react-quill-new/dist/quill.snow.css'; // Gaya Editor
-import { useOutletContext } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 export default function ArticleModal({ articleItem, onSuccess, onClose }) {
@@ -14,8 +14,11 @@ export default function ArticleModal({ articleItem, onSuccess, onClose }) {
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState('');
     const [loading, setLoading] = useState(false);
+    const [settings, setSettings] = useState(null);
 
-    const { settings } = useOutletContext()
+    useEffect(() => {
+        getSettings().then(setSettings);
+    }, []);
 
     useEffect(() => {
         if (articleItem) {

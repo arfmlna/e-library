@@ -78,6 +78,7 @@ export default function Mobile({
                                                             <li key={subIndex}>
                                                                 <NavLink 
                                                                     to={sub.path} 
+                                                                    onClick={() => setNavBtn(false)}
                                                                     className={({ isActive }) => `flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${isActive ? 'bg-primary text-primary-content shadow-md shadow-primary/20' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100/80 dark:hover:bg-slate-800/80'}`}
                                                                 >
                                                                     <span className="text-lg">{sub.icon}</span>
@@ -91,6 +92,7 @@ export default function Mobile({
                                         ) : (
                                             <NavLink 
                                                 to={data?.path} 
+                                                onClick={() => setNavBtn(false)}
                                                 className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 font-semibold rounded-xl transition-all ${isActive ? 'bg-primary text-primary-content shadow-md shadow-primary/20' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100/80 dark:hover:bg-slate-800/80'}`}
                                             >
                                                 <span className="text-xl">{data?.icon}</span>

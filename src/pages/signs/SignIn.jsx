@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { pb } from '../../utils/pocketbase.js'
 import { useNavigate } from 'react-router-dom'
 import Swal from 'sweetalert2'
@@ -13,6 +13,9 @@ export default function SignIn() {
         email: { color: 'black', status: false, icon: '🤔', message: '' },
         pass: { color: 'black', status: false, icon: '🤔', message: '' },
     })
+    const popupRef = useRef(null);
+    const popupCheckRef = useRef(null);
+    const cancelledRef = useRef(false);
 
     const navigate = useNavigate()
     const role = pb?.authStore?.record?.role
@@ -78,39 +81,112 @@ export default function SignIn() {
                 text: "Username atau Password salah ❌",
                 icon: "error"
             });
-            console.error(err.originalError);
-            console.error(err);
+            if (import.meta.env.DEV) {       
+                console.error(err.originalError);
+                console.error(err);
+            }
         }
     }
-
+    
     const OAuthGoogle = async () => {
+        cancelledRef.current = false;
+
+        Swal.fire({
+            title: 'Menghubungkan ke Google...',
+            text: 'Silakan pilih akun Google Anda.',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+
         try {
-            const authData = await pb.collection('users').authWithOAuth2({ 
+            const authPromise = pb.collection('users').authWithOAuth2({
                 provider: 'google',
                 createData: {
                     role: 'users',
                     status: 'unverified'
+                },
+                urlCallback: (rawUrl) => {
+                    const url = new URL(rawUrl);
+                    url.searchParams.set('prompt', 'select_account');
+
+                    const width = 600, height = 700;
+                    const left = window.screenX + (window.outerWidth - width) / 2;
+                    const top = window.screenY + (window.outerHeight - height) / 2;
+
+                    popupRef.current = window.open(
+                        url.toString(),
+                        'GoogleLogin',
+                        `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+                    );
+
+                    if (!popupRef.current) throw new Error('popup_blocked');
+
+                    
+                    popupCheckRef.current = setInterval(() => {
+                        if (popupRef.current?.closed) {
+                            clearInterval(popupCheckRef.current);
+                            popupCheckRef.current = null;
+
+                            setTimeout(() => {
+                                if (!pb.authStore.isValid) {
+                                    cancelledRef.current = true;
+                                    Swal.close();
+
+                                    Swal.fire({
+                                        title: 'Login Dibatalkan',
+                                        text: 'Anda menutup pemilihan akun Google.',
+                                        icon: 'info',
+                                        confirmButtonText: 'OK'
+                                    });
+                                }
+                            }, 1500);
+                        }
+                    }, 500);
                 }
             });
 
-            if (authData.token) {
-                logs(authData.record.id, 'login', 'google')
-                window.location.href = "/"
-            } else {
-                throw new Error("Token Tidak di Temukan")
-            }
-        } catch (error) {
-            Swal.fire({
-                title: "Error",
-                text: "Login Account Gagal ❌",
-                icon: "error",
-                confirmButtonText: "Ok!"
-            })
-            console.error(error)
-            console.error(error.data.data)
-        }
+            const authData = await authPromise;
 
-    }
+            clearInterval(popupCheckRef.current);
+            popupCheckRef.current = null;
+
+            if (authData?.token) {
+                cancelledRef.current = false;
+                logs(authData.record.id, 'login', 'google');
+                setTimeout(() => {
+                    window.location.href = "/";
+                }, 2000);
+                return;
+            }
+
+            if (cancelledRef.current) return;
+        } catch (error) {
+            clearInterval(popupCheckRef.current);
+            popupCheckRef.current = null;
+
+            if (cancelledRef.current) return;
+
+            const message = String(error.message || '').toLowerCase();
+            const cancelled = error.isAbort || message.includes('cancel') || message.includes('closed');
+
+            Swal.fire({
+                title: cancelled ? 'Login Dibatalkan' : 'Error',
+                text: cancelled
+                    ? 'Anda membatalkan login Google.'
+                    : message.includes('popup_blocked')
+                        ? 'Popup diblokir browser. Izinkan popup untuk situs ini.'
+                        : 'Login Account Gagal ❌',
+                icon: cancelled ? 'info' : 'error',
+                confirmButtonText: 'OK'
+            });
+            if (import.meta.env.DEV) {       
+                console.error(error);
+            }
+        } finally {
+            clearInterval(popupCheckRef.current);
+            popupCheckRef.current = null;
+        }
+    };
 
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-base-200 px-4 py-12 text-base-content transition-colors duration-300 relative">

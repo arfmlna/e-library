@@ -89,6 +89,7 @@ export default function DialogUpdate({title, openToggle, setOpenToggle, handleUp
                             required 
                             defaultValue={toInputDateTimeDefault(openToggle?.data?.eventDate)}
                             className="input input-bordered w-full h-10 px-3 text-sm bg-base-100 shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                            onFocus={(e) => e.target.showPicker()}
                             />
                         </div>
                         )}

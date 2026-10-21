@@ -14,51 +14,53 @@ export default function OverdueReportManager() {
         const fetchOverdueData = async () => {
             setLoading(true);
             try {
-            const todayStr = new Date().toISOString().substring(0, 19).replace('T', ' ');
+                const todayStr = new Date().toISOString().substring(0, 19).replace('T', ' ');
 
-            let filterQueries = [
-                `status = "borrowed"`,
-                `due_date < "${todayStr}"`
-            ];
+                let filterQueries = [
+                    `status = "borrowed"`,
+                    `due_date < "${todayStr}"`
+                ];
 
-            if (bookType !== 'all') {
-                filterQueries.push(`book_id.bookType = "${bookType}"`);
-            }
+                if (bookType !== 'all') {
+                    filterQueries.push(`book_id.bookType = "${bookType}"`);
+                }
 
-            if (searchQuery) {
-                filterQueries.push(`(loan_id.borrower.name ~ "${searchQuery}" || book_id.title ~ "${searchQuery}")`);
-            }
+                if (searchQuery) {
+                    filterQueries.push(`(loan_id.borrower.name ~ "${searchQuery}" || book_id.title ~ "${searchQuery}")`);
+                }
 
-            const records = await pb.collection('loan_details').getFullList({
-                filter: filterQueries.join(' && '),
-                sort: 'due_date', // Urutkan dari yang paling lama terlambat
-                expand: 'loan_id.borrower,book_id,fines_via_loan_detail'
-            });
+                const records = await pb.collection('loan_details').getFullList({
+                    filter: filterQueries.join(' && '),
+                    sort: 'due_date', // Urutkan dari yang paling lama terlambat
+                    expand: 'loan_id.borrower,book_id,fines_via_loan_detail'
+                });
 
-            const formatted = records.map((detail) => {
-                const loan = detail.expand?.loan_id;
-                const book = detail.expand?.book_id;
-                
-                const diffTime = Math.abs(new Date() - new Date(detail.due_date));
-                const daysOverdue = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const formatted = records.map((detail) => {
+                    const loan = detail.expand?.loan_id;
+                    const book = detail.expand?.book_id;
+                    
+                    const diffTime = Math.abs(new Date() - new Date(detail.due_date));
+                    const daysOverdue = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                return {
-                id: detail.id,
-                memberName: loan?.expand?.borrower?.name || 'Umum',
-                bookTitle: book?.title || 'Buku Terhapus',
-                bookType: book?.type === 'academic' ? 'Akademik' : 'Non-Akademik',
-                loanDate: loan?.loan_date?.substring(0, 10) || '-',
-                dueDate: detail.due_date?.substring(0, 10) || '-',
-                daysOverdue: daysOverdue,
-                fineEstimate: `Rp ${(daysOverdue * 2000).toLocaleString('id-ID')}` // Contoh denda otomatis Rp 2.000/hari
-                };
-            });
+                    return {
+                    id: detail.id,
+                    memberName: loan?.expand?.borrower?.name || 'Umum',
+                    bookTitle: book?.title || 'Buku Terhapus',
+                    bookType: book?.type === 'academic' ? 'Akademik' : 'Non-Akademik',
+                    loanDate: loan?.loan_date?.substring(0, 10) || '-',
+                    dueDate: detail.due_date?.substring(0, 10) || '-',
+                    daysOverdue: daysOverdue,
+                    fineEstimate: `Rp ${(daysOverdue * 2000).toLocaleString('id-ID')}` // Contoh denda otomatis Rp 2.000/hari
+                    };
+                });
 
-            setReports(formatted);
+                setReports(formatted);
             } catch (error) {
-            console.error("Gagal memuat laporan keterlambatan:", error);
+                if (import.meta.env.DEV) {
+                    console.error("Gagal memuat laporan keterlambatan:", error);
+                }
             } finally {
-            setLoading(false);
+                setLoading(false);
             }
         };
         

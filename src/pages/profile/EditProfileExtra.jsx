@@ -55,7 +55,9 @@ export default function EditProfileExtra() {
             navigate(-1); 
         },
         onError: (err) => {
-            console.error(err);
+            if (import.meta.env.DEV) {       
+                console.error(err);
+            }
             Swal.fire({
                 icon: 'error',
                 text: 'Gagal menyimpan data.'

@@ -8,7 +8,9 @@ export const fetchAuthLogs = async () => {
             fields: 'id,action,method,ip_address,created,user_agent,expand.user.name,expand.user.email'
         });
     } catch (error) {
-        console.error("Gagal mengambil auth logs:", error);
+        if (import.meta.env.DEV) {       
+            console.error("Gagal mengambil auth logs:", error);
+        }
         throw error;
     }
 };

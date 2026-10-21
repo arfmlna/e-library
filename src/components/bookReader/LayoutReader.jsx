@@ -17,17 +17,21 @@ export default function LayoutReader({
 
     return (
         <div className="w-full overflow-hidden relative select-none">
-            <div className="fixed top-3 left-3 z-10">
-                <button 
-                    className="p-2.5 bg-black/70 backdrop-blur-sm text-zinc-400 text-xs shadow-lg rounded-md border-none transition-all"
-                    onClick={() => navigate(-1)}
-                >
-                    <ArrowBigLeftDash size={20} />
-                </button>
-            </div>
-            <div className="p-2.5 fixed top-3 right-3 bg-black/70 backdrop-blur-sm text-zinc-400 text-xs rounded-md pointer-events-none tracking-wider z-10">
-                {currentPage} / {numPages}
-            </div>
+            { showTools && (
+                <>
+                    <div className="fixed top-3 left-3 z-10">
+                        <button 
+                            className="p-2.5 bg-black/70 backdrop-blur-sm text-zinc-400 text-xs shadow-lg rounded-md border-none transition-all"
+                            onClick={() => navigate(-1)}
+                        >
+                            <ArrowBigLeftDash size={20} />
+                        </button>
+                    </div>
+                    <div className="p-2.5 fixed top-3 right-3 bg-black/70 backdrop-blur-sm text-zinc-400 text-[8px] rounded-md pointer-events-none tracking-wider z-10">
+                        {currentPage} / {numPages}
+                    </div>
+                </>
+            ) }
             <button className="p-2.5 fixed top-15 right-3 bg-black/70 backdrop-blur-sm text-zinc-400 text-xs rounded-md tracking-wider z-10"
             onClick={handleShowTools}>
                 {showTools ? <Eye size={20}/> : <EyeClosed size={20}/>}

@@ -23,7 +23,9 @@ export default function UserBorrowHistory() {
                 });
                 setBorrowRequests(records);
             } catch (error) {
-                console.error("Gagal memuat data pengajuan:", error);
+                if (import.meta.env.DEV) {
+                    console.error("Gagal memuat data pengajuan:", error);
+                }
             }
         };
 
@@ -37,7 +39,9 @@ export default function UserBorrowHistory() {
                 });
                 setLoanHistory(records);
             } catch (error) {
-                console.error("Gagal memuat riwayat peminjaman:", error);
+                if (import.meta.env.DEV) {
+                    console.error("Gagal memuat riwayat peminjaman:", error);
+                }
             }
         };
         

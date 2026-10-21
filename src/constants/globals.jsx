@@ -26,7 +26,9 @@ export const saveBookToOffline = async (book, userId) => {
             return;
         }
     } catch (error) {
-        console.log(error.originalError)
+        if (import.meta.env.DEV) {
+            console.log(error.originalError)
+        }
         Swal.fire({
             title: "Gagal Ambil Data Setting!",
             text: "Gagal mengambil data setting dari server untuk membuka feature download buku offline.",
@@ -76,17 +78,39 @@ export const saveBookToOffline = async (book, userId) => {
 
         const downloadPromises = [];
 
+        // if (pdfFile && typeof pdfFile === 'string' && pdfFile.trim() !== '') {
+        //     const fileUrl = pb.files.getURL(book, pdfFile); 
+
+        //     downloadPromises.push(
+        //         fetch(fileUrl, { mode: 'cors' })
+        //             .then(async (res) => {
+        //                 if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        //                 const rawBlob = await res.blob();
+        //                 bookData.pdfBlob = await encryptBlob(rawBlob, cryptoKey);
+        //             })
+        //             .catch((e) => {
+        //                 throw new Error(`Gagal mengunduh PDF: ${e.message}`);
+        //             })
+        //     );
+        // }
+
         if (pdfFile && typeof pdfFile === 'string' && pdfFile.trim() !== '') {
-            const fileUrl = pb.files.getURL(book, pdfFile); 
+            const fileUrl = pb.files.getURL(book, pdfFile);
 
             downloadPromises.push(
-                fetch(fileUrl, { mode: 'cors' })
-                    .then(async (res) => {
-                        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+                fetch(fileUrl)
+                    .then(async res => {
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
                         const rawBlob = await res.blob();
+                        if (!rawBlob.size || rawBlob.type !== 'application/pdf') {
+                            throw new Error('File yang diunduh bukan PDF yang valid.');
+                        }
+
                         bookData.pdfBlob = await encryptBlob(rawBlob, cryptoKey);
+                        if (!bookData.pdfBlob) throw new Error('Enkripsi PDF gagal.');
                     })
-                    .catch((e) => {
+                    .catch(e => {
                         throw new Error(`Gagal mengunduh PDF: ${e.message}`);
                     })
             );
@@ -104,7 +128,9 @@ export const saveBookToOffline = async (book, userId) => {
                         bookData.poster = await encryptBlob(rawBlob, cryptoKey);
                     })
                     .catch((e) => {
-                        console.error("Gagal proses Poster:", e);
+                        if (import.meta.env.DEV) {
+                            console.error("Gagal proses Poster:", e);
+                        }
                     })
             );
         }
@@ -115,7 +141,7 @@ export const saveBookToOffline = async (book, userId) => {
         }
 
         // VALIDASI UTAMA: Jika pdfFile ada di database online tapi gagal diunduh ke lokal, batalkan penyimpanan.
-        if (pdfFile && !bookData.pdfBlob) {
+        if (!pdfFile && !bookData.pdfBlob) {
             throw new Error("Berkas PDF gagal diproses ke penyimpanan lokal.");
         }
 
@@ -125,7 +151,9 @@ export const saveBookToOffline = async (book, userId) => {
         Swal.fire({ icon: 'success', title: 'Buku Tersimpan!', timer: 1500, showConfirmButton: false });
         return true;
     } catch (error) {
-        console.error("Error saat offline saving:", error);
+        if (import.meta.env.DEV) {
+            console.error("Error saat offline saving:", error);
+        }
         Swal.fire({ icon: 'error', title: 'Gagal mengunduh', text: error.message });
         return false;
     }
@@ -201,7 +229,9 @@ export const getOfflineBooksList = async (page, perPage, searchTerm, userId) => 
     };
 
   } catch (error) {
-    console.error("Gagal mengambil daftar buku offline:", error);
+    if (import.meta.env.DEV) {
+        console.error("Gagal mengambil daftar buku offline:", error);
+    }
     return {
         page: page,
         perPage: perPage,
@@ -214,7 +244,9 @@ export const getOfflineBooksList = async (page, perPage, searchTerm, userId) => 
 
 export const getOfflineBookById = async (id, userId) => {
     if (!userId) {
-        console.warn("userId tidak tersedia. Gagal mengambil buku offline.");
+        if (import.meta.env.DEV) {
+            console.warn("userId tidak tersedia. Gagal mengambil buku offline.");
+        }
         return null;
     }
 
@@ -254,12 +286,15 @@ export const getOfflineBookById = async (id, userId) => {
 
             return updatedBook;
         }
-
-        console.warn(`Buku dengan ID ${id} tidak ditemukan di penyimpanan offline.`);
+        if (import.meta.env.DEV) {
+            console.warn(`Buku dengan ID ${id} tidak ditemukan di penyimpanan offline.`);
+        }
         return null;
 
     } catch (error) {
-        console.error("Gagal membaca atau mendekripsi dari IndexedDB:", error);
+        if (import.meta.env.DEV) {
+            console.error("Gagal membaca atau mendekripsi dari IndexedDB:", error);
+        }
         return null;
     }
 };
@@ -291,7 +326,9 @@ export const removeBookFromOffline = async (bookId, userId) => {
         
         return true;
     } catch (error) {
-        console.error("Gagal menghapus buku dari IndexedDB:", error);
+        if (import.meta.env.DEV) {
+            console.error("Gagal menghapus buku dari IndexedDB:", error);
+        }
         Swal.fire({ icon: 'error', title: 'Gagal menghapus', text: error.message });
         return false;
     }

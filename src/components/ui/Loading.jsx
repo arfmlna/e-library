@@ -3,14 +3,26 @@ import React from 'react';
 export default function Loading({ variant = 'full', count = 2 }) {
     if (variant === 'card') {
         return (
-            <div 
-                className="col-span-full grid gap-6 w-full"
-                style={{
-                    gridTemplateColumns: `repeat(${count}, minmax(0, 1fr))`
-                }}
-            >
-                {Array.from({ length: count }).map((_, i) => (
-                    <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-4 border dark:border-gray-700 space-y-4 animate-pulse">
+            <>
+                <div 
+                    className="col-span-full hidden md:grid gap-6 w-full"
+                    style={{
+                        gridTemplateColumns: `repeat(${count}, minmax(0, 1fr))`
+                    }}
+                >
+                    {Array.from({ length: count }).map((_, i) => (
+                        <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-4 border dark:border-gray-700 space-y-4 animate-pulse">
+                            <div className="h-48 bg-gray-200 dark:bg-gray-700 rounded-md w-full" />
+                            <div className="space-y-2">
+                                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4" />
+                                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+                                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                <div className="col-span-full grid md:hidden gap-6 w-full">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border dark:border-gray-700 space-y-4 animate-pulse">
                         <div className="h-48 bg-gray-200 dark:bg-gray-700 rounded-md w-full" />
                         <div className="space-y-2">
                             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4" />
@@ -18,8 +30,8 @@ export default function Loading({ variant = 'full', count = 2 }) {
                             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full" />
                         </div>
                     </div>
-                ))}
-            </div>
+                </div>
+            </>
         );
     }
 

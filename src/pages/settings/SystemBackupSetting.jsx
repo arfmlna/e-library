@@ -16,7 +16,9 @@ export default function SystemBackupSetting({ autoBackup, backupSchedule, onChan
 
             return await pb.backups.create(backupName);
         } catch (error) {
-            console.error("Gagal melakukan backup via PocketBase SDK:", error);
+            if (import.meta.env.DEV) {       
+                console.error("Gagal melakukan backup via PocketBase SDK:", error);
+            }
             throw error;
         }
     };

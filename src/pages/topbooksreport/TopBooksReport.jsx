@@ -11,35 +11,37 @@ export default function TopBooksReport() {
         const fetchTopBorrowedBooks = async () => {
             setLoading(true);
             try {
-            const records = await pb.collection('loan_details').getFullList({
-                expand: 'book_id'
-            });
+                const records = await pb.collection('loan_details').getFullList({
+                    expand: 'book_id'
+                });
 
-            const bookCountMap = records.reduce((acc, current) => {
-                const book = current.expand?.book_id;
-                if (!book) return acc;
+                const bookCountMap = records.reduce((acc, current) => {
+                    const book = current.expand?.book_id;
+                    if (!book) return acc;
 
-                if (!acc[book.id]) {
-                acc[book.id] = {
-                    id: book.id,
-                    title: book.title,
-                    type: book.type === 'academic' ? 'Akademik' : 'Non-Akademik',
-                    borrowCount: 0
-                };
-                }
-                acc[book.id].borrowCount += 1;
-                return acc;
-            }, {});
+                    if (!acc[book.id]) {
+                    acc[book.id] = {
+                        id: book.id,
+                        title: book.title,
+                        type: book.type === 'academic' ? 'Akademik' : 'Non-Akademik',
+                        borrowCount: 0
+                    };
+                    }
+                    acc[book.id].borrowCount += 1;
+                    return acc;
+                }, {});
 
-            const sortedBooks = Object.values(bookCountMap)
-                .sort((a, b) => b.borrowCount - a.borrowCount)
-                .slice(0, parseInt(limitFilter, 10));
+                const sortedBooks = Object.values(bookCountMap)
+                    .sort((a, b) => b.borrowCount - a.borrowCount)
+                    .slice(0, parseInt(limitFilter, 10));
 
-            setTopBooks(sortedBooks);
+                setTopBooks(sortedBooks);
             } catch (error) {
-            console.error("Gagal menghitung statistik buku terpopuler:", error);
+                if (import.meta.env.DEV) {       
+                    console.error("Gagal menghitung statistik buku terpopuler:", error);
+                }
             } finally {
-            setLoading(false);
+                setLoading(false);
             }
         };
 

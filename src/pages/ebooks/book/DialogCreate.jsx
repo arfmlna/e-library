@@ -98,7 +98,9 @@ export default function DialogCreate({
             refreshData();
             setOpenToggle(false);
         } catch (error) {
-            console.error("Error Detail:", error?.originalError);
+            if (import.meta.env.DEV) {
+                console.error("Error Detail:", error?.originalError);
+            }
             Swal.fire({
                 icon: 'error',
                 title: 'Gagal Menyimpan',

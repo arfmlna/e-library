@@ -19,8 +19,6 @@ const CategoryItem = ({ data }) => {
         return data?.latest_poster ? pb.files.getURL(mockBookRecord, data?.latest_poster) : data?.latest_pdf_file ? pb.files.getURL(mockBookRecord, data?.latest_pdf_file) : null;
     }, [data]);
 
-    console.log(posterUrl)
-
     return (
         <Link to={'/category/'+data?.name} key={data.id}>
             <div className="group rounded-md relative overflow-hidden aspect-video bg-gray-100 shadow-md shadow-blue-600">
@@ -108,7 +106,7 @@ export default function Categories() {
                         title='Data Tidak Tersedia'
                         />
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-20">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-5">
                         {category?.items?.map((data) => {
                             return (
                                 <CategoryItem data={data} key={data?.id} />

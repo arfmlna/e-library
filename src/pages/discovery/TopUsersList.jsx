@@ -70,7 +70,7 @@ export default function TopUsersList() {
                                         <tr>
                                             <th className="w-16 text-center">Rank</th>
                                             <th>Pengguna</th>
-                                            <th className="text-center w-36">Total Aktivitas</th>
+                                            <th className="text-center hidden md:block">Total Aktivitas</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -93,19 +93,23 @@ export default function TopUsersList() {
                                                                 />
                                                             </div>
                                                         </div>
-                                                        <div>
-                                                            <div className="font-bold text-sm max-w-[180px] sm:max-w-xs truncate">
+                                                        <div className='flex flex-col gap-0.5'>
+                                                            <div className="font-bold text-sm max-w-[150px] sm:max-w-xs truncate md:overflow-visible">
                                                                 {user.name}
                                                             </div>
                                                             <div className="text-[11px] opacity-50 flex items-center gap-1 mt-0.5">
                                                                 <User size={10} /> {user.role}
                                                             </div>
+                                                            <span className="inline-flex md:hidden w-fit text-[9px]  px-1.5 py-1 rounded-md items-center gap-1 bg-gray-800 text-white dark:bg-gray-300 dark:text-black">
+                                                                <Flame size={12} className="text-orange-500" />
+                                                                {user.activityCount} <span className="font-normal">Poin</span>
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 </td>
 
                                                 {/* Kolom Skor Aktivitas */}
-                                                <td className="text-center font-mono font-bold text-sm">
+                                                <td className="text-center font-mono font-bold text-sm hidden md:block">
                                                     <span className="px-2.5 py-1 rounded-md inline-flex items-center gap-1 bg-gray-800 text-white dark:bg-gray-300 dark:text-black">
                                                         <Flame size={12} className="text-orange-500" />
                                                         {user.activityCount} <span className="text-[11px] font-normal">Poin</span>

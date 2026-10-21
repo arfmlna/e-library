@@ -17,7 +17,9 @@ export default function CloudStorageInfo({ value, onChange }) {
                     total: result.maxStorageGB
                 });
             } catch (error) {
-                console.error("Gagal memuat kapasitas storage global:", error.message);
+                if (import.meta.env.DEV) {       
+                    console.error("Gagal memuat kapasitas storage global:", error.message);
+                }
             } finally {
                 setLoading(false);
             }

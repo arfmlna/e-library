@@ -17,39 +17,41 @@ export default function LoanReport() {
     const fetchReportData = async () => {
         setLoading(true);
         try {
-        let filterQueries = [];
-        if (statusFilter !== 'all') filterQueries.push(`status = "${statusFilter}"`);
-        if (bookType !== 'all') filterQueries.push(`book_id.bookType = "${bookType}"`)
-        if (startDate) filterQueries.push(`loan_id.loan_date >= "${startDate} 00:00:00"`);
-        if (endDate) filterQueries.push(`loan_id.loan_date <= "${endDate} 23:59:59"`);
-        if (searchQuery) filterQueries.push(`(loan_id.borrower.name ~ "${searchQuery}" || book_id.title ~ "${searchQuery}")`);
+            let filterQueries = [];
+            if (statusFilter !== 'all') filterQueries.push(`status = "${statusFilter}"`);
+            if (bookType !== 'all') filterQueries.push(`book_id.bookType = "${bookType}"`)
+            if (startDate) filterQueries.push(`loan_id.loan_date >= "${startDate} 00:00:00"`);
+            if (endDate) filterQueries.push(`loan_id.loan_date <= "${endDate} 23:59:59"`);
+            if (searchQuery) filterQueries.push(`(loan_id.borrower.name ~ "${searchQuery}" || book_id.title ~ "${searchQuery}")`);
 
-        const records = await pb.collection('loan_details').getFullList({
-            filter: filterQueries.join(' && '),
-            sort: '-created',
-            expand: 'loan_id.borrower,book_id,fines_via_loan_detail'
-        });
+            const records = await pb.collection('loan_details').getFullList({
+                filter: filterQueries.join(' && '),
+                sort: '-created',
+                expand: 'loan_id.borrower,book_id,fines_via_loan_detail'
+            });
 
-        const formatted = records.map((detail) => {
-            const loan = detail.expand?.loan_id;
-            const fineRecord = detail.expand?.fines_via_loan_detail?.[0];
-            return {
-            id: detail.id,
-            memberName: loan?.expand?.borrower?.name || 'Umum',
-            bookTitle: detail.expand?.book_id?.title || 'Buku Terhapus',
-            loanDate: loan?.loan_date?.substring(0, 10) || '-',
-            dueDate: detail.due_date?.substring(0, 10) || '-',
-            returnDate: detail.return_date?.substring(0, 10) || '-',
-            status: detail.status,
-            fine: fineRecord ? `Rp ${fineRecord.amount.toLocaleString('id-ID')}` : '-',
-            fineStatus: fineRecord?.status || '-'
-            };
-        });
-        setReports(formatted);
+            const formatted = records.map((detail) => {
+                const loan = detail.expand?.loan_id;
+                const fineRecord = detail.expand?.fines_via_loan_detail?.[0];
+                return {
+                id: detail.id,
+                memberName: loan?.expand?.borrower?.name || 'Umum',
+                bookTitle: detail.expand?.book_id?.title || 'Buku Terhapus',
+                loanDate: loan?.loan_date?.substring(0, 10) || '-',
+                dueDate: detail.due_date?.substring(0, 10) || '-',
+                returnDate: detail.return_date?.substring(0, 10) || '-',
+                status: detail.status,
+                fine: fineRecord ? `Rp ${fineRecord.amount.toLocaleString('id-ID')}` : '-',
+                fineStatus: fineRecord?.status || '-'
+                };
+            });
+            setReports(formatted);
         } catch (error) {
-        console.error("Gagal memuat laporan:", error);
+            if (import.meta.env.DEV) {
+                console.error("Gagal memuat laporan:", error);
+            }
         } finally {
-        setLoading(false);
+            setLoading(false);
         }
     };
 

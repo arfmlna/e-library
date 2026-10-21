@@ -10,7 +10,7 @@ const UserNavigation = lazy(() => import('./usrnav'))
 
 export default function Navbar({role, navlink}) {
     const [navBtn, setNavBtn] = useState(false)
-    const [hoverNav, setHoverNav] = useState(false)
+    const [hoverNav, setHoverNav] = useState(true)
     const [openSubIndex, setOpenSubIndex] = useState(null);
 
     const dataku = pb.authStore.record

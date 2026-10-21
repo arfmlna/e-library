@@ -101,7 +101,9 @@ export default function SearchWord({
                 alert('Kata tidak ditemukan');
             }
         } catch (error) {
-            console.error('Gagal membaca PDF:', error);
+            if (import.meta.env.DEV) {
+                console.error('Gagal membaca PDF:', error);
+            }
         } finally {
             setIsSearching(false);
         }

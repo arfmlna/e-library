@@ -124,7 +124,7 @@ export const navLinkList = [
     },
     // view downloaded books
     {
-        name: "Downloads",
+        name: "Offline Mode",
         path: "/downloads",
         icon: <MonitorDown className='pr-1' />,
         roles: ["users"]

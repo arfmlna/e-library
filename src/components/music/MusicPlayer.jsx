@@ -123,7 +123,11 @@ export default function MusicPlayer({
         if (isPlaying) {
             audioRef.current.pause();
         } else {
-            audioRef.current.play().catch((err) => console.log("Playback diblokir:", err));
+            audioRef.current.play().catch((err) => {
+                if (import.meta.env.DEV) {
+                    console.log("Playback diblokir:", err)
+                }
+            });
         }
         setIsPlaying(!isPlaying);
     };
@@ -229,7 +233,9 @@ export default function MusicPlayer({
                     });
                 }
             } catch (error) {
-            console.warn("Media Session API gagal dimuat atau tidak didukung penuh:", error);
+                if (import.meta.env.DEV) {
+                    console.warn("Media Session API gagal dimuat atau tidak didukung penuh:", error);
+                }
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps

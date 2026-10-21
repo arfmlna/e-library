@@ -1,6 +1,6 @@
 import { logs } from '@/constants/logs';
 import { pb } from '@/utils/pocketbase';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { FaArrowLeft, FaGoogle } from 'react-icons/fa6';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2'; // 👈 1. Import SweetAlert2
@@ -14,6 +14,9 @@ export default function SignUp() {
         passwordConfirm: ''
     });
     const [loading, setLoading] = useState(false);
+    const popupRef = useRef(null);
+    const popupCheckRef = useRef(null);
+    const cancelledRef = useRef(false);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -37,34 +40,40 @@ export default function SignUp() {
         Swal.showLoading();
 
         try {
-        const res = await pb.collection('users').create({
-            email: formData.email,
-            password: formData.password,
-            passwordConfirm: formData.passwordConfirm,
-            name: formData.name,
-            role: "users",
-            status: 'unverified'
-        });
+            const res = await pb.collection('users').create({
+                email: formData.email,
+                password: formData.password,
+                passwordConfirm: formData.passwordConfirm,
+                name: formData.name,
+                role: "users",
+                status: 'unverified',
+            });
 
-        await pb.collection('users').authWithPassword(formData.email, formData.password);
+            const authData = await pb.collection('users').authWithPassword(formData.email, formData.password);
 
-        logs(res.record.id, 'register', 'password')
-        
-        // 👈 Alert Sukses jika pendaftaran berhasil
-        Swal.fire({
-            icon: 'success',
-            title: 'Pendaftaran Berhasil!',
-            text: 'Akun Anda telah dibuat. Mengalihkan ke halaman verifikasi...',
-            timer: 2000,
-            showConfirmButton: false
-        });
+            logs(
+                authData.record.id, 
+                authData.meta?.isNew ? 'register' : 'login', 
+                'google'
+            );
+            
+            // 👈 Alert Sukses jika pendaftaran berhasil
+            Swal.fire({
+                icon: 'success',
+                title: 'Pendaftaran Berhasil!',
+                text: 'Akun Anda telah dibuat. Mengalihkan ke halaman verifikasi...',
+                timer: 2000,
+                showConfirmButton: false
+            });
 
-        setTimeout(() => {
-            window.location.href = "/"
-        }, 2000);
+            setTimeout(() => {
+                window.location.href = "/"
+            }, 2000);
 
         } catch (err) {
-            console.log(err.originalError)
+            if (import.meta.env.DEV) {       
+                console.log(err.originalError)
+            }
             // Menangkap pesan error dari PocketBase
             const errorData = err.data?.data;
             let msg = err.message || 'Gagal mendaftar.';
@@ -88,41 +97,106 @@ export default function SignUp() {
     };
 
     const handleGoogleSignUp = async () => {
-        setLoading(true);
-        Swal.showLoading();
+        cancelledRef.current = false;
+
+        Swal.fire({
+            title: 'Menghubungkan ke Google...',
+            text: 'Silakan pilih akun Google Anda.',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
 
         try {
-            const authData = await pb.collection('users').authWithOAuth2({ 
+            const authPromise = pb.collection('users').authWithOAuth2({
                 provider: 'google',
                 createData: {
                     role: 'users',
                     status: 'unverified'
+                },
+                urlCallback: (rawUrl) => {
+                    const url = new URL(rawUrl);
+                    url.searchParams.set('prompt', 'select_account');
+
+                    const width = 600, height = 700;
+                    const left = window.screenX + (window.outerWidth - width) / 2;
+                    const top = window.screenY + (window.outerHeight - height) / 2;
+
+                    popupRef.current = window.open(
+                        url.toString(),
+                        'GoogleLogin',
+                        `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+                    );
+
+                    if (!popupRef.current) throw new Error('popup_blocked');
+
+                    
+                    popupCheckRef.current = setInterval(() => {
+                        if (popupRef.current?.closed) {
+                            clearInterval(popupCheckRef.current);
+                            popupCheckRef.current = null;
+
+                            setTimeout(() => {
+                                if (!pb.authStore.isValid) {
+                                    cancelledRef.current = true;
+                                    Swal.close();
+
+                                    Swal.fire({
+                                        title: 'Login Dibatalkan',
+                                        text: 'Anda menutup pemilihan akun Google.',
+                                        icon: 'info',
+                                        confirmButtonText: 'OK'
+                                    });
+                                }
+                            }, 1500);
+                        }
+                    }, 500);
                 }
             });
 
-            logs(authData.record.id, 'register', 'google')
+            const authData = await authPromise;
+
+            clearInterval(popupCheckRef.current);
+            popupCheckRef.current = null;
+
+            if (authData?.token) {
+                cancelledRef.current = false;
+                logs(
+                    authData.record.id, 
+                    authData.meta?.isNew ? 'register' : 'login', 
+                    'google'
+                );
+                setTimeout(() => {
+                    window.location.href = "/";
+                }, 2000);
+                return;
+            }
+
+            if (cancelledRef.current) return;
+        } catch (error) {
+            clearInterval(popupCheckRef.current);
+            popupCheckRef.current = null;
+
+            if (cancelledRef.current) return;
+
+            const message = String(error.message || '').toLowerCase();
+            const cancelled = error.isAbort || message.includes('cancel') || message.includes('closed');
 
             Swal.fire({
-                icon: 'success',
-                title: 'Masuk dengan Google Sukses!',
-                text: 'Mengalihkan ke halaman verifikasi...',
-                timer: 2000,
-                showConfirmButton: false
+                title: cancelled ? 'Login Dibatalkan' : 'Error',
+                text: cancelled
+                    ? 'Anda membatalkan login Google.'
+                    : message.includes('popup_blocked')
+                        ? 'Popup diblokir browser. Izinkan popup untuk situs ini.'
+                        : 'Login Account Gagal ❌',
+                icon: cancelled ? 'info' : 'error',
+                confirmButtonText: 'OK'
             });
-
-            setTimeout(() => {
-                window.location.href = "/"
-            }, 2000);
-
-        } catch (err) {
-            Swal.fire({
-                icon: 'error',
-                title: 'OAuth Gagal',
-                text: err.message || 'Gagal masuk dengan Google.',
-                confirmButtonColor: '#d33'
-            });
+            if (import.meta.env.DEV) {       
+                console.error(error);
+            }
         } finally {
-            setLoading(false);
+            clearInterval(popupCheckRef.current);
+            popupCheckRef.current = null;
         }
     };
 
@@ -167,22 +241,22 @@ export default function SignUp() {
                 <form className="space-y-4" onSubmit={handleManualSignUp}>
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-                    <input type="text" name="name" required value={formData.name} onChange={handleChange} className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm" placeholder="John Doe" autoComplete='name' />
+                    <input type="text" name="name" required value={formData.name} onChange={handleChange} className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm text-black" placeholder="John Doe" autoComplete='name' />
                 </div>
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Alamat Email</label>
-                    <input type="email" name="email" required value={formData.email} onChange={handleChange} className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm" placeholder="nama@email.com" autoComplete='email' />
+                    <input type="email" name="email" required value={formData.email} onChange={handleChange} className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm text-black" placeholder="nama@email.com" autoComplete='email' />
                 </div>
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Password</label>
-                    <input type="password" name="password" required minLength={8} value={formData.password} onChange={handleChange} className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm" placeholder="Minimal 8 karakter" autoComplete='new-password' />
+                    <input type="password" name="password" required minLength={8} value={formData.password} onChange={handleChange} className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm text-black" placeholder="Minimal 8 karakter" autoComplete='new-password' />
                 </div>
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Konfirmasi Password</label>
-                    <input type="password" name="passwordConfirm" required value={formData.passwordConfirm} onChange={handleChange} className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm" placeholder="Ulangi password" autoComplete='new-password' />
+                    <input type="password" name="passwordConfirm" required value={formData.passwordConfirm} onChange={handleChange} className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm text-black" placeholder="Ulangi password" autoComplete='new-password' />
                 </div>
 
                 <button type="submit" disabled={loading} className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50">

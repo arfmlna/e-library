@@ -28,7 +28,9 @@ export const downloadPDF = async (url, filename) => {
         await db.put(storeName, PDFData)
         return PDFData;
     } catch (error) {
-        console.error('Error Download: ', error)
+        if (import.meta.env.DEV) {       
+            console.error('Error Download: ', error)
+        }
         throw error
     }
 }

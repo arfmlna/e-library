@@ -88,7 +88,9 @@ export default function BorrowRequestModal({ isOpen, book, userId, onClose, onSu
             onClose();
 
         } catch (error) {
-            console.error("Detail Error:", error.originalError || error);
+            if (import.meta.env.DEV) {
+                console.error("Detail Error:", error.originalError || error);
+            }
             Swal.fire({
                 title: "Gagal Memproses Data!",
                 text: error.message || "Terjadi kesalahan koneksi saat memverifikasi status ke server.",
@@ -106,8 +108,8 @@ export default function BorrowRequestModal({ isOpen, book, userId, onClose, onSu
     return (
         <Dialog open={isOpen} onClose={onClose} className="relative z-[999]">
             {/* Backdrop / Overlay gelap latar belakang */}
-            <div className="fixed inset-0 bg-white/50 dark:bg-black/50" aria-hidden="true" />
-
+            {/* <div className="fixed inset-0 bg-white/50 dark:bg-black/50" aria-hidden="true" /> */}
+        
             {/* Container Pembungkus posisi Modal */}
             <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
                 <DialogPanel data-theme={theme} className="w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-xl border border-base-200 dark:border-neutral-focus text-base-content transition-all">
@@ -147,6 +149,7 @@ export default function BorrowRequestModal({ isOpen, book, userId, onClose, onSu
                                 min={todayStr}
                                 value={borrowDate}
                                 onChange={(e) => setBorrowDate(e.target.value)}
+                                onFocus={(e) => e.target.showPicker()}
                             />
                         </div>
 
@@ -164,6 +167,7 @@ export default function BorrowRequestModal({ isOpen, book, userId, onClose, onSu
                                 min={borrowDate || todayStr} 
                                 value={returnDate}
                                 onChange={(e) => setReturnDate(e.target.value)}
+                                onFocus={(e) => e.target.showPicker()}
                             />
                         </div>
 

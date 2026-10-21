@@ -4,9 +4,9 @@ import { FaPeopleGroup } from 'react-icons/fa6'
 import { UserRound, UserRoundPlus, UserRoundX, Users } from 'lucide-react'
 import Swal from 'sweetalert2'
 import BatchUploadUser from './BatchUploadUser'
-import { useOutletContext } from 'react-router-dom'
 import { validateFileSize } from '@/constants/validationFileSize'
 import ImagePreviewModal from '../pengajuanaccount/ImagePreviewModal'
+import { getSettings } from '@/utils/settings'
 
 const LayoutDashboard = lazy(() => import('@/components/ui/LayoutDashboard'))
 const DialogCreate = lazy(() => import('./DialogCreate'))
@@ -42,8 +42,11 @@ export default function TemplateControl({
         status: false,
         data: []
     })
-
-    const { settings } = useOutletContext()
+    const [settings, setSettings] = useState(null);
+    
+    useEffect(() => {
+        getSettings().then(setSettings);
+    }, []);
 
     useEffect(() => {
         setPage(1)
@@ -126,7 +129,9 @@ export default function TemplateControl({
                     refreshData()
                 });
             } catch (err) {
-                console.log(err.originalError)
+                if (import.meta.env.DEV) {
+                    console.log(err.originalError)
+                }
                 Swal.fire(
                     'Gagal!',
                     'Terjadi kesalahan saat menghapus data: ' + err.message,

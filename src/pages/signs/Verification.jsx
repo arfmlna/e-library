@@ -6,7 +6,7 @@ import RoleSelector from './RoleSelector';
 import ActionButtons from './ActionButtons';
 import { pb } from '@/utils/pocketbase';
 import { validateFileSize } from '@/constants/validationFileSize';
-import { useOutletContext } from 'react-router-dom';
+import { getSettings } from '@/utils/settings';
 
 export default function Verification() {
     const queryClient = useQueryClient();
@@ -14,9 +14,13 @@ export default function Verification() {
     const [roleType, setRoleType] = useState('student');
     const [nomorInduk, setNomorInduk] = useState('');
     const [documentFile, setDocumentFile] = useState(null);
-
+    const [settings, setSettings] = useState(null);
+    
     const userId = pb.authStore.record.id
-    const { settings } = useOutletContext()
+    
+    useEffect(() => {
+        getSettings().then(setSettings);
+    }, []);
 
     const { data: infoVerif, refetch } = useQuery({
         queryKey: ['infoVerif', userId],
@@ -39,7 +43,9 @@ export default function Verification() {
                 };
 
             } catch (error) {
-                console.error("Gagal mengambil data infoVerif:", error);
+                if (import.meta.env.DEV) {       
+                    console.error("Gagal mengambil data infoVerif:", error);
+                }
                 throw error;
             }
         },
@@ -98,7 +104,9 @@ export default function Verification() {
             queryClient.invalidateQueries(['infoVerif', userId]);
 
         } catch (err) {
-            console.error("Detail Error:", err.originalError || err);
+            if (import.meta.env.DEV) {       
+                console.error("Detail Error:", err.originalError || err);
+            }
             
             const errorData = err.data?.data;
             let errorMsg = err.message || 'Terjadi gangguan sistem.';
@@ -142,7 +150,9 @@ export default function Verification() {
             window.location.href = '/'
 
         } catch (err) {
-            console.error("Gagal refresh session:", err);
+            if (import.meta.env.DEV) {       
+                console.error("Gagal refresh session:", err);
+            }
             Swal.fire({
                 icon: 'error',
                 title: 'Gagal Memperbarui',

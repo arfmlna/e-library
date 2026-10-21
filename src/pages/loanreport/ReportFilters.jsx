@@ -35,6 +35,7 @@ export default function ReportFilters({
                 <input type="date" 
                 value={startDate} 
                 onChange={(e) => setStartDate(e.target.value)} 
+                onFocus={(e) => e.target.showPicker()}
                 className="border border-gray-300 rounded-lg p-2 pr-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div className="flex flex-col gap-1 w-full sm:w-fit md:w-fit">
@@ -42,7 +43,9 @@ export default function ReportFilters({
                 <input type="date" 
                 value={endDate} 
                 onChange={(e) => setEndDate(e.target.value)} 
+                onFocus={(e) => e.target.showPicker()}
                 className="border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+
             </div>
             <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
                 <label className="text-xs font-semibold">Pencarian Cepat</label>

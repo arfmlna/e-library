@@ -80,7 +80,9 @@ export default function ReturnBook({ isLate, setIsLate, bookCondition, setBookCo
                         stock: (currentBook.stock ?? 0) + 1
                     });
                 } catch (stockErr) {
-                    console.error("Gagal memperbarui stok buku:", stockErr);
+                    if (import.meta.env.DEV) {
+                        console.error("Gagal memperbarui stok buku:", stockErr);
+                    }
                 }
             }
 
@@ -127,7 +129,9 @@ export default function ReturnBook({ isLate, setIsLate, bookCondition, setBookCo
             setIsPaidDirectly(true)
 
         } catch (error) {
-            console.error(error.originalError);
+            if (import.meta.env.DEV) {
+                console.error(error.originalError);
+            }
             Swal.fire({
                 icon: "error",
                 title: "Transaksi Gagal",

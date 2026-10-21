@@ -80,7 +80,9 @@ export default function BorrowTable({ memberId, setMemberId, list, setList, onRe
               });
             }
           } catch (err) {
-            console.error(`Gagal update stok buku ID ${book.id}:`, err);
+            if (import.meta.env.DEV) {
+              console.error(`Gagal update stok buku ID ${book.id}:`, err);
+            }
           }
       }
       return Promise.all([createDetail, updateStock])
@@ -99,7 +101,9 @@ export default function BorrowTable({ memberId, setMemberId, list, setList, onRe
       setMemberId('');
       
     } catch (error) {
-      console.error("Detail Error Kolom Loans:", error.originalError?.data);
+      if (import.meta.env.DEV) {
+        console.error("Detail Error Kolom Loans:", error.originalError?.data);
+      }
       Swal.fire({
         icon: 'error',
         title: 'Transaksi Gagal',

@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function CirculationForm({ formData, onChange }) {
     return (
-        <div className="card bg-base-200/50 shadow-sm md:col-span-2">
+        <div className="card bg-base-200/50 shadow-sm md:col-span-2 h-full">
             <div className="card-body">
                 <h2 className="card-title text-base mb-4 font-bold uppercase tracking-wider">
                 Aturan Sirkulasi Buku
@@ -38,7 +38,7 @@ export default function CirculationForm({ formData, onChange }) {
                     <span className="badge badge-neutral">/ Hari</span>
                     </label>
                 </div>
-                <div className="form-control w-full md:col-span-2">
+                <div className="form-control w-full">
                     <label className="label"><span className="label-text font-semibold">Denda Kehilangan</span></label>
                     <label className="input input-bordered flex items-center gap-2">
                     <span className="text-sm opacity-50">Rp</span>
@@ -46,6 +46,7 @@ export default function CirculationForm({ formData, onChange }) {
                     <span className="badge badge-neutral">/ Hari</span>
                     </label>
                 </div>
+                <div className="invisible"></div>
             </div>
             </div>
         </div>
