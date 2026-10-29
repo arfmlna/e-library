@@ -24,7 +24,7 @@ export default function PdfToPoster({ pdfFile, targetPage = 1, height = 384, wid
 
     const loadingElement = (
         <div className="absolute inset-0 bg-base-200 flex flex-col items-center justify-center gap-3 w-full h-full z-10">
-            <span className="loading loading-spinner loading-lg text-primary"></span>
+            <span className="loading loading-spinner loading-lg"></span>
         </div>
     );
 

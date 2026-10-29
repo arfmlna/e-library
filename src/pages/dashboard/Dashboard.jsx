@@ -68,7 +68,7 @@ export default function Dashboard() {
   })
 
   return (
-    <div className='w-full min-h-screen flex flex-col select-none py-20 px-5'>
+    <div className='w-full min-h-screen flex flex-col select-none py-5 px-5'>
         <div className="">
           <h1 className='text-4xl font-bold text-center'>
             Dashboard

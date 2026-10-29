@@ -56,8 +56,8 @@ export default function LatestBook() {
             {/* Section Header */}
             <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-2">
-                    <div className="p-2 bg-primary/10 dark:bg-slate-600 text-primary dark:text-slate-800 rounded-lg">
-                        <FilePlusCorner size={20} className="animate-pulse" />
+                    <div className="p-2 border-2 border-black dark:border-white text-black dark:text-white rounded-lg">
+                        <FilePlusCorner size={20} className="animate-accordion-down" />
                     </div>
                     <div>
                         <h2 className="text-xl font-bold tracking-tight">Buku Terbaru Untukmu</h2>

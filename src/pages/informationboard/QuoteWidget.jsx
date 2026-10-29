@@ -21,20 +21,19 @@ export default function QuoteWidget({ showLiterature, setShowLiterature }) {
 
     return (
         <div 
-            className="bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-green-400 dark:to-cyan-300 
-            rounded-lg shadow shadow-black dark:shadow-white 
+            className="rounded-lg shadow bg-white dark:bg-gray-800 shadow-black dark:shadow-white 
             p-5 flex flex-col justify-between min-h-[180px] cursor-pointer hover:opacity-95 transition-opacity" 
             onClick={() => setShowLiterature(!showLiterature)}
         >
             <div>
-                <span className="text-xs uppercase bg-white/20 dark:bg-gray-800 px-2 py-0.5 rounded-full tracking-wider text-white dark:text-slate-900 font-semibold">
+                <span className="text-xs uppercase px-2 py-0.5 rounded-full tracking-wider font-semibold">
                     Kutipan Hari Ini
                 </span>
-                <p className="text-sm italic mt-3 font-light text-white dark:text-slate-900">
+                <p className="text-sm italic mt-3 font-light">
                     "{mainQuote.q}"
                 </p>
             </div>
-            <p className="text-right text-xs font-semibold mt-4 text-purple-200 dark:text-slate-800">
+            <p className="text-right text-xs font-semibold mt-4">
                 - {mainQuote.a}
             </p>
         </div>

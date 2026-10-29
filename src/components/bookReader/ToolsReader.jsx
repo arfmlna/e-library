@@ -147,7 +147,7 @@ export default function ToolsReader({
                 <button
                     type="button"
                     onClick={() => setShowSearchWord(true)}
-                    className="p-2.5 bg-black/70 backdrop-blur-sm text-zinc-400 text-xs shadow-lg rounded-md border-none transition-all"
+                    className="p-2.5 border-2 border-black bg-white/70 backdrop-blur-sm text-black  text-xs shadow-lg rounded-md transition-all"
                     title="Cari"
                 >
                     <Search size={20} />
@@ -158,16 +158,16 @@ export default function ToolsReader({
                 <div className="fixed top-1/3 z-20 flex flex-col justify-center gap-2 w-xs md:w-md">
                     <div className="relative w-full flex justify-end">
                         <button
-                            className="absolute z-30 -right-3 btn btn-circle btn-xs btn-neutral"
+                            className="absolute z-30 -right-3 btn btn-circle btn-xs bg-white border-2 border-black text-black"
                             onClick={() => setShowSearchWord(false)}
                         >
-                            <X size={10} />
+                            <X size={10} className='font-black' />
                         </button>
                     </div>
 
                     <form
                         onSubmit={handleSearch}
-                        className="bg-black/70 backdrop-blur-sm p-2 rounded-md border border-zinc-800 flex gap-2 items-center"
+                        className="border-2 border-black bg-white/70 backdrop-blur-sm p-2 rounded-md flex gap-2 items-center"
                     >
                         <input
                             type="text"
@@ -182,20 +182,20 @@ export default function ToolsReader({
                                     setActiveSearchIndex(-1)
                                 }
                             }}
-                            className="bg-zinc-800 text-white text-xs px-2.5 py-1.5 rounded outline-none flex-1 border border-zinc-700 focus:border-zinc-500"
+                            className="bg-white text-black text-xs px-2.5 py-1.5 rounded outline-none flex-1 border-2 border-black focus:border-gray-800"
                         />
 
                         <button
                             type="submit"
-                            className="bg-zinc-600 hover:bg-zinc-500 text-white text-xs px-3 py-1.5 rounded font-medium transition-colors"
+                            className="bg-white border-2 border-black hover:bg-gray-200 text-black text-xs px-3 py-1.5 rounded font-medium transition-colors"
                         >
                             Cari
                         </button>
                     </form>
 
                     {searchResults.length > 0 && (
-                        <div className="bg-black/80 backdrop-blur-sm p-2 rounded-md border border-zinc-800 max-h-60 overflow-y-auto flex flex-col gap-1.5 scrollbar-thin">
-                            <div className="text-zinc-400 text-[10px] font-semibold px-1 tracking-wider uppercase">
+                        <div className="bg-white/80 backdrop-blur-sm p-2 rounded-md border-2 border-black max-h-60 overflow-y-auto flex flex-col gap-1.5 scrollbar-thin">
+                            <div className="text-black text-[10px] font-semibold px-1 tracking-wider uppercase">
                                 Ditemukan {searchResults.length} hasil:
                             </div>
 
@@ -204,17 +204,17 @@ export default function ToolsReader({
                                     key={`${result.page}-${idx}`}
                                     type="button"
                                     onClick={() => handleSelectResult(idx)}
-                                    className={`text-left p-2 rounded text-xs transition-colors flex flex-col gap-0.5 border ${
+                                    className={`text-left p-2 rounded text-xs transition-colors flex flex-col gap-0.5 ${
                                         idx === activeSearchIndex
-                                            ? 'bg-zinc-700/60 border-zinc-500 text-white'
-                                            : 'bg-zinc-900/40 border-transparent text-zinc-400 hover:bg-zinc-800/50'
+                                            ? 'bg-black border-2 border-black text-white'
+                                            : 'bg-white border-2 border-black text-black hover:bg-gray-800/50'
                                     }`}
                                 >
-                                    <span className="font-bold text-[11px] text-zinc-300">
+                                    <span className="font-bold text-[11px]">
                                         Halaman {result.page}
                                     </span>
 
-                                    <span className="truncate w-full italic text-zinc-400 text-[11px]"
+                                    <span className="truncate w-full italic text-[11px]"
                                     onClick={() => setShowSearchWord(false)}>
                                         "{result.snippet}"
                                     </span>

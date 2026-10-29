@@ -15,6 +15,7 @@ const Error = lazy(() => import('@/components/ui/Error'))
 
 export default function LayoutBook({
     title, 
+    subtitle,
     books, 
     refreshData, 
     searchItem, 
@@ -49,7 +50,7 @@ export default function LayoutBook({
     return (
         <Layout 
         title={title}
-        subtitle={"Kelola dan pinjam buku fisik maupun digital dalam satu tempat."}
+        subtitle={subtitle}
         searchItem={searchItem}
         handleChange={handleChange}
         viewMode={viewMode}

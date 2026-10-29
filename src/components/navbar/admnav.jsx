@@ -35,7 +35,7 @@ export default function AdminNav({
                     <div className="dropdown dropdown-end">
                         <div tabIndex={0} role="button" className="cursor-pointer">
                             <div className={`avatar ${isOnline ? 'avatar-online' : 'avatar-offline'} select-none`}>
-                                <div className="w-10 rounded-full ring-2 ring-primary ring-offset-base-100 ring-offset-2">
+                                <div className="w-10 rounded-full ring-2 ring-gray-700 dark:ring-white ring-offset-base-100 ring-offset-2">
                                     {userRecord?.avatar ? (
                                         <img src={avatarUrl} alt={userRecord?.avatar} />
                                     ) : (
@@ -44,16 +44,19 @@ export default function AdminNav({
                                 </div>
                             </div>
                         </div>
-                        <ul tabIndex={0} className="dropdown-content menu bg-base-100 dark:bg-neutral rounded-box z-[60] w-64 p-2 shadow-xl mt-3 border border-base-200">
-                            <li className='font-bold text-base-content capitalize pointer-events-none'>
-                                <p className="text-sm opacity-70">Hallo, {role ? role : 'Guest'}</p>
+                        <ul tabIndex={0} className="dropdown-content menu bg-white dark:bg-gray-800 rounded-box z-[60] w-64 p-2 shadow-xl mt-3 border border-base-200">
+                            <li className='font-bold text-black dark:text-white capitalize pointer-events-none'>
+                                <p className="text-sm">Hallo, {role ? role : 'Guest'}</p>
                             </li>
                             <div className="divider my-1"></div>
                             {navlink?.map((data, i) => {
                                 if (navCondition(data)) {
                                     return (
                                         <li key={i} className='font-semibold'>
-                                            <NavLink to={data?.path} className="flex items-center gap-3">
+                                            <NavLink to={data?.path} className={({ isActive }) => `flex flex-row items-center gap-2 py-2 px-4 rounded-xl font-semibold text-sm transition-all duration-200
+                                                    ${isActive 
+                                                        ? 'bg-white text-black border-2 border-black dark:bg-black dark:text-white dark:border-white font-bold' 
+                                                        : 'text-black dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}>
                                                 {data?.icon}
                                                 <span>{data.name}</span>
                                             </NavLink>
@@ -79,7 +82,7 @@ export default function AdminNav({
                         ${hoverNav ? 'w-64 px-6' : 'w-20 px-4 items-center'}
                     `}
                 >
-                    <div className="h-12 flex items-center justify-center font-bold text-xl tracking-wider text-black dark:text-white">
+                    <div className={`h-12 flex items-center justify-center font-bold text-xl tracking-wider ${hoverNav && 'border-none'} p-2 rounded-md border-2 text-black dark:text-white`}>
                         { role === "edmin" ? 
                             hoverNav ? "ADMIN DASHBOARD" : "AD" :
                             hoverNav ? "PETUGAS DASHBOARD" : "PD"
@@ -105,7 +108,7 @@ export default function AdminNav({
                                             }}
                                             className={({ isActive }) => `flex flex-row items-center gap-4 font-semibold py-3 px-3 rounded-lg transition-all w-full
                                                 ${(isActive || isAnyChildActive) ? 
-                                                'bg-black text-white shadow-md dark:bg-white dark:text-black' : 
+                                                'bg-white text-black border-2 border-black shadow-md dark:bg-black dark:text-white dark:border-white' : 
                                                 'hover:text-slate-700 text-black dark:hover:text-slate-300 dark:text-white'}
                                                 ${!hoverNav && 'justify-center'}
                                             `}
@@ -127,7 +130,7 @@ export default function AdminNav({
                                                         to={sub.path} 
                                                         className={({ isActive }) => `flex items-center gap-3 py-2 px-3 rounded-md text-sm font-medium transition-all
                                                             ${isActive ? 
-                                                            'bg-black text-white shadow-md dark:bg-white dark:text-black' : 
+                                                            'bg-white text-black border-2 border-black shadow-md dark:bg-black dark:text-white dark:border-white' : 
                                                             'hover:text-slate-700 text-black dark:hover:text-slate-300 dark:text-white'}
                                                         `}
                                                     >
@@ -147,7 +150,7 @@ export default function AdminNav({
                                     to={data?.path} 
                                     className={({ isActive }) => `flex flex-row items-center gap-4 font-semibold py-3 px-3 rounded-lg transition-all w-full
                                         ${(isActive ) ? 
-                                        'bg-black text-white shadow-md dark:bg-white dark:text-black' : 
+                                        'bg-white text-black border-2 border-black shadow-md dark:bg-black dark:text-white dark:border-white' : 
                                         'hover:text-slate-700 text-black dark:hover:text-slate-300 dark:text-white'}
                                         ${!hoverNav && 'justify-center'}
                                     `}

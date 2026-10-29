@@ -114,10 +114,10 @@ export default function EditProfileExtra() {
     }
 
     return (
-        <div className="card w-full max-w-xl bg-base-100 shadow-xl border border-base-300 mx-auto my-6">
+        <div className="card w-full max-w-xs md:max-w-xl bg-base-100 shadow-xl border border-base-300 mx-auto my-6">
             <div className="card-body p-6">
                 <div className="flex items-center gap-2 border-b border-base-300 pb-4 mb-4">
-                    <UserCog size={20} className="text-primary" />
+                    <UserCog size={20} className="" />
                         <h2 className="text-lg font-bold tracking-wide uppercase">Informasi Tambahan</h2>
                 </div>
 
@@ -143,6 +143,7 @@ export default function EditProfileExtra() {
                             type="date" 
                             value={birthDate}
                             onChange={(e) => setBirthDate(e.target.value)}
+                            onFocus={(e) => e.target.showPicker()}
                             className="input input-bordered w-full input-md bg-base-200/50 focus:input-primary" 
                         />
                     </div>
@@ -157,15 +158,15 @@ export default function EditProfileExtra() {
                             </span>
                         </div>
                         
-                        <div className="bg-base-200/40 rounded-lg overflow-hidden border border-base-300 focus-within:border-primary transition-all duration-200">
-                            <ReactQuill 
+                        <div className="[&_.ql-container]:rounded-b-sm [&_.ql-toolbar]:rounded-t-sm"> 
+                            <ReactQuill  
                                 ref={quillRef}
                                 theme="snow"
                                 value={bio}
                                 onChange={handleBioChange}
-                                modules={modules}
                                 placeholder="Tulis bio singkat Anda disini..."
-                                className="prose dark:prose-invert max-w-none text-sm"
+                                modules={modules}
+                                className="overflow-hidden rounded-sm dark:[&_.ql-formats]:invert dark:[&_.ql-editor.ql-blank::before]:!text-black dark:[&_.ql-editor.ql-blank::before]:!text-white [&_.ql-editor.ql-blank::before]:!opacity-100 [&_.ql-editor.ql-blank::before]:!not-italic"
                             />
                         </div>
                     </div>
@@ -185,7 +186,7 @@ export default function EditProfileExtra() {
                             disabled={mutation.isPending}
                             className="btn btn-primary btn-sm px-5 text-white"
                         >
-                            {mutation.isPending ? (
+                            { mutation.isPending ? (
                                 <span className="loading loading-spinner loading-xs"></span>
                             ) : (
                                 <>

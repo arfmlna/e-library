@@ -67,9 +67,9 @@ const BaseLayout = ({ navlink }) => {
       {(showMP && !showMusicPlayer) && (
         <button 
           onClick={() => setShowMusicPlayer(true)}
-          className="fixed bottom-6 right-6 z-40 btn btn-circle btn-primary btn-lg shadow-2xl transition-all duration-300 hover:scale-110"
+          className="fixed bottom-6 right-6 z-40 rounded-full p-2 border-4 border-black text-black dark:border-white dark:text-white shadow-2xl transition-all duration-300 hover:scale-110"
         >
-          <Music size={24} />
+          <Music size={24} strokeWidth={3} />
         </button>
       )}
 
@@ -99,7 +99,7 @@ const LoadingFull = () => (
 
 const ProtectedRoute = () => {
   const isValid = pb?.authStore?.isValid;
-  const record = pb?.authStore?.record;
+  // const record = pb?.authStore?.record;
 
   if (!isValid) {
     return <Navigate to="/home" replace />;
@@ -180,7 +180,7 @@ createRoot(document.getElementById('root')).render(
                 )}
 
                 {/* 6. FALLBACK 404 NOT FOUND */}
-                <Route path="*" element={<NotFound code={'404'} text={'Not Found'} />} />
+                {/* <Route path="*" element={<NotFound code={'404'} text={'Not Found'} />} /> */}
               </Routes>
             </Theme>
           </ConfigProvider>

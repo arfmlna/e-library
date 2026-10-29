@@ -1,8 +1,8 @@
 import React from 'react';
 
 export default function GenreTable({ genres, loading }) {
-    if (loading) return <div className="bg-white p-10 rounded-xl text-center shadow-sm text-gray-500">Menganalisis minat kategori buku...</div>;
-    if (genres.length === 0) return <div className="bg-white p-10 rounded-xl text-center shadow-sm text-gray-500">Belum ada riwayat peminjaman buku untuk dianalisis.</div>;
+    if (loading) return <div className="p-10 rounded-xl text-center shadow-sm">Menganalisis minat kategori buku...</div>;
+    if (genres.length === 0) return <div className="p-10 rounded-xl text-center shadow-sm">Belum ada riwayat peminjaman buku untuk dianalisis.</div>;
 
     // Hitung total semua peminjaman sebagai dasar pembagian persentase
     const totalAllLoans = genres.reduce((sum, item) => sum + item.totalBorrowed, 0);
@@ -27,7 +27,7 @@ export default function GenreTable({ genres, loading }) {
                     : 0;
 
                 return (
-                    <tr key={index} className="hover:bg-slate-200 dark:hover:bg-gray-700 transition">
+                    <tr key={index} className="hover:bg-gray-300 dark:hover:bg-gray-700 transition">
                     <td className="p-4 text-center font-bold">
                         <span className={`inline-block px-2.5 py-1 rounded-full text-xs ${
                         rank === 1 ? 'bg-purple-100 text-purple-800 border border-purple-200' :

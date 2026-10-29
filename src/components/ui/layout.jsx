@@ -1,4 +1,4 @@
-import { BookOpen, Grid, List } from 'lucide-react'
+import { BookOpen, Grid, LibraryBig, List } from 'lucide-react'
 import React, { lazy, useState } from 'react'
 const SearchData = lazy(() => import('@/components/search/Search'))
 
@@ -22,7 +22,9 @@ export default function Layout({
         <header className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-200 pb-5">
           <div>
               <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2 uppercase">
-                {/* <BookOpen className="" />  */}
+                <div className="p-2 border-2 border-black dark:border-white text-black dark:text-white rounded-lg">
+                  <LibraryBig size={20} className="animate-accordion-down" /> 
+                </div>
                 {title}
               </h1>
               { subtitle && (

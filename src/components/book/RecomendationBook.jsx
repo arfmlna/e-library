@@ -53,8 +53,8 @@ export default function RecommendedDigitalBooks() {
         <div className="w-full max-w-6xl mx-auto px-4 my-8">
             <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-2">
-                    <div className="p-2 bg-primary/10 dark:bg-slate-600 text-primary dark:text-slate-800 rounded-lg">
-                        <Sparkles size={20} className="animate-pulse" />
+                    <div className="p-2 border-2 border-black dark:border-white text-black dark:text-white rounded-lg">
+                        <Sparkles size={20} className="animate-accordion-down" />
                     </div>
                     <div>
                         <h2 className="text-xl font-bold tracking-tight">Rekomendasi Untukmu</h2>

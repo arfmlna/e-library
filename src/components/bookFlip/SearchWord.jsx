@@ -1,3 +1,4 @@
+import { StepBack, StepForward } from 'lucide-react';
 import React, { useState } from 'react'
 
 export default function SearchWord({
@@ -161,12 +162,12 @@ export default function SearchWord({
                 value={searchQuery}
                 onChange={handleInputChange}
                 disabled={isSearching}
-                className="input input-bordered input-sm col-span-9 w-full"
+                className="input input-ghost border-black dark:border-white text-black dark:text-white input-sm col-span-9 w-full"
                 />
                 <button
                 type="submit"
                 disabled={isSearching}
-                className="btn btn-primary btn-sm col-span-3"
+                className="btn btn-outline btn-sm col-span-3"
                 >
                     {isSearching ? 'Mencari...' : 'Cari'}
                 </button>
@@ -179,9 +180,9 @@ export default function SearchWord({
                         <button
                         type="button"
                         onClick={() => navigateSearch(-1)}
-                        className="btn btn-xs"
+                        className="btn btn-outline btn-xs"
                         >
-                            ◀
+                            <StepBack size={15}/>
                         </button>
                         <span>
                             Hasil : {currentResultIndex + 1} dari {searchResults.length} halaman
@@ -190,9 +191,9 @@ export default function SearchWord({
                         <button
                         type="button"
                         onClick={() => navigateSearch(1)}
-                        className="btn btn-xs"
+                        className="btn btn-outline btn-xs"
                         >
-                            ▶
+                            <StepForward size={15} />
                         </button>
                     </div>
                     <span className="text-[11px] mt-1">Page: <strong>Halaman {searchResults[currentResultIndex]?.pageIndex + 1}</strong></span>
@@ -201,14 +202,14 @@ export default function SearchWord({
 
             {isSearching ? (
                 <div className="mt-4 flex flex-col items-center justify-center gap-2 w-full p-4">
-                    <span className="loading loading-infinity loading-lg text-primary"></span>
-                    <p className="text-xs text-gray-500 font-medium animate-pulse">
+                    <span className="loading loading-infinity loading-lg"></span>
+                    <p className="text-xs font-medium animate-pulse">
                         Sedang memindai halaman buku...
                     </p>
                 </div>
             ) : searchResults.length > 0 ? (
                 <div
-                className="flex flex-col gap-1 mt-2 flex-1 overflow-y-auto max-h-[35vh] rounded-lg p-2 shadow-inner"
+                className="flex flex-col gap-1 mt-2 flex-1 overflow-y-auto max-h-[35vh] rounded-lg p-2 shadow-inner border"
                 style={{
                     scrollbarWidth: 'thin'
                 }}
@@ -216,7 +217,7 @@ export default function SearchWord({
                     <span className="text-[11px] font-bold px-1 uppercase tracking-wider">
                         Teks Terdeteksi:
                     </span>
-                    <div className="flex flex-col gap-1 overflow-y-auto pr-1">
+                    <div className="flex flex-col gap-1 overflow-y-auto p-1 border rounded">
                         {searchResults.map((item, idx) => (
                             <button
                             key={idx}
@@ -227,23 +228,33 @@ export default function SearchWord({
                             className={`text-left p-2 rounded text-xs transition-all border
                                 ${ idx === currentResultIndex
                                     ? `
-                                        bg-primary
-                                        text-primary-content
-                                        border-primary
+                                        bg-black
+                                        border-white
+                                        text-white
+                                        dark:bg-white
+                                        dark:border-black
+                                        dark:text-black
                                         font-semibold
                                         shadow-sm
                                     ` : `
-                                        bg-gray-50
+                                        bg-white
                                         hover:bg-gray-100
-                                        text-gray-700
-                                        border-gray-200
+                                        border-black
+                                        text-black
+                                        dark:bg-black
+                                        dark:hover:bg-gray-800
+                                        dark:border-white
+                                        dark:text-white
                                     `
                                 }
                             `}
                             >
 
                                 <div className="flex justify-between items-center mb-1">
-                                    <span className={`badge badge-xs ${idx === currentResultIndex ? 'badge-secondary' : 'badge-neutral'}`}>
+                                    <span className={`badge badge-xs ${idx === currentResultIndex ? 
+                                        'bg-white text-black border-black dark:bg-black dark:text-white dark:border-white' : 
+                                        'bg-black text-white border-white dark:bg-white dark:text-black dark:border-black'
+                                    }`}>
                                         Hal. {item.pageIndex + 1}
                                     </span>
                                 </div>

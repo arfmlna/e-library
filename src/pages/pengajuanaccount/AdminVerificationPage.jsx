@@ -122,7 +122,7 @@ export default function AdminVerificationPage() {
     }
 
     return (
-        <div className="min-h-screen bg-base-200 p-4 md:p-8 text-base-content">
+        <div className="min-h-screen p-4 md:p-8 text-base-content">
             <AdminHeader totalPending={pendingUsers?.length || 0} />
             <div className="max-w-6xl mx-auto">
                 {pendingUsers?.length === 0 ? (

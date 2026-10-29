@@ -40,11 +40,13 @@ export default function AuthActivityLogs() {
 
     return (
         <div className="w-full flex justify-center px-10">
-            <div className="card w-full bg-base-100 shadow-xl border border-base-300 my-6">
+            <div className="w-full my-6">
                 <div className="card-body p-5 md:p-6">
                     {/* Header */}
                     <div className="flex items-center gap-2 border-b border-base-300 pb-4 mb-4">
-                        <ShieldCheck className="text-success" size={24} />
+                        <div className="p-2 border-2 border-black dark:border-white text-black dark:text-white rounded-lg">
+                            <ShieldCheck className="animate-accordion-down" size={20} />
+                        </div>
                         <div>
                             <h2 className="text-lg font-bold tracking-wide uppercase">Tracking Akses Pengguna</h2>
                             <p className="text-xs opacity-60">Riwayat autentikasi login & registrasi member secara real-time</p>

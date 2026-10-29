@@ -80,6 +80,7 @@ export default function TopMembersReport() {
                     type="month" 
                     value={selectedMonth} 
                     onChange={(e) => setSelectedMonth(e.target.value)}
+                    onFocus={(e) => e.target.showPicker()}
                     className="input input-bordered input-sm"
                 />
             </div>

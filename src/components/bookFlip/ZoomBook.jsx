@@ -1,3 +1,4 @@
+import { Minus, Plus, RotateCcw } from 'lucide-react';
 import React from 'react'
 
 // export default function ZoomBook({ zoom, setZoom }) {
@@ -56,14 +57,14 @@ export default function ZoomBook({
             <label className="text-xs font-bold">
                 Ukuran Tampilan (Zoom)
             </label>
-            <div className="flex items-center justify-between p-2 rounded-lg btn">
+            <div className="flex items-center justify-between p-2 rounded-lg border">
                 <button
                 type="button"
                 onClick={handleZoomOut}
                 disabled={zoom <= 0.6}
-                className="btn btn-xs btn-secondary w-8"
+                className="btn btn-xs btn-outline w-8"
                 >
-                    -
+                    <Minus />
                 </button>
                 <span className="text-xs font-bold">
                     {Math.round(zoom * 100)}%
@@ -72,16 +73,16 @@ export default function ZoomBook({
                 type="button"
                 onClick={handleZoomIn}
                 disabled={zoom >= 2}
-                className="btn btn-xs btn-primary w-8"
+                className="btn btn-xs btn-outline w-8"
                 >
-                    +
+                    <Plus />
                 </button>
                 <button
                 type="button"
                 onClick={handleZoomReset}
-                className="btn btn-xs btn-error"
+                className="btn btn-xs btn-outline w-8"
                 >
-                    Reset
+                    <RotateCcw />
                 </button>
             </div>
         </div>

@@ -27,6 +27,7 @@ const Downloads = () => {
   return (
     <LayoutBook 
     title={'Books Offline'} 
+    subtitle={'Baca buku digital secara offline dalam satu tempat dengan mudah dan praktis.'}
     books={books} 
     refreshData={refreshData} 
     searchItem={searchItem} 

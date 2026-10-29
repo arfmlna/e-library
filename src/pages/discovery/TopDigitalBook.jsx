@@ -36,12 +36,15 @@ export default function TopDigitalBooks() {
                 <div className="p-5 md:p-6">
                     <div className="flex justify-between items-center pb-4 mb-5">
                         <div className="flex items-center gap-2">
-                            <div className="p-2 bg-primary/10 dark:bg-slate-600 text-primary dark:text-slate-800 rounded-lg">
-                                <Trophy className="text-black animate-pulse" size={22} />
+                            <div className="p-2 border-2 border-black dark:border-white text-black dark:text-white rounded-lg">
+                                <Trophy className="animate-accordion-down" size={20} />
                             </div>
-                            <h2 className="text-lg font-bold tracking-wide uppercase">Top 5 Buku Digital</h2>
+                            <div className="">
+                                <h2 className="text-lg font-bold tracking-wide uppercase">Top 5 Buku Digital</h2>
+                                <p className="text-xs opacity-60">Buku digital yang sering dibaca siswa</p>
+                            </div>
                         </div>
-                        <div className="badge badge-secondary gap-1 badge-sm font-semibold py-2">
+                        <div className="badge badge-ghost gap-1 badge-sm font-semibold py-2">
                             <Flame size={12} /> Terpopuler
                         </div>
                     </div>
@@ -59,7 +62,7 @@ export default function TopDigitalBooks() {
                                         <tr>
                                             <th className="w-16 text-center">Rank</th>
                                             <th>Buku</th>
-                                            <th className="text-center w-28 hidden md:block">Total Pembaca</th>
+                                            <th className="text-center w-28 hidden md:table-cell">Total Pembaca</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -94,7 +97,7 @@ export default function TopDigitalBooks() {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="text-center font-mono font-bold text-sm hidden md:block">
+                                                <td className="text-center font-mono font-bold text-sm hidden md:table-cell">
                                                     <span className="px-2.5 py-1 rounded-md bg-gray-800 text-white dark:bg-gray-300 dark:text-black">
                                                         {book.readersCount} Orang
                                                     </span>

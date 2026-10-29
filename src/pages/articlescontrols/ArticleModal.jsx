@@ -134,10 +134,10 @@ export default function ArticleModal({ articleItem, onSuccess, onClose }) {
                 <div className="form-control">
                     <label className="label text-xs font-semibold opacity-70">Kategori</label>
                     <select value={category} onChange={(e) => setCategory(e.target.value)} className="select select-bordered text-sm bg-base-100 w-full">
-                        <option value="prestasi">🏆 Prestasi</option>
-                        <option value="teknologi">💻 Teknologi</option>
-                        <option value="sastra">✍️ Sastra</option>
-                        <option value="informasi">📢 Informasi</option>
+                        <option value="prestasi">Prestasi</option>
+                        <option value="teknologi">Teknologi</option>
+                        <option value="sastra">Sastra</option>
+                        <option value="informasi">Informasi</option>
                     </select>
                 </div>
 
@@ -157,15 +157,16 @@ export default function ArticleModal({ articleItem, onSuccess, onClose }) {
             {/* 👈 Implementasi Rich Text Editor */}
             <div className="form-control">
                 <label className="label text-xs font-semibold opacity-70">Konten / Isi Artikel</label>
-                <div className="bg-white text-black rounded-lg overflow-hidden border border-base-300">
-                <ReactQuill 
-                theme="snow" 
-                modules={quillModules}
-                formats={quillFormats}
-                value={content} 
-                onChange={setContent} 
-                placeholder="Tulis cerita menarik Anda di sini..." 
-                />
+                <div className="[&_.ql-container]:rounded-b-sm [&_.ql-toolbar]:rounded-t-sm">
+                    <ReactQuill 
+                    theme="snow" 
+                    modules={quillModules}
+                    formats={quillFormats}
+                    value={content} 
+                    onChange={setContent} 
+                    placeholder="Tulis cerita menarik Anda di sini..." 
+                    className="overflow-hidden rounded-sm dark:[&_.ql-formats]:invert dark:[&_.ql-editor.ql-blank::before]:!text-black dark:[&_.ql-editor.ql-blank::before]:!text-white [&_.ql-editor.ql-blank::before]:!opacity-100 [&_.ql-editor.ql-blank::before]:!not-italic"
+                    />
                 </div>
             </div>
 

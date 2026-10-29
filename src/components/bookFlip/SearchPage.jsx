@@ -28,13 +28,13 @@ export default function SearchPage({inputPage, setInputPage, numPages, currentPa
                 placeholder="cari halaman..."
                 value={inputPage}
                 onChange={(e) => setInputPage(e.target.value)}
-                className="input input-bordered input-sm w-full col-span-9 placeholder:text-black dark:placeholder:text-white"
+                className="input input-ghost border-black dark:border-white text-black dark:text-white input-sm w-full col-span-9"
                 min="1"
                 max={numPages}
                 />
                 <button
                 type="submit"
-                className="btn btn-secondary btn-sm whitespace-nowrap col-span-3"
+                className="btn btn-outline btn-sm whitespace-nowrap col-span-3"
                 >
                     Pindah
                 </button>

@@ -1,3 +1,4 @@
+import { BookOpen, Hourglass, SquareCheckBig, X } from 'lucide-react';
 import React from 'react';
 
 export default function RequestCardList({ requests, formatDate }) {
@@ -17,8 +18,8 @@ export default function RequestCardList({ requests, formatDate }) {
                 return (
                     <div key={item.id} className="card bg-base-200 dark:bg-base-300 shadow-sm border border-base-300 dark:border-base-100">
                         <div className="card-body p-4 flex-row gap-4 items-center">
-                            <div className="w-12 h-16 bg-primary/10 rounded flex items-center justify-center text-2xl shadow-inner shrink-0">
-                                📖
+                            <div className="w-12 h-16 bg-slate-200 dark:bg-gray-800 rounded flex items-center justify-center text-2xl shadow-inner shrink-0">
+                                <BookOpen />
                             </div>
                             <div className="flex-1 min-w-0">
                                 <h3 className="font-bold text-base truncate">{book?.title || 'Buku Tidak Diketahui'}</h3>
@@ -28,9 +29,18 @@ export default function RequestCardList({ requests, formatDate }) {
                                 </p>
                             </div>
                             <div className="shrink-0">
-                                {item.status === 'pending' && <span className="badge badge-warning gap-1 py-3 px-3 font-semibold text-xs">⏳ Pending</span>}
-                                {item.status === 'approved' && <span className="badge badge-success text-white gap-1 py-3 px-3 font-semibold text-xs">✅ Diterima</span>}
-                                {item.status === 'rejected' && <span className="badge badge-error text-white gap-1 py-3 px-3 font-semibold text-xs">❌ Ditolak</span>}
+                                {item.status === 'pending' && <span className="badge badge-warning gap-1 py-3 px-3 font-semibold text-xs">
+                                    <Hourglass size={12} />
+                                    Pending
+                                </span>}
+                                {item.status === 'approved' && <span className="badge badge-success text-white gap-1 py-3 px-3 font-semibold text-xs">
+                                    <SquareCheckBig size={12} /> 
+                                    Diterima
+                                </span>}
+                                {item.status === 'rejected' && <span className="badge badge-error text-white gap-1 py-3 px-3 font-semibold text-xs">
+                                    <X size={12} />
+                                    Ditolak
+                                </span>}
                             </div>
                         </div>
                     </div>

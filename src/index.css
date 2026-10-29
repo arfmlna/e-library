@@ -206,15 +206,13 @@
 .quill-dark-fix .ql-snow .ql-picker { color: var(--fallback-bc, #4b5563); }
 .quill-dark-fix .ql-snow .ql-picker-options { background-color: var(--fallback-b1, #ffffff); }
 
-/* Pembungkus halaman utama dari react-pdf */
 .react-pdf__Page {
     position: relative !important;
-    display: inline-block !important; /* Mencegah bug misalignment */
+    display: inline-block !important;
     vertical-align: top;
     background-color: white;
 }
 
-/* Canvas bertindak sebagai cetakan bentuk fisik kertas */
 .react-pdf__Page__canvas {
     z-index: 1 !important;
     position: relative !important; 
@@ -223,7 +221,6 @@
     height: auto !important;
 }
 
-/* Text layer wajib dikunci absolut di atas canvas */
 .react-pdf__Page__textLayer {
     z-index: 2 !important;
     position: absolute !important;
@@ -236,7 +233,6 @@
     line-height: 1 !important;
 }
 
-/* Gaya penanda mark search query Anda */
 .textLayer mark {
     background-color: #facc15 !important; /* Warna kuning Tailwind 400 */
     color: black !important;

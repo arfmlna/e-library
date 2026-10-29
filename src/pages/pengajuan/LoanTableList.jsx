@@ -1,3 +1,4 @@
+import { Handshake, TimerOff, UndoDot } from 'lucide-react';
 import React from 'react';
 
 export default function LoanTableList({ loans, formatDate }) {
@@ -9,6 +10,10 @@ export default function LoanTableList({ loans, formatDate }) {
             </div>
         );
     }
+
+    const isOverdue = (dueDate) => {
+        return new Date() > new Date(dueDate);
+    };
 
     return (
         <div className="overflow-x-auto border border-base-200 dark:border-base-100 rounded-xl">
@@ -32,11 +37,40 @@ export default function LoanTableList({ loans, formatDate }) {
                                     {book?.title || 'Buku Tidak Diketahui'}
                                 </td>
                                 <td>{formatDate(loanHeader?.loan_date)}</td>
-                                <td className="text-warning font-medium">{formatDate(item.due_date)}</td>
+                                <td>{formatDate(item.due_date)}</td>
                                 <td>
-                                    {item.status === 'borrowed' && <span className="badge badge-info text-white font-medium text-xs">📖 Sedang Dipinjam</span>}
-                                    {item.status === 'returned' && <span className="badge badge-ghost opacity-60 font-medium text-xs">✔ Sudah Kembali</span>}
-                                    {item.status === 'overdue' && <span className="badge badge-error text-white font-bold text-xs animate-pulse">🚨 Terlambat</span>}
+                                    {item.status === 'borrowed' && (
+                                        <>
+                                            {/* Jika dipinjam dan BELUM terlambat */}
+                                            {!isOverdue(item.due_date) && (
+                                                <span className="badge badge-info text-white font-medium text-xs">
+                                                    <Handshake size={12} /> Sedang Dipinjam
+                                                </span>
+                                            )}
+                                            {/* Jika dipinjam dan SUDAH terlambat */}
+                                            {isOverdue(item.due_date) && (
+                                                <span className="badge badge-error text-white font-bold text-xs">
+                                                    <TimerOff size={12} /> Belum dikembalikan Terlambat
+                                                </span>
+                                            )}
+                                        </>
+                                    )}
+
+                                    {item.status === 'returned' && (
+                                        <>
+                                            {/* Jika dikembalikan TEPAT WAKTU (tanggal kembali <= tanggal tenggat) */}
+                                            {new Date(item.return_date) <= new Date(item.due_date) ? (
+                                                <span className="badge badge-ghost opacity-60 font-medium text-xs">
+                                                    <UndoDot size={12} /> Sudah Kembali
+                                                </span>
+                                            ) : (
+                                                /* Jika dikembalikan TERLAMBAT (tanggal kembali > tanggal tenggat) */
+                                                <span className="badge badge-warning text-white font-bold text-xs">
+                                                    <TimerOff size={12} /> Dikembalikan Terlambat
+                                                </span>
+                                            )}
+                                        </>
+                                    )}
                                 </td>
                             </tr>
                         );

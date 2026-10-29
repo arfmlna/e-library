@@ -97,7 +97,7 @@ export default function BookFlip({ path }) {
 
     return (
         <ErrorBoundary>
-            <div className="relative flex h-dvh w-screen overflow-hidden bg-slate-300 dark:bg-gray-950">
+            <div className="relative flex h-dvh w-screen overflow-hidden">
                 <SideBarControls
                 flipBookRef={flipBookRef}
                 pdfDocument={pdfDocument}
@@ -120,7 +120,7 @@ export default function BookFlip({ path }) {
                 setShowArrow={setShowArrow}
                 />
                 <button onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className={`hidden md:flex fixed z-50 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 rounded-full shadow-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-300
+                className={`hidden md:flex fixed z-50 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 border border-black dark:border-white p-2 rounded-full shadow-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-300
                 ${isSidebarOpen
                     ? 'left-[calc(280px+1.5rem)]'
                     : 'left-1'
@@ -131,7 +131,7 @@ export default function BookFlip({ path }) {
                 {!isSidebarOpen && (
                     <button
                     onClick={() => setIsSidebarOpen(true)}
-                    className="md:hidden fixed z-50 bottom-6 left-6 bg-blue-600 text-white p-2 rounded-full shadow-2xl active:scale-95 transition-all">
+                    className="md:hidden fixed z-50 bottom-6 left-6 border p-2 rounded-full shadow-2xl active:scale-95 transition-all">
                         <Menu size={24} />
                     </button>
                 )}
@@ -196,16 +196,18 @@ export default function BookFlip({ path }) {
                                             {Array.from({ length: numPages }, (_, i) => {
                                                     const isTargetPage = searchResults[currentResultIndex]?.pageIndex === i;
                                                     return (
-                                                        <PagePDF
-                                                        key={`page-${i + 1}`}
-                                                        number={i + 1}
-                                                        width={Math.round(dimensions.width)}
-                                                        height={Math.round(dimensions.height)}
-                                                        searchQuery={isTargetPage ? searchQuery : ''}
-                                                        hasSearchQuery={searchResults.length > 0}
-                                                        isTargetPage={isTargetPage}
-                                                        isVisible={Math.abs(i - currentPage) <= 1 || isTargetPage}
-                                                        />
+                                                        <div className="shadow-2xl" key={`page-${i + 1}`}>
+                                                            <PagePDF
+                                                            key={`page-${i + 1}`}
+                                                            number={i + 1}
+                                                            width={Math.round(dimensions.width)}
+                                                            height={Math.round(dimensions.height)}
+                                                            searchQuery={isTargetPage ? searchQuery : ''}
+                                                            hasSearchQuery={searchResults.length > 0}
+                                                            isTargetPage={isTargetPage}
+                                                            isVisible={Math.abs(i - currentPage) <= 1 || isTargetPage}
+                                                            />
+                                                        </div>
                                                     );
                                                 }
                                             )}

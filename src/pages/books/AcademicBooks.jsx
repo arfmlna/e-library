@@ -45,7 +45,7 @@ export default function AcademicBooks() {
         <>
             <LayoutBook 
             title={'Books Academic'} 
-            subTitle={"Lihat detail buku fisik akademik dalam satu tempat."}
+            subTitle={"Lihat katalog buku fisik akademik dalam satu tempat dengan mudah dan praktis."}
             books={books} 
             refreshData={refreshData} 
             searchItem={searchItem} 

@@ -21,7 +21,7 @@ export default function TopMembersTable({ members, loading }) {
                 {members.map((row, index) => {
                 const rank = index + 1;
                 return (
-                    <tr key={row.id} className={`hover:bg-slate-200 dark:hover:bg-gray-700 transition`}>
+                    <tr key={row.id} className={`hover:bg-gray-300 dark:hover:bg-gray-700 transition`}>
                     {/* KOLOM BADGE JUARA */}
                     <td className="p-4 text-center font-bold">
                         {rank === 1 ? (

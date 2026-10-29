@@ -27,9 +27,9 @@ export default function UsersSettings() {
   }, [textSize]);
 
   const getSizeLabel = (size) => {
-    if (size <= 50) return 'Kecil 🔍';
-    if (size <= 100) return 'Normal ✨';
-    if (size <= 200) return 'Besar 🔎';
+    if (size <= 50) return 'Kecil';
+    if (size <= 100) return 'Normal';
+    if (size <= 200) return 'Besar';
     return 'Sangat Besar 🚨';
   };
 
@@ -69,7 +69,7 @@ export default function UsersSettings() {
             <h2 className="font-bold text-lg">{info.name}</h2>
             <p className="text-sm text-base-content/60">{info.role}</p>
           </div>
-          <button className="btn btn-primary btn-sm ml-auto" onClick={() => navigate('/profile')}>
+          <button className="btn btn-outline btn-sm ml-auto" onClick={() => navigate('/profile')}>
             Edit
           </button>
         </div>
@@ -109,10 +109,10 @@ export default function UsersSettings() {
             <div className="flex justify-between mb-2 gap-20">
               <div className="">
                 <span className="text-sm font-medium">Ukuran Teks Buku</span>
-                <input type="range" min="10" max="200" className="range range-xs range-primary" defaultValue={textSize} 
+                <input type="range" min="10" max="200" className="range range-xs" defaultValue={textSize} 
                 onChange={(e) => setTextSize(e.target.value)} />
               </div>
-              <span className="btn btn-primary btn-xs my-auto">
+              <span className="btn btn-outline btn-xs my-auto">
                 {Math.round(textSize / 2)}% ({getSizeLabel(textSize)})
               </span>
             </div>

@@ -1,8 +1,8 @@
 import React from 'react';
 
 export default function TopBooksTable({ books, loading }) {
-    if (loading) return <div className="bg-white p-10 rounded-xl text-center shadow-sm text-gray-500">Menganalisis tren pembaca...</div>;
-    if (books.length === 0) return <div className="bg-white p-10 rounded-xl text-center shadow-sm text-gray-500">Belum ada transaksi peminjaman buku tercatat.</div>;
+    if (loading) return <div className="p-10 rounded-xl text-center shadow-sm">Menganalisis tren pembaca...</div>;
+    if (books.length === 0) return <div className="p-10 rounded-xl text-center shadow-sm">Belum ada transaksi peminjaman buku tercatat.</div>;
 
     return (
         <div className="rounded-xl shadow-sm border overflow-hidden">
@@ -21,7 +21,7 @@ export default function TopBooksTable({ books, loading }) {
                 {books.map((row, index) => {
                 const rank = index + 1;
                 return (
-                    <tr key={row.id} className="hover:bg-gray-50 transition">
+                    <tr key={row.id} className="hover:bg-gray-300 dark:hover:bg-gray-700 transition">
                     {/* KOLOM PERINGKAT DENGAN BADGE KHUSUS */}
                     <td className="p-4 text-center font-bold">
                         <span className={`inline-block px-2.5 py-1 rounded-full text-xs ${

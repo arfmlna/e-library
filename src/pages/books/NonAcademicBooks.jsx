@@ -45,7 +45,7 @@ export default function NonAcademicBooks() {
         <>
             <LayoutBook 
             title={'Books Non Academic'} 
-            subTitle={"Lihat detail buku fisik non akademik dalam satu tempat."}
+            subTitle={"Lihat katalog buku fisik non akademik dalam satu tempat dengan mudah dan praktis."}
             books={books} 
             refreshData={refreshData} 
             searchItem={searchItem} 

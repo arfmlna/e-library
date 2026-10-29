@@ -46,7 +46,7 @@ export default function AllBooks() {
         <>
             <LayoutBook 
             title={'Books'} 
-            subTitle={"Baca buku digital maupun lihat detail buku fisik diperpustakaan dalam satu tempat."}
+            subTitle={"Lihat koleksi buku digital maupun fisik dengan mudah"}
             books={books} 
             refreshData={refreshData} 
             searchItem={searchItem} 

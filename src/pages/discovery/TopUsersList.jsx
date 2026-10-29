@@ -43,10 +43,13 @@ export default function TopUsersList() {
                 <div className="p-5 md:p-6">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-base-300 pb-4 mb-5">
                         <div className="flex items-center gap-2">
-                            <div className="p-2 bg-primary/10 dark:bg-slate-600 text-primary dark:text-slate-800 rounded-lg">
-                                <Award className="text-black animate-pulse" size={22} />
+                            <div className="p-2 border-2 border-black dark:border-white text-black dark:text-white rounded-lg">
+                                <Award className="animate-accordion-down" size={20} />
                             </div>
-                            <h2 className="text-lg font-bold tracking-wide uppercase">Top Pembaca Teraktif</h2>
+                            <div className="">
+                                <h2 className="text-lg font-bold tracking-wide uppercase">Top Pembaca Teraktif</h2>
+                                <p className="text-xs opacity-60">Pembaca yang sangat aktif membaca buku digital</p>
+                            </div>
                         </div>
                         <select 
                             className="select select-bordered select-sm font-semibold focus:select-primary"
@@ -70,7 +73,7 @@ export default function TopUsersList() {
                                         <tr>
                                             <th className="w-16 text-center">Rank</th>
                                             <th>Pengguna</th>
-                                            <th className="text-center hidden md:block">Total Aktivitas</th>
+                                            <th className="text-center hidden md:table-cell">Total Aktivitas</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -109,7 +112,7 @@ export default function TopUsersList() {
                                                 </td>
 
                                                 {/* Kolom Skor Aktivitas */}
-                                                <td className="text-center font-mono font-bold text-sm hidden md:block">
+                                                <td className="text-center font-mono font-bold text-sm hidden md:table-cell">
                                                     <span className="px-2.5 py-1 rounded-md inline-flex items-center gap-1 bg-gray-800 text-white dark:bg-gray-300 dark:text-black">
                                                         <Flame size={12} className="text-orange-500" />
                                                         {user.activityCount} <span className="text-[11px] font-normal">Poin</span>

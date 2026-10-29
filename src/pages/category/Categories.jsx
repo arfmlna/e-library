@@ -95,7 +95,7 @@ export default function Categories() {
     return (
         <Layout 
         title={"Categories"} 
-        subtitle={"cari buku berdasarkan kategori"}
+        subtitle={"Cari buku dengan mudah berdasarkan kategori"}
         searchItem={false} >
             { isLoading ? <Loading variant='card' count={4} /> : error ? <Error refetch={refetch} variant='card' /> : 
                 category.length === 0 ? (

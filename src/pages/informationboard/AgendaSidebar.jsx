@@ -1,6 +1,7 @@
 import React, { lazy } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { pb } from '@/utils/pocketbase';
+import { CalendarDays } from 'lucide-react';
 
 const Error = lazy(() => import('@/components/ui/Error'))
 const Loading = lazy(() => import('@/components/ui/Loading'))
@@ -25,7 +26,7 @@ export default function AgendaSidebar() {
     return (
         <div className="rounded-lg shadow shadow-black dark:shadow-white p-4 bg-white dark:bg-gray-800">
             <h3 className="font-bold text-gray-800 dark:text-gray-200 text-lg border-b pb-2 mb-3 flex items-center">
-                <span className="mr-2">📅</span> Agenda Mendatang
+                <span className="mr-2"><CalendarDays /></span> Agenda Mendatang
             </h3>
             
             { isLoading ? <Loading variant='list' count={3} /> : error ? <Error refetch={refetch} variant='list' /> : 

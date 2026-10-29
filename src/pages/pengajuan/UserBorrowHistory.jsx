@@ -3,6 +3,7 @@ import TabNavigation from './TabNavigation';
 import RequestCardList from './RequestCardList';
 import LoanTableList from './LoanTableList';
 import { pb } from '@/utils/pocketbase';
+import { History, RotateCcw } from 'lucide-react';
 
 export default function UserBorrowHistory() {
     const [activeTab, setActiveTab] = useState('pengajuan'); // 'pengajuan' atau 'riwayat'
@@ -65,16 +66,17 @@ export default function UserBorrowHistory() {
     };
 
     return (
-        <div className="p-4 md:p-6 max-w-5xl mx-auto bg-base-100 dark:bg-gray-800 text-base-content min-h-screen transition-all  rounded-none md:rounded-2xl shadow-sm border border-base-200 dark:border-neutral-focus">
-            
-            {/* Header section */}
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold flex items-center gap-2">
-                    📚 Aktivitas Buku Saya
-                </h1>
-                <p className="text-sm text-base-content/70 dark:text-neutral-content/80 mt-1">
-                    Pantau status pengajuan peminjaman baru dan lihat daftar buku yang sedang atau telah Anda pinjam.
-                </p>
+        <div className="p-4 md:p-6 max-w-5xl mx-auto min-h-screen transition-all">
+            <div className="flex items-center gap-2 mb-4">
+                <div className="p-2 border-2 border-black dark:border-white text-black dark:text-white rounded-lg">
+                    <History />
+                </div>
+                <div className="">
+                    <h1 className="text-2xl font-bold flex items-center gap-2">Aktivitas Buku Saya</h1>
+                    <p className="text-sm text-base-content/70 dark:text-neutral-content/80 mt-1">
+                        Pantau status pengajuan peminjaman baru dan lihat daftar buku yang sedang atau telah Anda pinjam.
+                    </p>
+                </div>
             </div>
 
             {/* Navigasi Tab */}

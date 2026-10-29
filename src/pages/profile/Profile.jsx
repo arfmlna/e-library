@@ -76,10 +76,10 @@ export default function Profile() {
                 <div className="card-body p-6 md:p-8">
                     <div className="flex justify-between items-center border-b border-base-300 pb-4 mb-6 pl-10 md:pl-5">
                         <h2 className="text-xl font-bold tracking-wide uppercase">
-                        Profile
+                            Profile
                         </h2>
-                        <div className="badge badge-primary badge-sm font-bold uppercase tracking-wider">
-                        { myData?.role || "User" }
+                        <div className="badge badge-outline badge-sm font-bold uppercase tracking-wider">
+                            { myData?.role || "User" }
                         </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 items-start">
@@ -100,7 +100,7 @@ export default function Profile() {
                             </div>
                             <span className='mt-1.5'>max size : {settings?.max_upload_size}mb</span>
                             <label htmlFor="profileImage">
-                                <span className="btn btn-xs btn-outline btn-primary rounded-md mt-1">
+                                <span className="btn btn-xs btn-outline rounded-md mt-1">
                                     Ubah Foto
                                 </span>
                             </label>
@@ -148,7 +148,7 @@ export default function Profile() {
                                 <span className="text-sm font-semibold opacity-60 col-span-1">Status</span>
                                 <div className="col-span-2 md:col-span-3 flex items-center gap-1 text-sm font-medium">
                                 <span>:</span>
-                                <div className="badge badge-neutral badge-sm font-semibold">
+                                <div className="badge badge-outline badge-sm font-semibold">
                                     {
                                         // Ditambahkan optional chaining (?.) agar tidak crash saat data loading
                                         myData?.role === 'edmin' ? "Administator" : 
@@ -159,12 +159,12 @@ export default function Profile() {
                                 </div>
                             </div>
                         <div className="flex justify-between mt-10">
-                            <button className='btn btn-neutral btn-sm'
+                            <button className='btn btn-outline btn-sm'
                             onClick={() => navigate(-1)}>
                                 <ArrowBigLeftDash size={20}/>
                                 Back
                             </button>
-                            <NavLink className='btn btn-primary btn-sm' to={'/edit-profile'}>
+                            <NavLink className='btn btn-outline btn-sm' to={'/edit-profile'}>
                                 Edit Profile
                             </NavLink>
                         </div>

@@ -50,8 +50,8 @@ export const navLinkList = [
         roles: ["users"],
         sublink: [
             { name: "Discovery", path: "/discovery", icon: <Telescope className='pr-1' />, roles: ["users"] },
-            { name: "Top Borrowed Books", path: "/top-digital-book", icon: <Binary className='pr-1' />, roles: ["users"] },
-            { name: "Trending Digital Book", path: "/top-borrow-book", icon: <HandHeart className='pr-1' />, roles: ["users"] },
+            { name: "Trending Digital Book", path: "/top-digital-book", icon: <Binary className='pr-1' />, roles: ["users"] },
+            { name: "Top Borrowed Books", path: "/top-borrow-book", icon: <HandHeart className='pr-1' />, roles: ["users"] },
             { name: "Top Readers", path: "/top-users-list", icon: <Glasses className='pr-1' />, roles: ["users"] },
         ]
     },

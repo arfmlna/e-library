@@ -37,10 +37,13 @@ export default function TopBorrowedBooks() {
                 <div className="p-5 md:p-6">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-base-300 pb-4 mb-5">
                         <div className="flex items-center gap-2">
-                            <div className="p-2 bg-primary/10 dark:bg-slate-600 text-primary dark:text-slate-800 rounded-lg">
-                                <Medal className="text-black animate-pulse" size={22} />
+                            <div className="p-2 border-2 border-black dark:border-white text-black dark:text-white rounded-lg">
+                                <Medal className="animate-accordion-down" size={20} />
                             </div>
-                            <h2 className="text-lg font-bold tracking-wide uppercase">Top Buku Terlaris</h2>
+                            <div className="">
+                                <h2 className="text-lg font-bold tracking-wide uppercase">Top Buku Terlaris</h2>
+                                <p className="text-xs opacity-60">Buku fisik yang sering dipinjam siswa di perpustakaan</p>
+                            </div>
                         </div>
                         <select 
                             className="select select-bordered select-sm font-semibold focus:select-primary"
@@ -64,7 +67,7 @@ export default function TopBorrowedBooks() {
                                         <tr>
                                             <th className="w-16 text-center">Rank</th>
                                             <th>Buku</th>
-                                            <th className="text-center w-32 hidden md:block">Total Dipinjam</th>
+                                            <th className="text-center w-32 hidden md:table-cell">Total Dipinjam</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -101,7 +104,7 @@ export default function TopBorrowedBooks() {
                                                     </div>
                                                 </td>
 
-                                                <td className="text-center font-mono font-bold text-sm hidden md:block">
+                                                <td className="text-center font-mono font-bold text-sm hidden md:table-cell">
                                                     <span className="px-2.5 py-1 rounded-md bg-gray-800 text-white dark:bg-gray-300 dark:text-black">
                                                         {book.readersCount} Kali
                                                     </span>

@@ -1,9 +1,10 @@
 import React, { Suspense, useEffect } from 'react'
-import DarkMode from '../switch/DarkMode';
+// import DarkMode from '../switch/DarkMode';
 import { NavLink } from 'react-router-dom';
 import anonim from '/anonim.jpg'
 import { LogOut } from 'lucide-react';
 import { pb } from '@/utils/pocketbase';
+import DarkMode from '../switch/DarkMode';
 const icon = '/icon/apple-touch-icon.png'
 
 export default function UserNav({
@@ -25,11 +26,15 @@ export default function UserNav({
         return () => clearTimeout(timer);
     }, []);
     return (
+        // navbar hover true
         // ${hoverNav ? 'translate-y-0 opacity-100' : '-translate-y-24 opacity-0'}
+
+        // navbar hover false
+        // ${hoverNav ? 'translate-y-0 opacity-100' : 'translate-y-0 opacity-100'}
         <>
             <div className="hidden md:block select-none">
                 <nav className={`backdrop-blur-xl bg-white/80 dark:bg-gray-800 border-b border-slate-200/50 dark:border-slate-800/50 px-8 py-4 fixed top-0 w-full shadow-sm z-50 transition-all duration-300 ease-in-out
-                    ${hoverNav ? 'translate-y-0 opacity-100' : 'translate-y-0 opacity-100'}
+                    // ${hoverNav ? 'translate-y-0 opacity-100' : 'translate-y-0 opacity-100'}
                     `}
                     onMouseEnter={() => setHoverNav(true)}
                     onMouseLeave={() => setHoverNav(false)}>
@@ -37,7 +42,7 @@ export default function UserNav({
                         <div className="flex-none">
                             <span className="text-xl font-black tracking-tight flex items-center gap-3">
                                 <img src={icon} alt="icon" className='w-12' />
-                                Elib-Four
+                                ElibFour
                             </span>
                         </div>
                         <div className="flex flex-row items-center gap-2">
@@ -56,7 +61,7 @@ export default function UserNav({
                                                         }}
                                                         className={({ isActive }) => `flex flex-row items-center gap-2 text-sm font-semibold py-2 px-4 rounded-xl transition-all duration-200
                                                         ${(isActive || isAnyChildActive) 
-                                                            ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400 font-bold' 
+                                                            ? 'bg-gray-100 text-black dark:bg-gray-700/50 dark:text-white font-bold' 
                                                             : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}
                                                     >
                                                         {data?.icon}
@@ -69,7 +74,7 @@ export default function UserNav({
                                                             <NavLink key={subIndex} to={sub.path} 
                                                                 className={({isActive}) => `flex flex-row items-center gap-2 text-sm py-2 px-3 rounded-xl transition-all duration-150
                                                                 ${isActive 
-                                                                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' 
+                                                                    ? 'bg-gray-600 text-white shadow-md shadow-gray-500/20' 
                                                                     : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white'}`}>
                                                                     {sub.icon}
                                                                     <span>{sub.name}</span>
@@ -82,7 +87,7 @@ export default function UserNav({
                                             <NavLink key={i} to={data?.path} 
                                                 className={({ isActive }) => `flex flex-row items-center gap-2 py-2 px-4 rounded-xl font-semibold text-sm transition-all duration-200
                                                 ${isActive 
-                                                    ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400 font-bold' 
+                                                    ? 'bg-gray-100 text-black dark:bg-gray-700/50 dark:text-white font-bold' 
                                                     : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}>
                                                 {data?.icon}
                                                 <span>{data?.name}</span>
@@ -100,7 +105,7 @@ export default function UserNav({
                             <div className="dropdown dropdown-end">
                                 <div tabIndex={0} role="button" className="focus:outline-none transition hover:scale-105 active:scale-95">
                                     <div className={`avatar ${isOnline ? 'avatar-online' : 'avatar-offline'} cursor-pointer`}>
-                                        <div className="w-10 h-10 rounded-full ring-2 ring-blue-500/20 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 shadow-md">
+                                        <div className="w-10 h-10 rounded-full ring-2 ring-black/20 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 shadow-md">
                                             <img src={info?.avatar ? avatar : anonim} alt={info?.name} />
                                         </div>
                                     </div>
@@ -116,7 +121,10 @@ export default function UserNav({
                                         if(navCondition(data)){
                                             return (
                                                 <li key={i} className="my-0.5">
-                                                    <NavLink to={data?.path} className="flex flex-row items-center gap-3 py-2.5 px-3 rounded-xl text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-100 dark:hover:bg-slate-700/50 text-sm">
+                                                    <NavLink to={data?.path} className={({ isActive }) => `flex flex-row items-center gap-2 py-2 px-4 rounded-xl font-semibold text-sm transition-all duration-200
+                                                    ${isActive 
+                                                        ? 'bg-gray-100 text-black dark:bg-gray-700/50 dark:text-white font-bold' 
+                                                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'}`}>
                                                         <span className="text-lg opacity-80">{data?.icon}</span>
                                                         <span>{data.name}</span>
                                                     </NavLink>
