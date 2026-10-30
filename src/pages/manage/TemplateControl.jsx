@@ -193,16 +193,25 @@ export default function TemplateControl({
             setSelectedIds={setSelectedIds}
             fullData={fullData} >
                 <div className="flex justify-end gap-2 md:gap-5">
-                    <button className='btn-sm md:btn-md btn btn-success' onClick={() => setOpenToggle(true)}>
+                    <button 
+                        className='px-4 py-2 rounded-sm border-2 border-black text-black dark:border-white dark:text-white' 
+                        onClick={() => setOpenToggle(true)}
+                    >
                         <UserRoundPlus  />
                     </button>
 
                     { role === 'edmin' && (
                         <>
-                            <button className='btn-sm md:btn-md btn btn-error' onClick={() => handleDelete()}>
+                            <button 
+                                className='px-4 py-2 rounded-sm border-2 border-black text-black dark:border-white dark:text-white' 
+                                onClick={() => handleDelete()}
+                            >
                                 <UserRoundX />
                             </button>
-                            <button className='btn-sm md:btn-md btn btn-secondary' onClick={() => setShowBatch(true)}>
+                            <button 
+                                className='px-4 py-2 rounded-sm border-2 border-black text-black dark:border-white dark:text-white' 
+                                onClick={() => setShowBatch(true)}
+                            >
                                 Batch Upload
                             </button>
                         </>

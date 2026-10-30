@@ -224,10 +224,16 @@ export default function TemplateEBook({
             setSelectedIds={setSearchItem}
             >
                 <div className="flex justify-end gap-2 md:gap-5">
-                    <button className='btn-sm md:btn-md btn btn-success' onClick={() => setOpenToggle(true)}>
+                    <button 
+                        className='px-4 py-2 rounded-sm border-2 border-black text-black dark:border-white dark:text-white' 
+                        onClick={() => setOpenToggle(true)}
+                    >
                         <UserRoundPlus  />
                     </button>
-                    <button className='btn-sm md:btn-md btn btn-error' onClick={() => handleDelete()}>
+                    <button 
+                        className='px-4 py-2 rounded-sm border-2 border-black text-black dark:border-white dark:text-white' 
+                        onClick={() => handleDelete()}
+                    >
                         <UserRoundX />
                     </button>
                 </div>

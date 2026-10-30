@@ -4,7 +4,7 @@ import {
     Book, BookDown, BookHeart, BookType, BookUp, 
     BookUser, 
     Calendars, 
-    ChartBarStacked, ChartColumnStacked, ChartNoAxesCombined, CircleSmall, Clipboard, ClipboardClock, Compass, Flame, GitPullRequest, Glasses, GraduationCap, HandHeart, Home, HomeIcon, 
+    ChartBarStacked, ChartColumnStacked, ChartNoAxesCombined, CircleSmall, Clipboard, ClipboardClock, Compass, Flame, GitPullRequest, Glasses, GraduationCap, HandHeart, History, Home, HomeIcon, 
     Info, Landmark, LibraryBig, ListStart, Logs, MonitorDown, Newspaper, NotepadTextDashed, RedoDot, RefreshCcwDot, 
     Settings,  
     SquareLibrary, 
@@ -122,6 +122,13 @@ export const navLinkList = [
         icon: <ClipboardClock className='text-2xl pr-1' />,
         roles: ["users"]
     },
+    {
+        name: "Read History E-Book",
+        path: "/read-history-ebook",
+        icon: <History className='text-2xl pr-1' />,
+        roles: ["users"]
+    },
+
     // view downloaded books
     {
         name: "Offline Mode",

@@ -13,6 +13,7 @@ export default function LoanReport() {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
+    const [userType, setUserType] = useState('all')
 
     const fetchReportData = async () => {
         setLoading(true);
@@ -23,26 +24,30 @@ export default function LoanReport() {
             if (startDate) filterQueries.push(`loan_id.loan_date >= "${startDate} 00:00:00"`);
             if (endDate) filterQueries.push(`loan_id.loan_date <= "${endDate} 23:59:59"`);
             if (searchQuery) filterQueries.push(`(loan_id.borrower.name ~ "${searchQuery}" || book_id.title ~ "${searchQuery}")`);
+            if (userType !== 'all')  filterQueries.push(`loan_id.borrower.verification_via_users.users_type = "${userType}"`);
 
             const records = await pb.collection('loan_details').getFullList({
                 filter: filterQueries.join(' && '),
                 sort: '-created',
-                expand: 'loan_id.borrower,book_id,fines_via_loan_detail'
+                expand: 'loan_id.borrower.verification_via_users,book_id,fines_via_loan_detail'
             });
 
             const formatted = records.map((detail) => {
                 const loan = detail.expand?.loan_id;
                 const fineRecord = detail.expand?.fines_via_loan_detail?.[0];
+                const currentUsersType = loan?.expand?.borrower?.expand?.verification_via_users?.users_type || 'student';
+
                 return {
-                id: detail.id,
-                memberName: loan?.expand?.borrower?.name || 'Umum',
-                bookTitle: detail.expand?.book_id?.title || 'Buku Terhapus',
-                loanDate: loan?.loan_date?.substring(0, 10) || '-',
-                dueDate: detail.due_date?.substring(0, 10) || '-',
-                returnDate: detail.return_date?.substring(0, 10) || '-',
-                status: detail.status,
-                fine: fineRecord ? `Rp ${fineRecord.amount.toLocaleString('id-ID')}` : '-',
-                fineStatus: fineRecord?.status || '-'
+                    id: detail.id,
+                    memberName: loan?.expand?.borrower?.name || 'Umum',
+                    bookTitle: detail.expand?.book_id?.title || 'Buku Terhapus',
+                    loanDate: loan?.loan_date?.substring(0, 10) || '-',
+                    dueDate: detail.due_date?.substring(0, 10) || '-',
+                    returnDate: detail.return_date?.substring(0, 10) || '-',
+                    status: detail.status,
+                    fine: fineRecord ? `Rp ${fineRecord.amount.toLocaleString('id-ID')}` : '-',
+                    fineStatus: fineRecord?.status || '-',
+                    usersType: currentUsersType
                 };
             });
             setReports(formatted);
@@ -106,7 +111,7 @@ export default function LoanReport() {
     useEffect(() => { 
         fetchReportData(); 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [statusFilter, bookType, startDate, endDate, searchQuery]);
+    }, [statusFilter, bookType, startDate, endDate, searchQuery, userType]);
 
 
 
@@ -133,6 +138,7 @@ export default function LoanReport() {
             endDate={endDate} setEndDate={setEndDate}
             searchQuery={searchQuery} setSearchQuery={setSearchQuery}
             bookType={bookType} setBookType={setBookType}  
+            userType={userType} setUserType={setUserType}
         />
 
         <ReportTable reports={reports} loading={loading} />

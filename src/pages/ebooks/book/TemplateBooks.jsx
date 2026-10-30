@@ -249,15 +249,24 @@ export default function TemplateControl({
                         <option value="nonAcademic">Non Academic</option>
                     </select>
                     <div className="mx-auto"></div>
-                    <button className='btn-sm md:btn-md btn btn-success' onClick={() => setOpenToggle(true)}>
+                    <button 
+                        className='px-4 py-2 rounded-sm border-2 border-black text-black dark:border-white dark:text-white' 
+                        onClick={() => setOpenToggle(true)}
+                    >
                         <UserRoundPlus  />
                     </button>
                     { role === 'edmin' && (
                         <>
-                            <button className='btn-sm md:btn-md btn btn-error' onClick={() => handleDelete()}>
+                            <button 
+                                className='px-4 py-2 rounded-sm border-2 border-black text-black dark:border-white dark:text-white' 
+                                onClick={() => handleDelete()}
+                            >
                                 <UserRoundX />
                             </button>
-                            <button className='btn-sm md:btn-md btn btn-error' onClick={() => setShow(true)}>
+                            <button 
+                                className='px-4 py-2 rounded-sm border-2 border-black text-black dark:border-white dark:text-white' 
+                                onClick={() => setShow(true)}
+                            >
                                 Upload Batch
                             </button>
                         </>

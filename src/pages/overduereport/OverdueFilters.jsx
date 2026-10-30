@@ -1,9 +1,25 @@
 import React from 'react';
 
-export default function OverdueFilters({ bookType, setBookType, searchQuery, setSearchQuery }) {
+export default function OverdueFilters({ 
+    bookType, 
+    setBookType, 
+    searchQuery, 
+    setSearchQuery,
+    userType,
+    setUserType
+}) {
   return (
     <div className="bg-white dark:bg-gray-800 text-black dark:text-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-wrap gap-4 items-end text-gray-800">
       
+      <div className="flex flex-col gap-1 w-full sm:w-fit md:w-fit">
+          <label className="text-xs font-semibold">Users Tipe</label>
+          <select value={userType} onChange={(e) => setUserType(e.target.value)} className="border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option className='bg-white dark:bg-gray-800 text-black dark:text-white' value="all">Semua</option>
+              <option className='bg-white dark:bg-gray-800 text-black dark:text-white' value="student">Murid</option>
+              <option className='bg-white dark:bg-gray-800 text-black dark:text-white' value="teacher">Guru</option>
+          </select>
+      </div>
+
       {/* SELECT TYPE BOOK */}
       <div className="flex flex-col gap-1 w-full sm:w-48">
         <label className="text-xs font-semibold">Tipe Koleksi Buku</label>

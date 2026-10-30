@@ -10,7 +10,9 @@ export default function ReportFilters({
     searchQuery, 
     setSearchQuery,
     bookType,
-    setBookType
+    setBookType,
+    userType,
+    setUserType
 }) {
     return (
         <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-wrap gap-4 items-end">
@@ -20,6 +22,14 @@ export default function ReportFilters({
                     <option className='bg-white dark:bg-gray-800 text-black dark:text-white' value="all">Semua Status</option>
                     <option className='bg-white dark:bg-gray-800 text-black dark:text-white' value="borrowed">Sedang Dipinjam</option>
                     <option className='bg-white dark:bg-gray-800 text-black dark:text-white' value="returned">Sudah Kembali</option>
+                </select>
+            </div>
+            <div className="flex flex-col gap-1 w-full sm:w-fit md:w-fit">
+                <label className="text-xs font-semibold">Users Tipe</label>
+                <select value={userType} onChange={(e) => setUserType(e.target.value)} className="border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option className='bg-white dark:bg-gray-800 text-black dark:text-white' value="all">Semua</option>
+                    <option className='bg-white dark:bg-gray-800 text-black dark:text-white' value="student">Murid</option>
+                    <option className='bg-white dark:bg-gray-800 text-black dark:text-white' value="teacher">Guru</option>
                 </select>
             </div>
             <div className="flex flex-col gap-1 w-full sm:w-fit md:w-fit">

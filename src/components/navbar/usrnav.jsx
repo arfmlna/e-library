@@ -17,7 +17,7 @@ export default function UserNav({
 }) {
     const info = pb.authStore.record
     const avatar = pb.files.getURL(info, info.avatar)
-    const navCondition = (data) => data?.name === 'Profile' || data?.name === 'Auth Logs Activity' || data?.name === 'Offline Mode' || data?.name === 'Settings' || data?.name === 'Request & History Borrow Book'
+    const navCondition = (data) => data?.name === 'Profile' || data?.name === 'Auth Logs Activity' || data?.name === 'Offline Mode' || data?.name === 'Settings' || data?.name === 'Request & History Borrow Book' || data?.name === 'Read History E-Book'
     const toggleSubMenu = () => {
         setHoverNav(true);
     };
